@@ -88,6 +88,7 @@
     <Compile Include="FusionXmlSig.cs" />
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="IFusionRoom.cs" />
+    <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
