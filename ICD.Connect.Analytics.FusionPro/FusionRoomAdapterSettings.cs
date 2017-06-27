@@ -5,7 +5,6 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Attributes.Factories;
-using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Analytics.FusionPro
 {
@@ -32,6 +31,11 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// Gets the originator factory name.
 		/// </summary>
 		public override string FactoryName { get { return FACTORY_NAME; } }
+
+		/// <summary>
+		/// Gets the type of the originator for this settings instance.
+		/// </summary>
+		public override Type OriginatorType { get { return typeof(FusionRoomAdapter); } }
 
 		[SettingsProperty(SettingsProperty.ePropertyType.Ipid)]
 		public byte Ipid { get; set; }
@@ -83,19 +87,6 @@ namespace ICD.Connect.Analytics.FusionPro
 			writer.WriteElementString(ROOM_NAME_ELEMENT, RoomName);
 			writer.WriteElementString(ROOM_ID_ELEMENT, RoomId);
 			writer.WriteElementString(FUSION_SIGS_ELEMENT, FusionSigsPath);
-		}
-
-		/// <summary>
-		/// Creates a new originator instance from the settings.
-		/// </summary>
-		/// <param name="factory"></param>
-		/// <returns></returns>
-		public override IOriginator ToOriginator(IDeviceFactory factory)
-		{
-			FusionRoomAdapter output = new FusionRoomAdapter();
-			output.ApplySettings(this, factory);
-
-			return output;
 		}
 
 		/// <summary>
