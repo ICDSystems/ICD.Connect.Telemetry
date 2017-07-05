@@ -147,6 +147,9 @@ namespace ICD.Connect.Analytics.FusionPro
 			m_FusionRoom = fusionRoom;
 			if (m_FusionRoom != null && !m_FusionRoom.Registered)
 			{
+				if (Name != null)
+					m_FusionRoom.Description = Name;
+
 				eDeviceRegistrationUnRegistrationResponse result = m_FusionRoom.Register();
 				if (result != eDeviceRegistrationUnRegistrationResponse.Success)
 					ErrorLog.Error("Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
