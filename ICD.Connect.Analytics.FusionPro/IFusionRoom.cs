@@ -1,9 +1,10 @@
 ﻿using ICD.Common.Properties;
+using ICD.Connect.Devices;
 using ICD.Connect.Panels;
 
 namespace ICD.Connect.Analytics.FusionPro
 {
-	public interface IFusionRoom : ISigDevice
+	public interface IFusionRoom : ISigDevice, IDevice
 	{
 		/// <summary>
 		/// Loads sigs from the xml file at the given path.
