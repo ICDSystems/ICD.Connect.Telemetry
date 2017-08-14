@@ -2,7 +2,7 @@
 using ICD.Connect.Devices;
 using ICD.Connect.Panels;
 
-namespace ICD.Connect.Analytics.FusionPro
+namespace ICD.Connect.Analytics
 {
 	public interface IFusionRoom : ISigDevice, IDevice
 	{
