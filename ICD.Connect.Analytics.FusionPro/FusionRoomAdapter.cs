@@ -1,15 +1,17 @@
 ﻿using System;
+#if SIMPLSHARP
 using System.Text;
 using Crestron.SimplSharp;
-using Crestron.SimplSharp.CrestronIO;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.Misc.CrestronPro;
+using ICD.Connect.Protocol.Sigs;
+using ICD.Common.Utils.IO;
+#endif
 using ICD.Connect.Panels;
 using ICD.Connect.Panels.SigCollections;
-using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Settings.Core;
 
 namespace ICD.Connect.Analytics.FusionPro
@@ -30,10 +32,12 @@ namespace ICD.Connect.Analytics.FusionPro
 		private IDeviceStringInputCollection m_StringInput;
 		private IDeviceStringOutputCollection m_StringOutput;
 
-		private FusionRoom m_FusionRoom;
+#if SIMPLSHARP
+        private FusionRoom m_FusionRoom;
+#endif
 		private string m_FusionSigsPath;
 
-		#region Properties
+#region Properties
 
 		/// <summary>
 		/// Collection of Boolean Inputs sent to the device.
@@ -42,9 +46,13 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			get
 			{
-				return m_BooleanInput ??
+#if SIMPLSHARP
+                return m_BooleanInput ??
 				       (m_BooleanInput = new FusionBooleanInputCollectionAdapter(m_FusionRoom.UserDefinedBooleanSigDetails));
-			}
+#else
+                throw new NotImplementedException();
+#endif
+            }
 		}
 
 		/// <summary>
@@ -54,9 +62,13 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			get
 			{
-				return m_BooleanOutput ??
+#if SIMPLSHARP
+                return m_BooleanOutput ??
 				       (m_BooleanOutput = new FusionBooleanOutputCollectionAdapter(m_FusionRoom.UserDefinedBooleanSigDetails));
-			}
+#else
+                throw new NotImplementedException();
+#endif
+            }
 		}
 
 		/// <summary>
@@ -66,9 +78,13 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			get
 			{
-				return m_UShortInput ??
+#if SIMPLSHARP
+                return m_UShortInput ??
 				       (m_UShortInput = new FusionUShortInputCollectionAdapter(m_FusionRoom.UserDefinedUShortSigDetails));
-			}
+#else
+                throw new NotImplementedException();
+#endif
+            }
 		}
 
 		/// <summary>
@@ -78,9 +94,13 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			get
 			{
-				return m_UShortOutput ??
+#if SIMPLSHARP
+                return m_UShortOutput ??
 				       (m_UShortOutput = new FusionUShortOutputCollectionAdapter(m_FusionRoom.UserDefinedUShortSigDetails));
-			}
+#else
+                throw new NotImplementedException();
+#endif
+            }
 		}
 
 		/// <summary>
@@ -90,9 +110,13 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			get
 			{
-				return m_StringInput ??
+#if SIMPLSHARP
+                return m_StringInput ??
 				       (m_StringInput = new FusionStringInputCollectionAdapter(m_FusionRoom.UserDefinedStringSigDetails));
-			}
+#else
+                throw new NotImplementedException();
+#endif
+            }
 		}
 
 		/// <summary>
@@ -102,14 +126,18 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			get
 			{
-				return m_StringOutput ??
+#if SIMPLSHARP
+                return m_StringOutput ??
 				       (m_StringOutput = new FusionStringOutputCollectionAdapter(m_FusionRoom.UserDefinedStringSigDetails));
-			}
+#else
+                throw new NotImplementedException();
+#endif
+            }
 		}
 
-		#endregion
+#endregion
 
-		#region Methods
+#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -118,14 +146,17 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			base.DisposeFinal(disposing);
 
-			SetFusionRoom(null);
+#if SIMPLSHARP
+            SetFusionRoom(null);
+#endif
 		}
 
-		/// <summary>
-		/// Sets the wrapped fusion room.
-		/// </summary>
-		/// <param name="fusionRoom"></param>
-		[PublicAPI]
+#if SIMPLSHARP
+        /// <summary>
+        /// Sets the wrapped fusion room.
+        /// </summary>
+        /// <param name="fusionRoom"></param>
+        [PublicAPI]
 		public void SetFusionRoom(FusionRoom fusionRoom)
 		{
 			Unsubscribe(m_FusionRoom);
@@ -159,6 +190,7 @@ namespace ICD.Connect.Analytics.FusionPro
 
 			UpdateCachedOnlineStatus();
 		}
+#endif
 
 		/// <summary>
 		/// Sets the fusion error message.
@@ -166,8 +198,12 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <param name="message"></param>
 		public void SetErrorMessage(string message)
 		{
-			m_FusionRoom.ErrorMessage.InputSig.StringValue = message;
-		}
+#if SIMPLSHARP
+            m_FusionRoom.ErrorMessage.InputSig.StringValue = message;
+#else
+            throw new NotImplementedException();
+#endif
+        }
 
 		/// <summary>
 		/// Loads sigs from the xml file at the given path.
@@ -175,16 +211,17 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <param name="path"></param>
 		public void LoadSigsFromPath(string path)
 		{
-			m_FusionRoom.RemoveAllSigs();
+#if SIMPLSHARP
+            m_FusionRoom.RemoveAllSigs();
 
 			m_FusionSigsPath = PathUtils.GetDefaultConfigPath(path);
-			if (string.IsNullOrEmpty(m_FusionSigsPath) || !File.Exists(m_FusionSigsPath))
+			if (string.IsNullOrEmpty(m_FusionSigsPath) || !IcdFile.Exists(m_FusionSigsPath))
 			{
 				IcdErrorLog.Error("Unable to find {0}", m_FusionSigsPath);
 				return;
 			}
 
-			string xml = File.ReadToEnd(m_FusionSigsPath, Encoding.UTF8);
+			string xml = IcdFile.ReadToEnd(m_FusionSigsPath, Encoding.UTF8);
 
 			foreach (FusionXmlSig sig in FusionXmlSig.SigsFromXml(xml))
 			{
@@ -199,11 +236,14 @@ namespace ICD.Connect.Analytics.FusionPro
 
 				m_FusionRoom.AddSig(sig.CrestronSigType, (uint)number, sig.Name, sig.CrestronSigMask);
 			}
-		}
+#else
+            throw new NotImplementedException();
+#endif
+        }
 
-		#endregion
+#endregion
 
-		#region Settings
+#region Settings
 
 		/// <summary>
 		/// Override to apply properties to the settings instance.
@@ -213,10 +253,16 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.Ipid = m_FusionRoom == null ? (byte)0 : (byte)m_FusionRoom.ID;
+#if SIMPLSHARP
+            settings.Ipid = m_FusionRoom == null ? (byte)0 : (byte)m_FusionRoom.ID;
 			settings.RoomName = m_FusionRoom == null ? null : m_FusionRoom.ParameterRoomName;
 			settings.RoomId = m_FusionRoom == null ? null : m_FusionRoom.ParameterInstanceID;
-			settings.FusionSigsPath = m_FusionSigsPath;
+#else
+            settings.Ipid = 0;
+            settings.RoomName = null;
+            settings.RoomId = null;
+#endif
+            settings.FusionSigsPath = m_FusionSigsPath;
 		}
 
 		/// <summary>
@@ -226,7 +272,9 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			base.ClearSettingsFinal();
 
-			SetFusionRoom(null);
+#if SIMPLSHARP
+            SetFusionRoom(null);
+#endif
 			m_FusionSigsPath = null;
 		}
 
@@ -239,15 +287,19 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			base.ApplySettingsFinal(settings, factory);
 
-			FusionRoom fusionRoom = new FusionRoom(settings.Ipid, ProgramInfo.ControlSystem, settings.RoomName, settings.RoomId);
-
+#if SIMPLSHARP
+            FusionRoom fusionRoom = new FusionRoom(settings.Ipid, ProgramInfo.ControlSystem, settings.RoomName, settings.RoomId);
 			SetFusionRoom(fusionRoom);
+
 			LoadSigsFromPath(settings.FusionSigsPath);
-		}
+#else
+            throw new NotImplementedException();
+#endif
+        }
 
-		#endregion
+#endregion
 
-		#region Private Methods
+#region Private Methods
 
 		/// <summary>
 		/// Gets the current online status of the device.
@@ -255,14 +307,19 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <returns></returns>
 		protected override bool GetIsOnlineStatus()
 		{
-			return m_FusionRoom != null && m_FusionRoom.IsOnline;
-		}
+#if SIMPLSHARP
+            return m_FusionRoom != null && m_FusionRoom.IsOnline;
+#else
+            return false;
+#endif
+        }
 
-		/// <summary>
-		/// Subscribes to the FusionRoom events.
-		/// </summary>
-		/// <param name="fusionRoom"></param>
-		private void Subscribe(FusionRoom fusionRoom)
+#if SIMPLSHARP
+        /// <summary>
+        /// Subscribes to the FusionRoom events.
+        /// </summary>
+        /// <param name="fusionRoom"></param>
+        private void Subscribe(FusionRoom fusionRoom)
 		{
 			if (fusionRoom == null)
 				return;
@@ -335,7 +392,8 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			UpdateCachedOnlineStatus();
 		}
+#endif
 
-		#endregion
+#endregion
 	}
 }

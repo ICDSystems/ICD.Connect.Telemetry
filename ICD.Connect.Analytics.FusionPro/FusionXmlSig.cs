@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharp.CrestronXml;
@@ -177,3 +178,4 @@ namespace ICD.Connect.Analytics.FusionPro
 		#endregion
 	}
 }
+#endif

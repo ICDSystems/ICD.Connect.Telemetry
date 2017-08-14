@@ -1,4 +1,5 @@
-﻿using Crestron.SimplSharpPro;
+﻿#if SIMPLSHARP
+using Crestron.SimplSharpPro;
 using ICD.Connect.Misc.CrestronPro.Sigs;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Protocol.Sigs;
@@ -83,3 +84,4 @@ namespace ICD.Connect.Analytics.FusionPro
 		}
 	}
 }
+#endif
