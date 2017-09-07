@@ -380,7 +380,9 @@ namespace ICD.Connect.Analytics.FusionPro
 				return;
 
 			T sig = getSig(number);
-			RaiseOutputSigChangeCallback(sig);
+			SigInfo sigInfo = new SigInfo(sig);
+
+			RaiseOutputSigChangeCallback(sigInfo);
 		}
 
 		/// <summary>
