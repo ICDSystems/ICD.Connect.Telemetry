@@ -171,8 +171,14 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <returns></returns>
 		public override string ToString()
 		{
-			return string.Format("{0}(Number: {1}, Name: {2}, Type: {3}, Mask: {4})",
-			                     GetType().Name, Number, Name, SigType, SigMask);
+			ReprBuilder builder = new ReprBuilder(this);
+
+			builder.AppendProperty("Number", Number);
+			builder.AppendProperty("Name", Name);
+			builder.AppendProperty("SigType", SigType);
+			builder.AppendProperty("SigMask", SigMask);
+
+			return builder.ToString();
 		}
 
 		#endregion
