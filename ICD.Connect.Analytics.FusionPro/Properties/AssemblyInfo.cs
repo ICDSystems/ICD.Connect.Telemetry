@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 
-[assembly: AssemblyTitle("ICD.SimplSharp.LoggingUtilsPro")]
+[assembly: AssemblyTitle("ICD.Connect.Analytics.FusionPro")]
 [assembly: AssemblyCompany("ICD Systems")]
-[assembly: AssemblyProduct("ICD.SimplSharp.LoggingUtilsPro")]
-[assembly: AssemblyCopyright("Copyright © ICD Systems 2016")]
+[assembly: AssemblyProduct("ICD.Connect.Analytics.FusionPro")]
+[assembly: AssemblyCopyright("Copyright © ICD Systems 2017")]
 [assembly: AssemblyVersion("1.2.0.*")]
