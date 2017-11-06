@@ -236,6 +236,8 @@ namespace ICD.Connect.Analytics.FusionPro
 
 				m_FusionRoom.AddSig(sig.CrestronSigType, (uint)number, sig.Name, sig.CrestronSigMask);
 			}
+
+			FusionRVI.GenerateFileForAllFusionDevices();
 #else
             throw new NotImplementedException();
 #endif
