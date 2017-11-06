@@ -1,7 +1,7 @@
 ﻿using System;
+using ICD.Common.Services.Logging;
 #if SIMPLSHARP
 using System.Text;
-using Crestron.SimplSharp;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Properties;
@@ -183,7 +183,7 @@ namespace ICD.Connect.Analytics.FusionPro
 
 				eDeviceRegistrationUnRegistrationResponse result = m_FusionRoom.Register();
 				if (result != eDeviceRegistrationUnRegistrationResponse.Success)
-					ErrorLog.Error("Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
+					Logger.AddEntry(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
 			}
 
 			Subscribe(m_FusionRoom);
@@ -217,7 +217,7 @@ namespace ICD.Connect.Analytics.FusionPro
 			m_FusionSigsPath = PathUtils.GetDefaultConfigPath(path);
 			if (string.IsNullOrEmpty(m_FusionSigsPath) || !IcdFile.Exists(m_FusionSigsPath))
 			{
-				IcdErrorLog.Error("Unable to find {0}", m_FusionSigsPath);
+				Logger.AddEntry(eSeverity.Error, "{0} unable to find {1}", this, m_FusionSigsPath);
 				return;
 			}
 
@@ -230,7 +230,7 @@ namespace ICD.Connect.Analytics.FusionPro
 				int number = (int)sig.Number - (int)SIG_OFFSET;
 				if (number < MIN_SIG || number > MAX_SIG)
 				{
-					ErrorLog.Error("Skipping FusionRoom sig {0} - joins start at 50.", sig);
+					Logger.AddEntry(eSeverity.Warning, "{0} skipping FusionRoom sig {1} - joins start at 50.", this, sig);
 					continue;
 				}
 
