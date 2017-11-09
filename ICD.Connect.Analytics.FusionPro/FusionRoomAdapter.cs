@@ -214,14 +214,16 @@ namespace ICD.Connect.Analytics.FusionPro
 #if SIMPLSHARP
             m_FusionRoom.RemoveAllSigs();
 
-			m_FusionSigsPath = PathUtils.GetDefaultConfigPath(path);
-			if (string.IsNullOrEmpty(m_FusionSigsPath) || !IcdFile.Exists(m_FusionSigsPath))
+			m_FusionSigsPath = path;
+			string fullPath = PathUtils.GetDefaultConfigPath(path);
+
+			if (string.IsNullOrEmpty(fullPath) || !IcdFile.Exists(fullPath))
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} unable to find {1}", this, m_FusionSigsPath);
+				Logger.AddEntry(eSeverity.Error, "{0} unable to find {1}", this, path);
 				return;
 			}
 
-			string xml = IcdFile.ReadToEnd(m_FusionSigsPath, Encoding.UTF8);
+			string xml = IcdFile.ReadToEnd(fullPath, Encoding.UTF8);
 
 			foreach (FusionXmlSig sig in FusionXmlSig.SigsFromXml(xml))
 			{
