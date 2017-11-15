@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices;
 using ICD.Connect.Settings.Attributes;
+using ICD.Connect.Settings.Attributes.SettingsProperties;
 
 namespace ICD.Connect.Analytics.FusionPro
 {
@@ -36,7 +37,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// </summary>
 		public override Type OriginatorType { get { return typeof(FusionRoomAdapter); } }
 
-		[SettingsProperty(SettingsProperty.ePropertyType.Ipid)]
+		[IpIdSettingsProperty]
 		public byte Ipid { get; set; }
 
 		public string RoomName { get; set; }
@@ -50,7 +51,6 @@ namespace ICD.Connect.Analytics.FusionPro
 			{
 				if (string.IsNullOrEmpty(m_RoomId))
 					m_RoomId = Guid.NewGuid().ToString();
-
 				return m_RoomId;
 			}
 			set { m_RoomId = value; }
@@ -59,6 +59,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <summary>
 		/// Gets/sets the fusion sigs path. Returns the default path if it has not been set.
 		/// </summary>
+		[PathSettingsProperty(".xml")]
 		public string FusionSigsPath
 		{
 			get
