@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Crestron.SimplSharp.CrestronXml;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
@@ -149,11 +148,11 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// </summary>
 		/// <param name="writer"></param>
 		[PublicAPI]
-		public void ToXml(XmlWriter writer)
+		public void ToXml(IcdXmlTextWriter writer)
 		{
 			writer.WriteStartElement(SIG_ELEMENT);
 			{
-				writer.WriteAttributeString(NUMBER_ATTRIBUTE, XmlConvert.ToString(m_Number));
+				writer.WriteAttributeString(NUMBER_ATTRIBUTE, IcdXmlConvert.ToString(m_Number));
 
 				writer.WriteElementString(NAME_ELEMENT, m_Name);
 
