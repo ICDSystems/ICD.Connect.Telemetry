@@ -1,5 +1,5 @@
 ﻿using System;
-using ICD.Common.Services.Logging;
+using ICD.Common.Utils.Services.Logging;
 #if SIMPLSHARP
 using System.Text;
 using Crestron.SimplSharpPro;
