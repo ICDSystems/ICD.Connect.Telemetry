@@ -110,7 +110,7 @@ namespace ICD.Connect.Analytics.FusionPro
 				FusionSigsPath = fusionSigsPath
 			};
 
-			ParseXml(output, xml);
+			output.ParseXml(xml);
 			return output;
 		}
 
