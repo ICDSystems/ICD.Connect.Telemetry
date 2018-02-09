@@ -11,6 +11,7 @@ namespace ICD.Connect.Analytics.FusionPro
 	/// <summary>
 	/// Settings for the FusionRoomAdapter originator.
 	/// </summary>
+	[KrangSettings(FACTORY_NAME)]
 	public sealed class FusionRoomAdapterSettings : AbstractDeviceSettings
 	{
 		private const string FACTORY_NAME = "FusionRoom";
@@ -90,28 +91,22 @@ namespace ICD.Connect.Analytics.FusionPro
 		}
 
 		/// <summary>
-		/// Loads the settings from XML.
+		/// Updates the settings from xml.
 		/// </summary>
 		/// <param name="xml"></param>
-		/// <returns></returns>
-		[PublicAPI, XmlFactoryMethod(FACTORY_NAME)]
-		public static FusionRoomAdapterSettings FromXml(string xml)
+		public override void ParseXml(string xml)
 		{
+			base.ParseXml(xml);
+
 			byte ipid = XmlUtils.ReadChildElementContentAsByte(xml, IPID_ELEMENT);
 			string roomName = XmlUtils.ReadChildElementContentAsString(xml, ROOM_NAME_ELEMENT);
 			string roomId = XmlUtils.TryReadChildElementContentAsString(xml, ROOM_ID_ELEMENT);
 			string fusionSigsPath = XmlUtils.TryReadChildElementContentAsString(xml, FUSION_SIGS_ELEMENT);
 
-			FusionRoomAdapterSettings output = new FusionRoomAdapterSettings
-			{
-				Ipid = ipid,
-				RoomName = roomName,
-				RoomId = roomId,
-				FusionSigsPath = fusionSigsPath
-			};
-
-			output.ParseXml(xml);
-			return output;
+			Ipid = ipid;
+			RoomName = roomName;
+			RoomId = roomId;
+			FusionSigsPath = fusionSigsPath;
 		}
 
 		#endregion
