@@ -87,6 +87,7 @@
     <Compile Include="Assets\AssetTypeExtensions.cs" />
     <Compile Include="Assets\FusionAssetDetailsAdapter.cs" />
     <Compile Include="Assets\FusionOccupancySensorAdapter.cs" />
+    <Compile Include="Assets\FusionRemoteOccupancySensorAdapter.cs" />
     <Compile Include="FusionRoomAdapter.cs" />
     <Compile Include="FusionRoomAdapterSettings.cs" />
     <Compile Include="FusionSigCollectionAdapters.cs" />
