@@ -9,12 +9,14 @@ using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.Misc.CrestronPro;
+using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Common.Utils.IO;
 #endif
 using ICD.Connect.Panels;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Settings.Core;
+using eAssetType = ICD.Connect.Analytics.Assets.eAssetType;
 
 namespace ICD.Connect.Analytics.FusionPro
 {
@@ -218,6 +220,25 @@ namespace ICD.Connect.Analytics.FusionPro
 			UpdateCachedOnlineStatus();
 		}
 #endif
+
+		/// <summary>
+		/// Adds the asset to the fusion room.
+		/// </summary>
+		/// <param name="assetType"></param>
+		/// <param name="number"></param>
+		/// <param name="name"></param>
+		/// <param name="type"></param>
+		/// <param name="instanceId"></param>
+		public void AddAsset(eAssetType assetType, uint number, string name, string type, string instanceId)
+		{
+#if SIMPLSHARP
+			m_FusionRoom.AddAsset(assetType.FromIcd(), number, name, type, instanceId);
+			m_FusionRoom.ReRegister();
+			FusionRVI.GenerateFileForAllFusionDevices();
+#else
+			throw new NotSupportedException();
+#endif
+		}
 
 		/// <summary>
 		/// Sets the fusion error message.

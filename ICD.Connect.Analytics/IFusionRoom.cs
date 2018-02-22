@@ -20,6 +20,16 @@ namespace ICD.Connect.Analytics
 		void LoadSigsFromPath(string path);
 
 		/// <summary>
+		/// Adds the asset to the fusion room.
+		/// </summary>
+		/// <param name="assetType"></param>
+		/// <param name="number"></param>
+		/// <param name="name"></param>
+		/// <param name="type"></param>
+		/// <param name="instanceId"></param>
+		void AddAsset(eAssetType assetType, uint number, string name, string type, string instanceId);
+
+		/// <summary>
 		/// Sets the fusion error message.
 		/// </summary>
 		/// <param name="message"></param>
