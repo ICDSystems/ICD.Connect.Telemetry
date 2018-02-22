@@ -1,6 +1,8 @@
 ﻿using System;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Analytics.Assets;
 #if SIMPLSHARP
+using ICD.Connect.Analytics.FusionPro.Assets;
 using System.Text;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
@@ -31,6 +33,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		private IDeviceUShortOutputCollection m_UShortOutput;
 		private IDeviceStringInputCollection m_StringInput;
 		private IDeviceStringOutputCollection m_StringOutput;
+		private IFusionAssetDataCollection m_FusionAssets;
 
 #if SIMPLSHARP
         private FusionRoom m_FusionRoom;
@@ -50,7 +53,7 @@ namespace ICD.Connect.Analytics.FusionPro
                 return m_BooleanInput ??
 				       (m_BooleanInput = new FusionBooleanInputCollectionAdapter(m_FusionRoom.UserDefinedBooleanSigDetails));
 #else
-                throw new NotImplementedException();
+                throw new NotSupportedException();
 #endif
             }
 		}
@@ -66,7 +69,7 @@ namespace ICD.Connect.Analytics.FusionPro
                 return m_BooleanOutput ??
 				       (m_BooleanOutput = new FusionBooleanOutputCollectionAdapter(m_FusionRoom.UserDefinedBooleanSigDetails));
 #else
-                throw new NotImplementedException();
+                throw new NotSupportedException();
 #endif
             }
 		}
@@ -82,7 +85,7 @@ namespace ICD.Connect.Analytics.FusionPro
                 return m_UShortInput ??
 				       (m_UShortInput = new FusionUShortInputCollectionAdapter(m_FusionRoom.UserDefinedUShortSigDetails));
 #else
-                throw new NotImplementedException();
+                throw new NotSupportedException();
 #endif
             }
 		}
@@ -98,7 +101,7 @@ namespace ICD.Connect.Analytics.FusionPro
                 return m_UShortOutput ??
 				       (m_UShortOutput = new FusionUShortOutputCollectionAdapter(m_FusionRoom.UserDefinedUShortSigDetails));
 #else
-                throw new NotImplementedException();
+                throw new NotSupportedException();
 #endif
             }
 		}
@@ -114,7 +117,7 @@ namespace ICD.Connect.Analytics.FusionPro
                 return m_StringInput ??
 				       (m_StringInput = new FusionStringInputCollectionAdapter(m_FusionRoom.UserDefinedStringSigDetails));
 #else
-                throw new NotImplementedException();
+                throw new NotSupportedException();
 #endif
             }
 		}
@@ -130,9 +133,25 @@ namespace ICD.Connect.Analytics.FusionPro
                 return m_StringOutput ??
 				       (m_StringOutput = new FusionStringOutputCollectionAdapter(m_FusionRoom.UserDefinedStringSigDetails));
 #else
-                throw new NotImplementedException();
+                throw new NotSupportedException();
 #endif
             }
+		}
+
+		/// <summary>
+		/// Collection of user configured assets received from the device.
+		/// </summary>
+		public IFusionAssetDataCollection UserConfigurableAssetDetails
+		{
+			get
+			{
+#if SIMPLSHARP
+				return m_FusionAssets ??
+					   (m_FusionAssets = new FusionAssetDetailsAdapter(m_FusionRoom.UserConfigurableAssetDetails));
+#else
+                throw new NotSupportedException();
+#endif
+			}
 		}
 
 #endregion
@@ -174,6 +193,14 @@ namespace ICD.Connect.Analytics.FusionPro
 				{
 				}
 			}
+
+	        m_BooleanInput = null;
+	        m_BooleanOutput = null;
+	        m_UShortInput = null;
+	        m_UShortOutput = null;
+	        m_StringInput = null;
+	        m_StringOutput = null;
+	        m_FusionAssets = null;
 
 			m_FusionRoom = fusionRoom;
 			if (m_FusionRoom != null && !m_FusionRoom.Registered)

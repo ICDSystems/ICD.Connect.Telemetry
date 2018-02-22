@@ -1,4 +1,5 @@
 ﻿using ICD.Common.Properties;
+using ICD.Connect.Analytics.Assets;
 using ICD.Connect.Devices;
 using ICD.Connect.Panels;
 
@@ -6,6 +7,11 @@ namespace ICD.Connect.Analytics
 {
 	public interface IFusionRoom : ISigDevice, IDevice
 	{
+		/// <summary>
+		/// Gets the user configurable assets.
+		/// </summary>
+		IFusionAssetDataCollection UserConfigurableAssetDetails { get; }
+
 		/// <summary>
 		/// Loads sigs from the xml file at the given path.
 		/// </summary>

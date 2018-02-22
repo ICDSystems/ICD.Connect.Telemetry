@@ -83,6 +83,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractFusionSigCollectionAdapter.cs" />
+    <Compile Include="Assets\AbstractFusionAssetAdapter.cs" />
+    <Compile Include="Assets\AssetTypeExtensions.cs" />
+    <Compile Include="Assets\FusionAssetDetailsAdapter.cs" />
+    <Compile Include="Assets\FusionOccupancySensorAdapter.cs" />
     <Compile Include="FusionRoomAdapter.cs" />
     <Compile Include="FusionRoomAdapterSettings.cs" />
     <Compile Include="FusionSigCollectionAdapters.cs" />
