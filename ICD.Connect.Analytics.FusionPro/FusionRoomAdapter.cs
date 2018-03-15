@@ -340,7 +340,13 @@ namespace ICD.Connect.Analytics.FusionPro
 			base.ApplySettingsFinal(settings, factory);
 
 #if SIMPLSHARP
-            FusionRoom fusionRoom = new FusionRoom(settings.Ipid, ProgramInfo.ControlSystem, settings.RoomName, settings.RoomId);
+            FusionRoom fusionRoom = settings.Ipid == null 
+									? null
+									: new FusionRoom(settings.Ipid.Value,
+													 ProgramInfo.ControlSystem,
+													 settings.RoomName,
+													 settings.RoomId);
+			
 			SetFusionRoom(fusionRoom);
 
 			LoadSigsFromPath(settings.FusionSigsPath);

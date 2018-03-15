@@ -38,7 +38,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		public override Type OriginatorType { get { return typeof(FusionRoomAdapter); } }
 
 		[IpIdSettingsProperty]
-		public byte Ipid { get; set; }
+		public byte? Ipid { get; set; }
 
 		public string RoomName { get; set; }
 
@@ -83,7 +83,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		{
 			base.WriteElements(writer);
 
-			writer.WriteElementString(IPID_ELEMENT, StringUtils.ToIpIdString(Ipid));
+			writer.WriteElementString(IPID_ELEMENT, Ipid == null ? null : StringUtils.ToIpIdString(Ipid.Value));
 			writer.WriteElementString(ROOM_NAME_ELEMENT, RoomName);
 			writer.WriteElementString(ROOM_ID_ELEMENT, RoomId);
 			writer.WriteElementString(FUSION_SIGS_ELEMENT, FusionSigsPath);
