@@ -37,7 +37,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// </summary>
 		public override Type OriginatorType { get { return typeof(FusionRoomAdapter); } }
 
-		[IpIdSettingsProperty]
+		[CrestronByteSettingsProperty]
 		public byte? Ipid { get; set; }
 
 		public string RoomName { get; set; }
