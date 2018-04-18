@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Connect.Misc.Occupancy;
+#if SIMPLSHARP
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Analytics.Assets;
 
@@ -19,10 +20,10 @@ namespace ICD.Connect.Analytics.FusionPro.Assets
 		/// Sets the room occupied state.
 		/// </summary>
 		/// <param name="occupied"></param>
-		public void SetRoomOccupied(bool occupied)
+		public void SetRoomOccupied(eOccupancyState occupied)
 		{
-			FusionAsset.RoomOccupied.InputSig.BoolValue = occupied;
-			FusionAsset.RoomUnoccupied.InputSig.BoolValue = !occupied;
+			FusionAsset.RoomOccupied.InputSig.BoolValue = occupied == eOccupancyState.Occupied;
+			FusionAsset.RoomUnoccupied.InputSig.BoolValue = occupied == eOccupancyState.Unoccupied;
 		}
 
 		/// <summary>
