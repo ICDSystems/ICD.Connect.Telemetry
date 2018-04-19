@@ -1,4 +1,6 @@
-﻿namespace ICD.Connect.Analytics.Assets
+﻿using ICD.Connect.Misc.Occupancy;
+
+namespace ICD.Connect.Analytics.Assets
 {
 	public interface IFusionAsset
 	{
@@ -50,7 +52,7 @@
 		/// Sets the room occupied state.
 		/// </summary>
 		/// <param name="occupied"></param>
-		void SetRoomOccupied(bool occupied);
+		void SetRoomOccupied(eOccupancyState occupied);
 
 		/// <summary>
 		/// Sets the room occupancy info.

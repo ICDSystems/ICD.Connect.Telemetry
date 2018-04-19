@@ -114,6 +114,10 @@
       <Project>{46CD87DE-F3EF-41D4-8783-9ECF21183765}</Project>
       <Name>ICD.Connect.Misc.CrestronPro_SimplSharp</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Misc\ICD.Connect.Misc\ICD.Connect.Misc_SimplSharp.csproj">
+      <Project>{3BAE6352-77B5-499A-9DA5-2AB198F53183}</Project>
+      <Name>ICD.Connect.Misc_SimplSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Panels\ICD.Connect.Panels\ICD.Connect.Panels_SimplSharp.csproj">
       <Project>{A441FE98-6A8E-4EF3-98F0-D17041D2E118}</Project>
       <Name>ICD.Connect.Panels_SimplSharp</Name>
