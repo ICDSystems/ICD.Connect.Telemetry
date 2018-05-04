@@ -10,11 +10,9 @@ namespace ICD.Connect.Analytics.FusionPro
 	/// <summary>
 	/// Settings for the FusionRoomAdapter originator.
 	/// </summary>
-	[KrangSettings(FACTORY_NAME)]
+	[KrangSettings("FusionRoom", typeof(FusionRoomAdapter))]
 	public sealed class FusionRoomAdapterSettings : AbstractDeviceSettings
 	{
-		private const string FACTORY_NAME = "FusionRoom";
-
 		private const string IPID_ELEMENT = "IPID";
 		private const string ROOM_NAME_ELEMENT = "RoomName";
 		private const string ROOM_ID_ELEMENT = "RoomId";
@@ -26,16 +24,6 @@ namespace ICD.Connect.Analytics.FusionPro
 		private string m_FusionSigsPath;
 
 		#region Properties
-
-		/// <summary>
-		/// Gets the originator factory name.
-		/// </summary>
-		public override string FactoryName { get { return FACTORY_NAME; } }
-
-		/// <summary>
-		/// Gets the type of the originator for this settings instance.
-		/// </summary>
-		public override Type OriginatorType { get { return typeof(FusionRoomAdapter); } }
 
 		[CrestronByteSettingsProperty]
 		public byte? Ipid { get; set; }
