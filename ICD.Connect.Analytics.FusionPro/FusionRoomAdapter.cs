@@ -271,7 +271,8 @@ namespace ICD.Connect.Analytics.FusionPro
 				return;
 			}
 
-			string xml = IcdFile.ReadToEnd(fullPath, Encoding.UTF8);
+			string xml = IcdFile.ReadToEnd(fullPath, new UTF8Encoding(false));
+			xml = EncodingUtils.StripUtf8Bom(xml);
 
 			foreach (FusionXmlSig sig in FusionXmlSig.SigsFromXml(xml))
 			{
