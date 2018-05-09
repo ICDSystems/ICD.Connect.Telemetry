@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.1] - 2018-05-09
+### Changed
+ - Fixing issues with loading UTF8-BOM configs
+
 ## [3.0.0] - 2018-04-24
 ### Changed
  - Fusion RemoteOccupancySensor asset uses enum for occupancy state instead of bool. Now supports unknown state.
