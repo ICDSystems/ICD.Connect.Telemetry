@@ -212,7 +212,7 @@ namespace ICD.Connect.Analytics.FusionPro
 
 				eDeviceRegistrationUnRegistrationResponse result = m_FusionRoom.Register();
 				if (result != eDeviceRegistrationUnRegistrationResponse.Success)
-					Logger.AddEntry(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
+					Log(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
 			}
 
 			Subscribe(m_FusionRoom);
@@ -267,7 +267,7 @@ namespace ICD.Connect.Analytics.FusionPro
 
 			if (string.IsNullOrEmpty(fullPath) || !IcdFile.Exists(fullPath))
 			{
-				Logger.AddEntry(eSeverity.Error, "{0} unable to find {1}", this, path);
+				Log(eSeverity.Error, "Unable to find {0}", path);
 				return;
 			}
 
@@ -280,7 +280,7 @@ namespace ICD.Connect.Analytics.FusionPro
 				int number = (int)sig.Number - (int)SIG_OFFSET;
 				if (number < MIN_SIG || number > MAX_SIG)
 				{
-					Logger.AddEntry(eSeverity.Warning, "{0} skipping FusionRoom sig {1} - joins start at 50.", this, sig);
+					Log(eSeverity.Warning, "Skipping FusionRoom sig {0} - joins start at 50.", sig);
 					continue;
 				}
 
