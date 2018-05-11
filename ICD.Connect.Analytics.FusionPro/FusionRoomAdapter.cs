@@ -1,6 +1,8 @@
 ﻿using System;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Analytics.Assets;
+using ICD.Connect.Settings;
+using ICD.Connect.Settings.Cores;
 #if SIMPLSHARP
 using ICD.Connect.Analytics.FusionPro.Assets;
 using System.Text;
@@ -15,7 +17,6 @@ using ICD.Common.Utils.IO;
 #endif
 using ICD.Connect.Panels;
 using ICD.Connect.Panels.SigCollections;
-using ICD.Connect.Settings.Core;
 using eAssetType = ICD.Connect.Analytics.Assets.eAssetType;
 
 namespace ICD.Connect.Analytics.FusionPro
