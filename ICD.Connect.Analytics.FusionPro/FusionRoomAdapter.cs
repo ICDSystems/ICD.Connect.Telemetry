@@ -2,7 +2,6 @@
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Analytics.Assets;
 using ICD.Connect.Settings;
-using ICD.Connect.Settings.Cores;
 #if SIMPLSHARP
 using ICD.Connect.Analytics.FusionPro.Assets;
 using System.Text;
