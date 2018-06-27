@@ -47,7 +47,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <summary>
 		/// Collection of Boolean Inputs sent to the device.
 		/// </summary>
-		protected override IDeviceBooleanInputCollection BooleanInput
+		public override IDeviceBooleanInputCollection BooleanInput
 		{
 			get
 			{
@@ -79,7 +79,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <summary>
 		/// Collection of Integer Inputs sent to the device.
 		/// </summary>
-		protected override IDeviceUShortInputCollection UShortInput
+		public override IDeviceUShortInputCollection UShortInput
 		{
 			get
 			{
@@ -111,7 +111,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <summary>
 		/// Collection of String Inputs sent to the device.
 		/// </summary>
-		protected override IDeviceStringInputCollection StringInput
+		public override IDeviceStringInputCollection StringInput
 		{
 			get
 			{
