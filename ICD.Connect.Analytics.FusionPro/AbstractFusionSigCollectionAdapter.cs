@@ -26,7 +26,6 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// </summary>
 		/// <param name="sigNumber">Number of the sig to return.</param>
 		/// <returns/>
-		/// <exception cref="T:System.IndexOutOfRangeException">Invalid Sig Number specified.</exception>
 		public TAdapter this[uint sigNumber]
 		{
 			get
@@ -42,7 +41,7 @@ namespace ICD.Connect.Analytics.FusionPro
 						if (!m_Collection.Contains(offset))
 						{
 							string message = string.Format("Key {0} not present in {1}", sigNumber, m_Collection.GetType().Name);
-							throw new IndexOutOfRangeException(message);
+							throw new ArgumentOutOfRangeException("sigNumber", message);
 						}
 
 						T sig = m_Collection[offset];
@@ -52,7 +51,7 @@ namespace ICD.Connect.Analytics.FusionPro
 						if (adapter.Number == 0)
 						{
 							string message = string.Format("Key {0} not present in {1}", sigNumber, m_Collection.GetType().Name);
-							throw new IndexOutOfRangeException(message);
+							throw new ArgumentOutOfRangeException("sigNumber", message);
 						}
 
 						m_SigAdapterNumberCache[sigNumber] = adapter;
