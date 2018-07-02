@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.0.2] - 2018-07-02
+### Changed
+ - Sig collections are now public
+
 ## [3.0.1] - 2018-05-09
 ### Changed
  - Fixing issues with loading UTF8-BOM configs
