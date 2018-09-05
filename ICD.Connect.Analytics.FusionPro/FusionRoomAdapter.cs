@@ -1,6 +1,7 @@
 ﻿using System;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Analytics.Assets;
+using ICD.Connect.Panels.Devices;
 #if SIMPLSHARP
 using ICD.Connect.Analytics.FusionPro.Assets;
 using System.Text;
@@ -13,7 +14,6 @@ using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Common.Utils.IO;
 #endif
-using ICD.Connect.Panels;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Settings.Core;
 using eAssetType = ICD.Connect.Analytics.Assets.eAssetType;

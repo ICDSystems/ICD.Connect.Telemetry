@@ -1,7 +1,7 @@
 ﻿using ICD.Common.Properties;
 using ICD.Connect.Analytics.Assets;
 using ICD.Connect.Devices;
-using ICD.Connect.Panels;
+using ICD.Connect.Panels.Devices;
 
 namespace ICD.Connect.Analytics
 {
