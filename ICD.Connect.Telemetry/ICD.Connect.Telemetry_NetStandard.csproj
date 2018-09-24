@@ -4,8 +4,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>ICD.Connect.Analytics</RootNamespace>
-    <AssemblyName>ICD.Connect.Analytics</AssemblyName>
+    <RootNamespace>ICD.Connect.Telemetry</RootNamespace>
+    <AssemblyName>ICD.Connect.Telemetry</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>true</Deterministic>
     <EazfuscatorIntegration>MSBuild</EazfuscatorIntegration>
