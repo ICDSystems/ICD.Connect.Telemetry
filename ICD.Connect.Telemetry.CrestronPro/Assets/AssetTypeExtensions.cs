@@ -1,8 +1,8 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Connect.Telemetry.Assets;
+#if SIMPLSHARP
 using System;
-using ICD.Connect.Analytics.Assets;
 
-namespace ICD.Connect.Analytics.FusionPro.Assets
+namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
 	public static class AssetTypeExtensions
 	{

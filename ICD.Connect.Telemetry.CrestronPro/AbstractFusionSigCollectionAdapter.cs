@@ -8,7 +8,7 @@ using ICD.Common.Utils;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Protocol.Sigs;
 
-namespace ICD.Connect.Analytics.FusionPro
+namespace ICD.Connect.Telemetry.CrestronPro
 {
 	public abstract class AbstractFusionSigCollectionAdapter<TAdapter, T> : ISigCollectionBase<TAdapter>
 		where TAdapter : ISig

@@ -5,7 +5,7 @@ using ICD.Connect.Devices;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
 
-namespace ICD.Connect.Analytics.FusionPro
+namespace ICD.Connect.Telemetry.CrestronPro
 {
 	/// <summary>
 	/// Settings for the FusionRoomAdapter originator.

@@ -1,8 +1,8 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Connect.Telemetry.Assets;
+#if SIMPLSHARP
 using Crestron.SimplSharpPro.Fusion;
-using ICD.Connect.Analytics.Assets;
 
-namespace ICD.Connect.Analytics.FusionPro.Assets
+namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
 	public sealed class FusionOccupancySensorAdapter : AbstractFusionAssetAdapter<FusionOccupancySensor>,
 	                                                   IFusionOccupancySensorAsset

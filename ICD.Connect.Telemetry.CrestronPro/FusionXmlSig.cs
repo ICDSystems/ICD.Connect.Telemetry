@@ -7,7 +7,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Xml;
 using ICD.Connect.Protocol.Sigs;
 
-namespace ICD.Connect.Analytics.FusionPro
+namespace ICD.Connect.Telemetry.CrestronPro
 {
 	/// <summary>
 	/// Parses to/from xml fusion sigs.

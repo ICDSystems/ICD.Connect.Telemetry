@@ -1,24 +1,24 @@
-﻿using System;
-using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Analytics.Assets;
-using ICD.Connect.Panels.Devices;
-#if SIMPLSHARP
-using ICD.Connect.Analytics.FusionPro.Assets;
+﻿#if SIMPLSHARP
 using System.Text;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.IO;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Misc.CrestronPro;
 using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
+using ICD.Connect.Telemetry.CrestronPro.Assets;
 using ICD.Connect.Protocol.Sigs;
-using ICD.Common.Utils.IO;
 #endif
+using System;
+using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Settings.Core;
-using eAssetType = ICD.Connect.Analytics.Assets.eAssetType;
+using ICD.Connect.Telemetry.Assets;
+using eAssetType = ICD.Connect.Telemetry.Assets.eAssetType;
 
-namespace ICD.Connect.Analytics.FusionPro
+namespace ICD.Connect.Telemetry.CrestronPro
 {
 	/// <summary>
 	/// Wrapper for the Crestron FusionRoom object.

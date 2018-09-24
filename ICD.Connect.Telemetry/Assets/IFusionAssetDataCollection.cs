@@ -1,6 +1,6 @@
 ﻿using ICD.Common.Properties;
 
-namespace ICD.Connect.Analytics.Assets
+namespace ICD.Connect.Telemetry.Assets
 {
 	public interface IFusionAssetDataCollection
 	{

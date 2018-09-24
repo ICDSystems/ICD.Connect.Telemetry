@@ -1,9 +1,9 @@
-﻿using ICD.Connect.Misc.Occupancy;
-#if SIMPLSHARP
+﻿#if SIMPLSHARP
 using Crestron.SimplSharpPro.Fusion;
-using ICD.Connect.Analytics.Assets;
+using ICD.Connect.Misc.Occupancy;
+using ICD.Connect.Telemetry.Assets;
 
-namespace ICD.Connect.Analytics.FusionPro.Assets
+namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
 	public sealed class FusionRemoteOccupancySensorAdapter : AbstractFusionAssetAdapter<FusionRemoteOccupancySensor>, IFusionRemoteOccupancySensorAsset
 	{
