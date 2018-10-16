@@ -15,8 +15,7 @@ using System;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Settings.Core;
-using ICD.Connect.Telemetry.Assets;
-using eAssetType = ICD.Connect.Telemetry.Assets.eAssetType;
+using eAssetType = ICD.Connect.Telemetry.CrestronPro.Assets.eAssetType;
 
 namespace ICD.Connect.Telemetry.CrestronPro
 {

@@ -1,6 +1,4 @@
-﻿using ICD.Connect.Telemetry.Assets;
-using eAssetType = ICD.Connect.Telemetry.Assets.eAssetType;
-#if SIMPLSHARP
+﻿#if SIMPLSHARP
 using System;
 using System.Collections.Generic;
 using System.Linq;

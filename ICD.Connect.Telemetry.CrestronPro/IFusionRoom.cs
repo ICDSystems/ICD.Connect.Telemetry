@@ -1,7 +1,7 @@
 ﻿using ICD.Common.Properties;
 using ICD.Connect.Devices;
 using ICD.Connect.Panels.Devices;
-using ICD.Connect.Telemetry.Assets;
+using ICD.Connect.Telemetry.CrestronPro.Assets;
 
 namespace ICD.Connect.Telemetry
 {

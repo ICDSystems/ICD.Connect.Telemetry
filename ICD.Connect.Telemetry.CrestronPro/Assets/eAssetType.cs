@@ -1,4 +1,4 @@
-﻿namespace ICD.Connect.Telemetry.Assets
+﻿namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
 	public enum eAssetType
 	{

@@ -1,6 +1,6 @@
 ﻿using ICD.Connect.Misc.Occupancy;
 
-namespace ICD.Connect.Telemetry.Assets
+namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
 	public interface IFusionAsset
 	{
