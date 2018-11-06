@@ -2,6 +2,6 @@
 {
 	public interface ITelemetryProvider
 	{
-		 
+		ITelemetryCollection Telemetry { get; }
 	}
 }

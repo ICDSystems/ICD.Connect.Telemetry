@@ -57,44 +57,39 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\ProgramData\Crestron\SDK\SimplSharpHelperInterface.dll</HintPath>
     </Reference>
+    <Reference Include="SimplSharpReflectionInterface, Version=1.0.5583.25238, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\ProgramData\Crestron\SDK\SimplSharpReflectionInterface.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ObfuscationSettings.cs" />
+    <Compile Include="AbstractUpdatableTelemetryNodeItem.cs" />
+    <Compile Include="Attributes\AbstractTelemetryAttribute.cs" />
+    <Compile Include="Attributes\ITelemetryAttribute.cs" />
+    <Compile Include="Attributes\MethodTelemetryAttribute.cs" />
+    <Compile Include="Attributes\PropertyTelemetryAttribute.cs" />
+    <Compile Include="CallbackTelemetryNodeItem.cs" />
+    <Compile Include="AbstractTelemetryNodeItem.cs" />
+    <Compile Include="Attributes\EventTelemetryAttribute.cs" />
     <Compile Include="ITelemetryCollection.cs" />
     <Compile Include="ITelemetryItem.cs" />
     <Compile Include="ITelemetryProvider.cs" />
-    <Compile Include="KrangPlugin.cs" />
+    <Compile Include="IUpdatableTelemetryNodeItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TelemetryNodeItem.cs" />
+    <Compile Include="StaticTelemetryNodeItem.cs" />
+    <Compile Include="TelemetryPropertyInfoEqualityComparer.cs" />
+    <Compile Include="TelemetryUtils.cs" />
+    <Compile Include="UpdatableTelemetryNodeItem.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_SimplSharp.csproj">
       <Project>{CB4055C6-D59E-479E-9C56-2C92335A7D9A}</Project>
       <Name>ICD.Common.Utils_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_SimplSharp.csproj">
-      <Project>{727F5820-5A61-440D-8899-E454FE8238D7}</Project>
-      <Name>ICD.Connect.API_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_SimplSharp.csproj">
-      <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
-      <Name>ICD.Connect.Devices_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Misc\ICD.Connect.Misc\ICD.Connect.Misc_SimplSharp.csproj">
-      <Project>{3BAE6352-77B5-499A-9DA5-2AB198F53183}</Project>
-      <Name>ICD.Connect.Misc_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Panels\ICD.Connect.Panels\ICD.Connect.Panels_SimplSharp.csproj">
-      <Project>{A441FE98-6A8E-4EF3-98F0-D17041D2E118}</Project>
-      <Name>ICD.Connect.Panels_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_SimplSharp.csproj">
-      <Project>{5B84EB3C-1C3A-4C4D-98C2-69F67CF51D5A}</Project>
-      <Name>ICD.Connect.Settings_SimplSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />

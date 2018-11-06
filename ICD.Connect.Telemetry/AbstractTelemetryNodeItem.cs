@@ -5,19 +5,20 @@ using System.Linq;
 
 namespace ICD.Connect.Telemetry
 {
-	public class TelemetryNodeItem<T> : ITelemetryItem<T>, ITelemetryCollection, IDisposable
+	public abstract class AbstractTelemetryNodeItem<T> : ITelemetryItem<T>, ITelemetryCollection, IDisposable
 	{
 		private readonly List<ITelemetryItem> m_Children;  
 
 		public string Name { get; private set; }
-		public T Value { get; private set; }
+		object ITelemetryItem.Value { get { return Value; } }
+		public T Value { get; protected set; }
 		public Type ValueType { get { return typeof(T); } }
 
-		public TelemetryNodeItem(string name, T value)
+		protected AbstractTelemetryNodeItem(string name)
 		{
 			m_Children = new List<ITelemetryItem>();
+
 			Name = name;
-			Value = value;
 		}
 
 		public void Dispose()

@@ -6,10 +6,11 @@ namespace ICD.Connect.Telemetry
 	{
 		string Name { get; }
 		Type ValueType { get; }
+		object Value { get; }
 	}
 
 	public interface ITelemetryItem<T> : ITelemetryItem
 	{
-		T Value { get; }
+		new T Value { get; }
 	}
 }
