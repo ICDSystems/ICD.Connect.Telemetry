@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace ICD.Connect.Telemetry.Attributes
+﻿namespace ICD.Connect.Telemetry.Attributes
 {
 	public interface ITelemetryAttribute
 	{
-		 string Name { get; }
+		string Name { get; }
 	}
 }

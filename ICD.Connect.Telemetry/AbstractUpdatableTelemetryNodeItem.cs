@@ -1,17 +1,27 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using Crestron.SimplSharp.Reflection;
+#else
+using System.Reflection;
+#endif
 
 namespace ICD.Connect.Telemetry
 {
 	public abstract class AbstractUpdatableTelemetryNodeItem<T> : AbstractTelemetryNodeItem<T>, IUpdatableTelemetryNodeItem
 	{
-		protected readonly Func<T> m_Callback;
 
-		protected AbstractUpdatableTelemetryNodeItem(string name, Func<T> updateFunction)
+		private readonly PropertyInfo m_PropertyInfo;
+		private readonly object m_Parent;
+
+		protected AbstractUpdatableTelemetryNodeItem(string name, object parent, PropertyInfo propertyInfo)
 			: base(name)
 		{
-			m_Callback = updateFunction;
+			m_PropertyInfo = propertyInfo;
+			m_Parent = parent;
 		}
 
-		public abstract void Update();
+		public void Update()
+		{
+			Value = (T)m_PropertyInfo.GetValue(m_Parent, null);
+		}
 	}
 }

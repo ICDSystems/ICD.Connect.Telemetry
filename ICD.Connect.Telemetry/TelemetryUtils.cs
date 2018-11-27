@@ -27,11 +27,11 @@ namespace ICD.Connect.Telemetry
 
 			foreach (PropertyInfo property in properties)
 			{
-				PropertyTelemetryAttribute attribute = GetTelemetryAttribute(property) as PropertyTelemetryAttribute;
+				ITelemetryPropertyAttribute attribute = GetTelemetryAttribute(property);
 				if (attribute == null)
 					continue;
 
-				
+				instance.Telemetry.Add(attribute.InstantiateTelemetryItem(instance, property));
 			}
 		}
 
@@ -54,12 +54,12 @@ namespace ICD.Connect.Telemetry
 		}
 
 		[CanBeNull]
-		private static ITelemetryAttribute GetTelemetryAttribute(PropertyInfo property)
+		private static ITelemetryPropertyAttribute GetTelemetryAttribute(PropertyInfo property)
 		{
 			if (property == null)
 				throw new ArgumentNullException("property");
-			
-				return property.GetCustomAttributes<ITelemetryAttribute>(true).FirstOrDefault();
+
+			return property.GetCustomAttributes<ITelemetryPropertyAttribute>(true).FirstOrDefault();
 		}
 	}
 }

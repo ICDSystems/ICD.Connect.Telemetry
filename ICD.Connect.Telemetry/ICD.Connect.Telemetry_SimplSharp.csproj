@@ -68,13 +68,18 @@
   <ItemGroup>
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="AbstractUpdatableTelemetryNodeItem.cs" />
+    <Compile Include="Attributes\AbstractPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractTelemetryAttribute.cs" />
+    <Compile Include="Attributes\AbstractUpdatablePropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\ITelemetryAttribute.cs" />
+    <Compile Include="Attributes\ITelemetryPropertyAttribute.cs" />
+    <Compile Include="Attributes\StaticPropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\UpdatablePropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\MethodTelemetryAttribute.cs" />
-    <Compile Include="Attributes\PropertyTelemetryAttribute.cs" />
-    <Compile Include="CallbackTelemetryNodeItem.cs" />
+    <Compile Include="Attributes\DynamicPropertyTelemetryAttribute.cs" />
+    <Compile Include="DynamicTelemetryNodeItem.cs" />
     <Compile Include="AbstractTelemetryNodeItem.cs" />
-    <Compile Include="Attributes\EventTelemetryAttribute.cs" />
+    <Compile Include="Attributes\TelemetryEventAttribute.cs" />
     <Compile Include="ITelemetryCollection.cs" />
     <Compile Include="ITelemetryItem.cs" />
     <Compile Include="ITelemetryProvider.cs" />
