@@ -1,9 +1,9 @@
 ﻿using ICD.Common.Properties;
-using ICD.Connect.Analytics.Assets;
 using ICD.Connect.Devices;
-using ICD.Connect.Panels;
+using ICD.Connect.Panels.Devices;
+using ICD.Connect.Telemetry.Assets;
 
-namespace ICD.Connect.Analytics
+namespace ICD.Connect.Telemetry
 {
 	public interface IFusionRoom : ISigDevice, IDevice
 	{

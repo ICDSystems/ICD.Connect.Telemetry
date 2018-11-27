@@ -1,20 +1,20 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Connect.Telemetry.Assets;
+using eAssetType = ICD.Connect.Telemetry.Assets.eAssetType;
+#if SIMPLSHARP
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Utils;
-using ICD.Connect.Analytics.Assets;
-using eAssetType = Crestron.SimplSharpPro.Fusion.eAssetType;
 
-namespace ICD.Connect.Analytics.FusionPro.Assets
+namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
 	public sealed class FusionAssetDetailsAdapter : IFusionAssetDataCollection
 	{
 		private readonly CrestronCollection<CustomFusionAssetData> m_Collection;
 		private readonly Dictionary<uint, FusionAssetData> m_AdapterCache;
-		private readonly Dictionary<Analytics.Assets.eAssetType, List<uint>> m_TypeToAdapters; 
+		private readonly Dictionary<eAssetType, List<uint>> m_TypeToAdapters; 
 		private readonly SafeCriticalSection m_Section;
 
 		/// <summary>
@@ -29,7 +29,7 @@ namespace ICD.Connect.Analytics.FusionPro.Assets
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public FusionAssetData GetAssetData(Analytics.Assets.eAssetType type)
+		public FusionAssetData GetAssetData(eAssetType type)
 		{
 			m_Section.Enter();
 
@@ -55,7 +55,7 @@ namespace ICD.Connect.Analytics.FusionPro.Assets
 		{
 			m_Collection = collection;
 			m_AdapterCache = new Dictionary<uint, FusionAssetData>();
-			m_TypeToAdapters = new Dictionary<Analytics.Assets.eAssetType, List<uint>>();
+			m_TypeToAdapters = new Dictionary<eAssetType, List<uint>>();
 			m_Section = new SafeCriticalSection();
 		}
 
@@ -74,7 +74,7 @@ namespace ICD.Connect.Analytics.FusionPro.Assets
 				{
 					CustomFusionAssetData assetData = m_Collection[id];
 					FusionAssetBase asset = assetData.Asset;
-					Analytics.Assets.eAssetType assetType = assetData.Type.ToIcd();
+					eAssetType assetType = assetData.Type.ToIcd();
 
 					IFusionAsset adapter = BuildAdapterForAsset(assetData, asset);
 					FusionAssetData data = new FusionAssetData(id, assetType, adapter);
@@ -106,26 +106,26 @@ namespace ICD.Connect.Analytics.FusionPro.Assets
 		{
 			switch (assetData.Type)
 			{
-				case eAssetType.OccupancySensor:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.OccupancySensor:
 					return new FusionOccupancySensorAdapter(asset as FusionOccupancySensor);
 
-				case eAssetType.RemoteOccupancySensor:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.RemoteOccupancySensor:
 					return new FusionRemoteOccupancySensorAdapter(asset as FusionRemoteOccupancySensor);
 
-				case eAssetType.NA:
-				case eAssetType.DemandResponse:
-				case eAssetType.DynamicAsset:
-				case eAssetType.EnergyLoad:
-				case eAssetType.EnergySupply:
-				case eAssetType.HvacZone:
-				case eAssetType.LightingLoad:
-				case eAssetType.LightingScenes:
-				case eAssetType.Logging:
-				case eAssetType.PhotocellSensor:
-				case eAssetType.RemoteRealTimePower:
-				case eAssetType.ShadeLoad:
-				case eAssetType.ShadePresets:
-				case eAssetType.StaticAsset:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.NA:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.DemandResponse:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.DynamicAsset:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.EnergyLoad:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.EnergySupply:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.HvacZone:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.LightingLoad:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.LightingScenes:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.Logging:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.PhotocellSensor:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.RemoteRealTimePower:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.ShadeLoad:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.ShadePresets:
+				case Crestron.SimplSharpPro.Fusion.eAssetType.StaticAsset:
 					throw new NotImplementedException();
 
 				default:

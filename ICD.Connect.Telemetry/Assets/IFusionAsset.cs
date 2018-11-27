@@ -1,6 +1,6 @@
 ﻿using ICD.Connect.Misc.Occupancy;
 
-namespace ICD.Connect.Analytics.Assets
+namespace ICD.Connect.Telemetry.Assets
 {
 	public interface IFusionAsset
 	{

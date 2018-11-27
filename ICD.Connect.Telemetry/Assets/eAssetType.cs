@@ -1,4 +1,4 @@
-﻿namespace ICD.Connect.Analytics.Assets
+﻿namespace ICD.Connect.Telemetry.Assets
 {
 	public enum eAssetType
 	{

@@ -1,24 +1,24 @@
 ﻿using System;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Analytics.Assets;
 using ICD.Connect.Settings;
-#if SIMPLSHARP
-using ICD.Connect.Analytics.FusionPro.Assets;
+﻿#if SIMPLSHARP
 using System.Text;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.IO;
 using ICD.Connect.Misc.CrestronPro;
 using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
+using ICD.Connect.Telemetry.CrestronPro.Assets;
 using ICD.Connect.Protocol.Sigs;
-using ICD.Common.Utils.IO;
 #endif
-using ICD.Connect.Panels;
+using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
-using eAssetType = ICD.Connect.Analytics.Assets.eAssetType;
+using ICD.Connect.Telemetry.Assets;
+using eAssetType = ICD.Connect.Telemetry.Assets.eAssetType;
 
-namespace ICD.Connect.Analytics.FusionPro
+namespace ICD.Connect.Telemetry.CrestronPro
 {
 	/// <summary>
 	/// Wrapper for the Crestron FusionRoom object.
@@ -47,7 +47,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <summary>
 		/// Collection of Boolean Inputs sent to the device.
 		/// </summary>
-		protected override IDeviceBooleanInputCollection BooleanInput
+		public override IDeviceBooleanInputCollection BooleanInput
 		{
 			get
 			{
@@ -79,7 +79,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <summary>
 		/// Collection of Integer Inputs sent to the device.
 		/// </summary>
-		protected override IDeviceUShortInputCollection UShortInput
+		public override IDeviceUShortInputCollection UShortInput
 		{
 			get
 			{
@@ -111,7 +111,7 @@ namespace ICD.Connect.Analytics.FusionPro
 		/// <summary>
 		/// Collection of String Inputs sent to the device.
 		/// </summary>
-		protected override IDeviceStringInputCollection StringInput
+		public override IDeviceStringInputCollection StringInput
 		{
 			get
 			{

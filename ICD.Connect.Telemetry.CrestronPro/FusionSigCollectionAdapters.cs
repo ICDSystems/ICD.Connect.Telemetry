@@ -4,7 +4,7 @@ using ICD.Connect.Misc.CrestronPro.Sigs;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Protocol.Sigs;
 
-namespace ICD.Connect.Analytics.FusionPro
+namespace ICD.Connect.Telemetry.CrestronPro
 {
 	public sealed class FusionStringInputCollectionAdapter :
 		AbstractFusionSigCollectionAdapter<IStringInputSig, StringSigData>, IDeviceStringInputCollection
