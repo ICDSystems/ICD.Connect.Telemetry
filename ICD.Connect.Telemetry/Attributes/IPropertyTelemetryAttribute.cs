@@ -1,9 +1,13 @@
-﻿using Crestron.SimplSharp.Reflection;
+﻿#if SIMPLSHARP
+using Crestron.SimplSharp.Reflection;
+#else
+using System.Reflection;
+#endif
 using ICD.Common.Properties;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
-	public interface ITelemetryPropertyAttribute : ITelemetryAttribute
+	public interface IPropertyTelemetryAttribute : ITelemetryAttribute
 	{
 		/// <summary>
 		/// Instantiates a new telemetry item for the given instance and property.
@@ -12,6 +16,6 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// <param name="propertyInfo"></param>
 		/// <returns></returns>
 		[NotNull]
-		ITelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo);
+		IFeedbackTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo);
 	}
 }

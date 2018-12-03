@@ -1,24 +1,23 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Connect.API.Commands;
+using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Telemetry
 {
-	public abstract class AbstractTelemetryNodeItem<T> : ITelemetryItem<T>, ITelemetryCollection, IDisposable
+	public abstract class AbstractTelemetryNodeItemBase : ITelemetryItem, ITelemetryCollection, IDisposable
 	{
-		private readonly List<ITelemetryItem> m_Children;  
+		private readonly List<ITelemetryItem> m_Children;
 
 		public string Name { get; private set; }
-		object ITelemetryItem.Value { get { return Value; } }
-		public T Value { get; protected set; }
-		public Type ValueType { get { return typeof(T); } }
 
-		protected AbstractTelemetryNodeItem(string name)
+		protected AbstractTelemetryNodeItemBase(string name)
 		{
-			m_Children = new List<ITelemetryItem>();
-
 			Name = name;
+
+			m_Children = new List<ITelemetryItem>();
 		}
 
 		public void Dispose()
@@ -35,7 +34,7 @@ namespace ICD.Connect.Telemetry
 			where TChildren : ITelemetryItem
 		{
 			return m_Children.OfType<TChildren>().ToList();
-		} 
+		}
 
 		public virtual ITelemetryItem GetChildByName(string name)
 		{
@@ -49,7 +48,7 @@ namespace ICD.Connect.Telemetry
 
 		public virtual void Add(ITelemetryItem item)
 		{
-			if(!m_Children.Contains(item))
+			if (!m_Children.Contains(item))
 				m_Children.Add(item);
 		}
 
@@ -81,6 +80,46 @@ namespace ICD.Connect.Telemetry
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return GetEnumerator();
+		}
+
+		#endregion
+
+		#region Console
+		/// <summary>
+		/// Gets the name of the node.
+		/// </summary>
+		public string ConsoleName { get; private set; }
+
+		/// <summary>
+		/// Gets the help information for the node.
+		/// </summary>
+		public string ConsoleHelp { get; private set; }
+
+		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			throw new NotImplementedException();
 		}
 
 		#endregion

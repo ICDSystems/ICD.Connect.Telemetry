@@ -67,25 +67,33 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ObfuscationSettings.cs" />
+    <Compile Include="AbstractTelemetryNodeItemBase.cs" />
     <Compile Include="AbstractUpdatableTelemetryNodeItem.cs" />
+    <Compile Include="Attributes\AbstractMethodTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractUpdatablePropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\IEventTelemetryAttribute.cs" />
+    <Compile Include="Attributes\IMethodTelemetryAttribute.cs" />
     <Compile Include="Attributes\ITelemetryAttribute.cs" />
-    <Compile Include="Attributes\ITelemetryPropertyAttribute.cs" />
+    <Compile Include="Attributes\IPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\StaticPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\UpdatablePropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\MethodTelemetryAttribute.cs" />
     <Compile Include="Attributes\DynamicPropertyTelemetryAttribute.cs" />
     <Compile Include="DynamicTelemetryNodeItem.cs" />
-    <Compile Include="AbstractTelemetryNodeItem.cs" />
-    <Compile Include="Attributes\TelemetryEventAttribute.cs" />
+    <Compile Include="AbstractFeedbackTelemetryNodeItem.cs" />
+    <Compile Include="Attributes\EventTelemetryAttribute.cs" />
+    <Compile Include="IManagementTelemetryItem.cs" />
     <Compile Include="ITelemetryCollection.cs" />
+    <Compile Include="IFeedbackTelemetryItem.cs" />
     <Compile Include="ITelemetryItem.cs" />
     <Compile Include="ITelemetryProvider.cs" />
     <Compile Include="IUpdatableTelemetryNodeItem.cs" />
+    <Compile Include="MethodTelemetryNodeItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaticTelemetryNodeItem.cs" />
+    <Compile Include="TelemetryMethodInfoEqualityComparer.cs" />
     <Compile Include="TelemetryPropertyInfoEqualityComparer.cs" />
     <Compile Include="TelemetryUtils.cs" />
     <Compile Include="UpdatableTelemetryNodeItem.cs" />

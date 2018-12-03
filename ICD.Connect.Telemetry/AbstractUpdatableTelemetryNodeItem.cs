@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace ICD.Connect.Telemetry
 {
-	public abstract class AbstractUpdatableTelemetryNodeItem<T> : AbstractTelemetryNodeItem<T>, IUpdatableTelemetryNodeItem
+	public abstract class AbstractUpdatableTelemetryNodeItem<T> : AbstractFeedbackTelemetryNodeItem<T>, IUpdatableTelemetryNodeItem
 	{
 
 		private readonly PropertyInfo m_PropertyInfo;

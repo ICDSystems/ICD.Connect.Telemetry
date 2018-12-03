@@ -3,9 +3,9 @@
 namespace ICD.Connect.Telemetry.Attributes
 {
 	[AttributeUsage(AttributeTargets.Event, Inherited = true, AllowMultiple = false)]
-	public sealed class TelemetryEventAttribute : AbstractTelemetryAttribute
+	public sealed class EventTelemetryAttribute : AbstractTelemetryAttribute, IEventTelemetryAttribute
 	{
-		public TelemetryEventAttribute(string name) 
+		public EventTelemetryAttribute(string name) 
 			: base(name)
 		{
 		}

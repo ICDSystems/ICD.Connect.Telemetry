@@ -1,16 +1,9 @@
-﻿using System;
+﻿using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Telemetry
 {
-	public interface ITelemetryItem
+	public interface ITelemetryItem : IConsoleNode
 	{
 		string Name { get; }
-		Type ValueType { get; }
-		object Value { get; }
-	}
-
-	public interface ITelemetryItem<T> : ITelemetryItem
-	{
-		new T Value { get; }
 	}
 }

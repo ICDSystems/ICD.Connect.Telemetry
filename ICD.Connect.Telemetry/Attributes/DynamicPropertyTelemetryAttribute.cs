@@ -29,7 +29,7 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// <param name="instance"></param>
 		/// <param name="propertyInfo"></param>
 		/// <returns></returns>
-		public override ITelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
+		public override IFeedbackTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
 		{
 			IEnumerable<Type> types = instance.GetType().GetAllTypes();
 #if SIMPLSHARP
@@ -42,7 +42,7 @@ namespace ICD.Connect.Telemetry.Attributes
 
 			foreach (EventInfo info in eventInfos)
 			{
-				IEnumerable<TelemetryEventAttribute> attributes = info.GetCustomAttributes<TelemetryEventAttribute>();
+				IEnumerable<EventTelemetryAttribute> attributes = info.GetCustomAttributes<EventTelemetryAttribute>();
 				
 				if (attributes.All(attr => attr.Name != EventName))
 					continue;
@@ -56,7 +56,7 @@ namespace ICD.Connect.Telemetry.Attributes
 
 			Type type = typeof(DynamicTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
 
-			return (ITelemetryItem)ReflectionUtils.CreateInstance(type, new object[] {Name, instance, eventInfo, propertyInfo});
+			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new object[] {Name, instance, eventInfo, propertyInfo});
 		}
 	}
 }
