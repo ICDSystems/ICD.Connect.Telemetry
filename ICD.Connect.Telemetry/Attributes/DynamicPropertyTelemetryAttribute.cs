@@ -4,7 +4,7 @@ using System.Linq;
 using Crestron.SimplSharp.Reflection;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-
+using ICD.Connect.Telemetry.Nodes;
 #if SIMPLSHARP
 using Activator = Crestron.SimplSharp.Reflection.Activator;
 #else

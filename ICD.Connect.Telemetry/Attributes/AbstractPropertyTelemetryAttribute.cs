@@ -1,5 +1,6 @@
 using System;
 using Crestron.SimplSharp.Reflection;
+using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes
 {

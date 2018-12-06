@@ -4,6 +4,7 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Attributes;
+using ICD.Connect.Telemetry.Nodes;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -15,13 +16,16 @@ namespace ICD.Connect.Telemetry
 	public static class TelemetryUtils
 	{
 		[PublicAPI]
-		public static void InstantiateTelemetry(ITelemetryProvider instance)
+		public static ITelemetryCollection InstantiateTelemetry(ITelemetryProvider instance)
 		{
-			InstantiatePropertyTelemetry(instance);
-			InstantiateMethodTelemetry(instance);
+			//TODO: replace this with an actual root node item
+			var collection = new StaticTelemetryNodeItem<object>("Telemetry", null);
+			InstantiatePropertyTelemetry(instance, collection);
+			InstantiateMethodTelemetry(instance, collection);
+			return collection;
 		}
 
-		private static void InstantiatePropertyTelemetry(ITelemetryProvider instance)
+		private static void InstantiatePropertyTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
 		{
 			IEnumerable<PropertyInfo> properties = GetPropertiesWithTelemetryAttributes(instance.GetType());
 
@@ -31,11 +35,11 @@ namespace ICD.Connect.Telemetry
 				if (attribute == null)
 					continue;
 
-				instance.Telemetry.Add(attribute.InstantiateTelemetryItem(instance, property));
+				collection.Add(attribute.InstantiateTelemetryItem(instance, property));
 			}
 		}
 
-		private static void InstantiateMethodTelemetry(ITelemetryProvider instance)
+		private static void InstantiateMethodTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
 		{
 			IEnumerable<MethodInfo> methods = GetMethodsWithTelemetryAttributes(instance.GetType());
 
@@ -44,7 +48,8 @@ namespace ICD.Connect.Telemetry
 				IMethodTelemetryAttribute attribute = GetTelemetryAttribute(method);
 				if (attribute == null)
 					continue;
-				instance.Telemetry.Add(attribute.InstantiateTelemetryItem(instance, method));
+
+				collection.Add(attribute.InstantiateTelemetryItem(instance, method));
 			}
 		}
 

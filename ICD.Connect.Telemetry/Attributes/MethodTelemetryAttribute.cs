@@ -2,6 +2,7 @@
 using System.Linq;
 using Crestron.SimplSharp.Reflection;
 using ICD.Common.Utils;
+using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
