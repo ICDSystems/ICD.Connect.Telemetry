@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
-#if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
+#if SIMPLSHARP
+
 #else
 using System.Reflection;
 #endif
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.Nodes
 {
 	public sealed class MethodTelemetryNodeItem : AbstractTelemetryNodeItemBase, IManagementTelemetryItem
 	{

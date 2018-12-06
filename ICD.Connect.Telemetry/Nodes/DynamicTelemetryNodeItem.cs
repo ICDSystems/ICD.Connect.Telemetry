@@ -1,13 +1,13 @@
-﻿using System;
-#if SIMPLSHARP
-using Crestron.SimplSharp.Reflection;
+﻿#if SIMPLSHARP
 #else
 using System.Reflection;
 #endif
+using System;
+using Crestron.SimplSharp.Reflection;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.Nodes
 {
 	public sealed class DynamicTelemetryNodeItem<T> : AbstractUpdatableTelemetryNodeItem<T>
 	{

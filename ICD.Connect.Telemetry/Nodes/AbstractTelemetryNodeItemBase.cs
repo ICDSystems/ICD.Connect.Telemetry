@@ -5,7 +5,7 @@ using System.Linq;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.Nodes
 {
 	public abstract class AbstractTelemetryNodeItemBase : ITelemetryItem, ITelemetryCollection, IDisposable
 	{

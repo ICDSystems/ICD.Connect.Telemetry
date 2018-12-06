@@ -1,10 +1,11 @@
-﻿#if SIMPLSHARP
-using Crestron.SimplSharp.Reflection;
+﻿using Crestron.SimplSharp.Reflection;
+#if SIMPLSHARP
+
 #else
 using System.Reflection;
 #endif
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.Nodes
 {
 	public sealed class UpdatableTelemetryNodeItem<T> : AbstractUpdatableTelemetryNodeItem<T>
 	{

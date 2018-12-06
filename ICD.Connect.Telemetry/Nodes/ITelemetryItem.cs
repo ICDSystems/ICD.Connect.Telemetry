@@ -1,6 +1,6 @@
 ﻿using ICD.Connect.API.Nodes;
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.Nodes
 {
 	public interface ITelemetryItem : IConsoleNode
 	{

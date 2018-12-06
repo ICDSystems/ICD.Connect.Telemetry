@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.Nodes
 {
 	public interface IFeedbackTelemetryItem : ITelemetryItem
 	{
