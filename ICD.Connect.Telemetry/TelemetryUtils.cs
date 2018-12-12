@@ -4,7 +4,6 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Attributes;
-using ICD.Connect.Telemetry.Nodes;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -18,8 +17,7 @@ namespace ICD.Connect.Telemetry
 		[PublicAPI]
 		public static ITelemetryCollection InstantiateTelemetry(ITelemetryProvider instance)
 		{
-			//TODO: replace this with an actual root node item
-			var collection = new StaticTelemetryNodeItem<object>("Telemetry", null);
+			TelemetryCollection collection = new TelemetryCollection();
 			InstantiatePropertyTelemetry(instance, collection);
 			InstantiateMethodTelemetry(instance, collection);
 			return collection;
