@@ -4,6 +4,7 @@ using ICD.Common.Utils.Xml;
 using ICD.Connect.Devices;
 using ICD.Connect.Settings.Attributes;
 using ICD.Connect.Settings.Attributes.SettingsProperties;
+using ICD.Connect.Telemetry.Crestron;
 
 namespace ICD.Connect.Telemetry.CrestronPro
 {

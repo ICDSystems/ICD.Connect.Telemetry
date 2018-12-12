@@ -1,4 +1,7 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Connect.Telemetry.Crestron;
+using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Telemetry.CrestronPro.Assets;
+#if SIMPLSHARP
 using System.Text;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
@@ -8,14 +11,13 @@ using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Misc.CrestronPro;
 using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
-using ICD.Connect.Telemetry.CrestronPro.Assets;
 using ICD.Connect.Protocol.Sigs;
 #endif
 using System;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Settings.Core;
-using eAssetType = ICD.Connect.Telemetry.CrestronPro.Assets.eAssetType;
+using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 
 namespace ICD.Connect.Telemetry.CrestronPro
 {

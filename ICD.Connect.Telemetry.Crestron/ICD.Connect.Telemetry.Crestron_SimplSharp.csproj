@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{E0BBC879-638E-4D6D-9CFE-DF9F561B69D0}</ProjectGuid>
+    <ProjectGuid>{FC1260C8-7183-471C-81F2-13382A9ED767}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ICD.Connect.Telemetry.CrestronPro</RootNamespace>
-    <AssemblyName>ICD.Connect.Telemetry.CrestronPro</AssemblyName>
-    <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92300};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <RootNamespace>ICD.Connect.Telemetry.Crestron</RootNamespace>
+    <AssemblyName>ICD.Connect.Telemetry.Crestron</AssemblyName>
+    <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92500};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>WindowsCE</PlatformFamilyName>
     <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
     <OSVersion>5.0</OSVersion>
@@ -68,11 +68,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\ProgramData\Crestron\SDK\SimplSharpNewtonsoft.dll</HintPath>
     </Reference>
-    <Reference Include="SimplSharpPro, Version=1.5.2.2, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\ProgramData\Crestron\SDK\SimplSharpPro.exe</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="SimplSharpReflectionInterface, Version=1.0.5583.25238, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\ProgramData\Crestron\SDK\SimplSharpReflectionInterface.dll</HintPath>
@@ -82,17 +77,13 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\AbstractFusionAssetAdapter.cs" />
+    <Compile Include="Assets\eAssetType.cs" />
+    <Compile Include="Assets\FusionAssetData.cs" />
+    <Compile Include="Assets\IFusionAsset.cs" />
+    <Compile Include="Assets\IFusionAssetDataCollection.cs" />
     <None Include="ObfuscationSettings.cs" />
-    <Compile Include="AbstractFusionSigCollectionAdapter.cs" />
-    <Compile Include="Assets\AssetTypeExtensions.cs" />
-    <Compile Include="Assets\FusionAssetDetailsAdapter.cs" />
-    <Compile Include="Assets\FusionOccupancySensorAdapter.cs" />
-    <Compile Include="Assets\FusionRemoteOccupancySensorAdapter.cs" />
-    <Compile Include="FusionRoomAdapter.cs" />
-    <Compile Include="FusionRoomAdapterSettings.cs" />
-    <Compile Include="FusionSigCollectionAdapters.cs" />
-    <Compile Include="FusionXmlSig.cs" />
-    <Compile Include="KrangPlugin.cs" />
+    <Compile Include="IFusionRoom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
@@ -128,10 +119,6 @@
     <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_SimplSharp.csproj">
       <Project>{5B84EB3C-1C3A-4C4D-98C2-69F67CF51D5A}</Project>
       <Name>ICD.Connect.Settings_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ICD.Connect.Telemetry.Crestron\ICD.Connect.Telemetry.Crestron_SimplSharp.csproj">
-      <Project>{FC1260C8-7183-471C-81F2-13382A9ED767}</Project>
-      <Name>ICD.Connect.Telemetry.Crestron_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Telemetry\ICD.Connect.Telemetry_SimplSharp.csproj">
       <Project>{9512C0A5-F966-4AC6-9668-62C6F343B0CD}</Project>

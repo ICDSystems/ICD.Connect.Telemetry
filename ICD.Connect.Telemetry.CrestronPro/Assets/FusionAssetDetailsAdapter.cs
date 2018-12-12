@@ -1,10 +1,12 @@
-﻿#if SIMPLSHARP
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Utils;
+using ICD.Connect.Telemetry.Crestron.Assets;
+using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
+#if SIMPLSHARP
 
 namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
@@ -27,7 +29,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public FusionAssetData GetAssetData(eAssetType type)
+		public FusionAssetData GetAssetData(Crestron.Assets.eAssetType type)
 		{
 			m_Section.Enter();
 
@@ -104,26 +106,26 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		{
 			switch (assetData.Type)
 			{
-				case Crestron.SimplSharpPro.Fusion.eAssetType.OccupancySensor:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.OccupancySensor:
 					return new FusionOccupancySensorAdapter(asset as FusionOccupancySensor);
 
-				case Crestron.SimplSharpPro.Fusion.eAssetType.RemoteOccupancySensor:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.RemoteOccupancySensor:
 					return new FusionRemoteOccupancySensorAdapter(asset as FusionRemoteOccupancySensor);
 
-				case Crestron.SimplSharpPro.Fusion.eAssetType.NA:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.DemandResponse:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.DynamicAsset:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.EnergyLoad:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.EnergySupply:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.HvacZone:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.LightingLoad:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.LightingScenes:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.Logging:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.PhotocellSensor:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.RemoteRealTimePower:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.ShadeLoad:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.ShadePresets:
-				case Crestron.SimplSharpPro.Fusion.eAssetType.StaticAsset:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.NA:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.DemandResponse:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.DynamicAsset:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.EnergyLoad:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.EnergySupply:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.HvacZone:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.LightingLoad:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.LightingScenes:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.Logging:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.PhotocellSensor:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.RemoteRealTimePower:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.ShadeLoad:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.ShadePresets:
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.StaticAsset:
 					throw new NotImplementedException();
 
 				default:

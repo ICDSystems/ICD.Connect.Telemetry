@@ -46,20 +46,20 @@ namespace ICD.Connect.Telemetry.CrestronPro
 		/// <summary>
 		/// Gets the sig type in crestron format.
 		/// </summary>
-		public Crestron.SimplSharpPro.eSigType CrestronSigType
+		public global::Crestron.SimplSharpPro.eSigType CrestronSigType
 		{
 			get
 			{
 				switch (m_SigType)
 				{
 					case eSigType.Na:
-						return Crestron.SimplSharpPro.eSigType.NA;
+						return global::Crestron.SimplSharpPro.eSigType.NA;
 					case eSigType.Digital:
-						return Crestron.SimplSharpPro.eSigType.Bool;
+						return global::Crestron.SimplSharpPro.eSigType.Bool;
 					case eSigType.Analog:
-						return Crestron.SimplSharpPro.eSigType.UShort;
+						return global::Crestron.SimplSharpPro.eSigType.UShort;
 					case eSigType.Serial:
-						return Crestron.SimplSharpPro.eSigType.String;
+						return global::Crestron.SimplSharpPro.eSigType.String;
 					default:
 						throw new ArgumentOutOfRangeException();
 				}
@@ -75,20 +75,20 @@ namespace ICD.Connect.Telemetry.CrestronPro
 		/// <summary>
 		/// Gets the sig mask in crestron format.
 		/// </summary>
-		public Crestron.SimplSharpPro.eSigIoMask CrestronSigMask
+		public global::Crestron.SimplSharpPro.eSigIoMask CrestronSigMask
 		{
 			get
 			{
 				switch (m_SigMask)
 				{
 					case eSigIoMask.Na:
-						return Crestron.SimplSharpPro.eSigIoMask.NA;
+						return global::Crestron.SimplSharpPro.eSigIoMask.NA;
 					case eSigIoMask.OutputSigOnly:
-						return Crestron.SimplSharpPro.eSigIoMask.OutputSigOnly;
+						return global::Crestron.SimplSharpPro.eSigIoMask.OutputSigOnly;
 					case eSigIoMask.InputSigOnly:
-						return Crestron.SimplSharpPro.eSigIoMask.InputSigOnly;
+						return global::Crestron.SimplSharpPro.eSigIoMask.InputSigOnly;
 					case eSigIoMask.InputOutputSig:
-						return Crestron.SimplSharpPro.eSigIoMask.InputOutputSig;
+						return global::Crestron.SimplSharpPro.eSigIoMask.InputOutputSig;
 					default:
 						throw new ArgumentOutOfRangeException();
 				}
