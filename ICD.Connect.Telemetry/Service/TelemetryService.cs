@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Service
 {
@@ -59,6 +60,18 @@ namespace ICD.Connect.Telemetry.Service
 				return m_Telemetries[provider] ?? (m_Telemetries[provider] = TelemetryUtils.InstantiateTelemetry(provider));
 			
 			throw new KeyNotFoundException("Provider not added to the telemetry service.");
+		}
+
+		/// <summary>
+		/// Attempts to lazy-load the telemetry nodes for a given provider. 
+		/// </summary>
+		/// <param name="provider"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		public ITelemetryItem GetTelemetryForProvider(ITelemetryProvider provider, string name)
+		{
+			return GetTelemetryForProvider(provider).GetChildByName(name);
 		}
 
 		private void ProviderOnRequestTelemetryRebuild(object sender, EventArgs eventArgs)
