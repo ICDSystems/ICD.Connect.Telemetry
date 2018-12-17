@@ -91,9 +91,17 @@
     <Compile Include="FusionRoomAdapter.cs" />
     <Compile Include="FusionRoomAdapterSettings.cs" />
     <Compile Include="FusionSigCollectionAdapters.cs" />
-    <Compile Include="FusionXmlSig.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SigMappings\IcdDisplayFusionSigs.cs" />
+    <Compile Include="SigMappings\IcdDisplayWithAudioFusionSigs.cs" />
+    <Compile Include="SigMappings\IcdStandardFusionSigs.cs" />
+    <Compile Include="TelemetryAssets\AbstractDisplayFusionAssetFactory.cs" />
+    <Compile Include="TelemetryAssets\AbstractFusionAssetFactory.cs" />
+    <Compile Include="TelemetryAssets\DisplayFusionAssetFactory.cs" />
+    <Compile Include="TelemetryAssets\DisplayWithAudioFusionAssetFactory.cs" />
+    <Compile Include="TelemetryAssets\IFusionAssetFactory.cs" />
+    <Compile Include="FusionTelemetryMunger.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
@@ -108,6 +116,10 @@
     <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_SimplSharp.csproj">
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
       <Name>ICD.Connect.Devices_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Displays\ICD.Connect.Displays\ICD.Connect.Displays_SimplSharp.csproj">
+      <Project>{FCC7D685-B801-43A5-AEB3-774442027A0D}</Project>
+      <Name>ICD.Connect.Displays_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Misc\ICD.Connect.Misc.CrestronPro\ICD.Connect.Misc.CrestronPro_SimplSharp.csproj">
       <Project>{46CD87DE-F3EF-41D4-8783-9ECF21183765}</Project>

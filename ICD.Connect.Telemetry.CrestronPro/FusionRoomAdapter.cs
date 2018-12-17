@@ -1,8 +1,10 @@
-﻿using ICD.Connect.Telemetry.Crestron;
+﻿using System.Collections.Generic;
+using ICD.Connect.Telemetry.Crestron;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.CrestronPro.Assets;
 #if SIMPLSHARP
 using System.Text;
+using System.Linq;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Properties;
@@ -18,6 +20,8 @@ using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Settings.Core;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
+using eSigIoMask = ICD.Connect.Protocol.Sigs.eSigIoMask;
+using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 
 namespace ICD.Connect.Telemetry.CrestronPro
 {
@@ -250,9 +254,53 @@ namespace ICD.Connect.Telemetry.CrestronPro
 #if SIMPLSHARP
             m_FusionRoom.ErrorMessage.InputSig.StringValue = message;
 #else
-            throw new NotImplementedException();
+            throw new NotSupportedException();
 #endif
-        }
+		}
+
+		/// <summary>
+		/// Removes the asset with the given id.
+		/// </summary>
+		/// <param name="assetId"></param>
+		public void RemoveAsset(uint assetId)
+		{
+#if SIMPLSHARP
+			m_FusionRoom.RemoveAsset(assetId);
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		/// <summary>
+		/// Gets the configured asset ids.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<uint> GetAssetIds()
+		{
+#if SIMPLSHARP
+			return m_FusionRoom.UserConfigurableAssetDetails
+			                   .Select<CustomFusionAssetData, uint>(data => data.Number);
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		/// <summary>
+		/// Adds the sig for the given asset id.
+		/// </summary>
+		/// <param name="assetId"></param>
+		/// <param name="sigType"></param>
+		/// <param name="number"></param>
+		/// <param name="name"></param>
+		/// <param name="mask"></param>
+		public void AddSig(uint assetId, eSigType sigType, uint number, string name, eSigIoMask mask)
+		{
+#if SIMPLSHARP
+			return m_FusionRoom.AddSig(assetId, sigType.FromIcd(), number, name, mask.FromIcd());
+#else
+			throw new NotSupportedException();
+#endif
+		}
 
 		/// <summary>
 		/// Loads sigs from the xml file at the given path.
@@ -272,6 +320,7 @@ namespace ICD.Connect.Telemetry.CrestronPro
 				return;
 			}
 
+			/*
 			string xml = IcdFile.ReadToEnd(fullPath, new UTF8Encoding(false));
 			xml = EncodingUtils.StripUtf8Bom(xml);
 
@@ -288,7 +337,9 @@ namespace ICD.Connect.Telemetry.CrestronPro
 
 				m_FusionRoom.AddSig(sig.CrestronSigType, (uint)number, sig.Name, sig.CrestronSigMask);
 			}
+			 */
 
+			// TODO - Post fusion munger
 			FusionRVI.GenerateFileForAllFusionDevices();
 #else
             throw new NotImplementedException();

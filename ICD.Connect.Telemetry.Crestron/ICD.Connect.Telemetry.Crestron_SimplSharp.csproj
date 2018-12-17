@@ -83,6 +83,8 @@
     <Compile Include="Assets\IFusionAsset.cs" />
     <Compile Include="Assets\IFusionAssetDataCollection.cs" />
     <None Include="ObfuscationSettings.cs" />
+    <Compile Include="eSigIoMask.cs" />
+    <Compile Include="FusionSigMapping.cs" />
     <Compile Include="IFusionRoom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Properties\ControlSystem.cfg" />
