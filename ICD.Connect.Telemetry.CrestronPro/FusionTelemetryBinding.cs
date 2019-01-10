@@ -140,7 +140,7 @@ namespace ICD.Connect.Telemetry.CrestronPro
 			{
 				//Cast value to double, since we only care about decimal types here 
 				//and all decimal types can be converted to double
-				return rangeAttribute.RemapRangeToUshort((double)GetTelemetry.Value);
+				return rangeAttribute.RemapRangeToUShort((double)GetTelemetry.Value);
 			}
 
 			ServiceProvider.GetService<ILoggerService>()
