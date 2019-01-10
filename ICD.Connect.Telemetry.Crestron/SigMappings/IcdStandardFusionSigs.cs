@@ -1,11 +1,7 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
-using ICD.Connect.Devices;
-using ICD.Connect.Protocol.Sigs;
-using ICD.Connect.Settings;
-using ICD.Connect.Telemetry.Crestron;
 
-namespace ICD.Connect.Telemetry.CrestronPro.SigMappings
+namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
 	public static class IcdStandardFusionSigs
 	{

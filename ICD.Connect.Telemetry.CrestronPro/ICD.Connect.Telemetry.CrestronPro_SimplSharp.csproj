@@ -84,6 +84,7 @@
   <ItemGroup>
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="AbstractFusionSigCollectionAdapter.cs" />
+    <Compile Include="Assets\AbstractFusionAssetAdapter.cs" />
     <Compile Include="Assets\AssetTypeExtensions.cs" />
     <Compile Include="Assets\CustomFusionAssetDataCollectionAdapter.cs" />
     <Compile Include="Assets\FusionOccupancySensorAdapter.cs" />
@@ -92,14 +93,9 @@
     <Compile Include="FusionRoomAdapter.cs" />
     <Compile Include="FusionRoomAdapterSettings.cs" />
     <Compile Include="FusionSigCollectionAdapters.cs" />
-    <Compile Include="FusionTelemetryBinding.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SigExtensions.cs" />
-    <Compile Include="SigMappings\IcdDisplayFusionSigs.cs" />
-    <Compile Include="SigMappings\IcdDisplayWithAudioFusionSigs.cs" />
-    <Compile Include="SigMappings\IcdStandardFusionSigs.cs" />
-    <Compile Include="FusionTelemetryMunger.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

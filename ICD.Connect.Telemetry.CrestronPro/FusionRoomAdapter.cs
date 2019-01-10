@@ -20,7 +20,7 @@ using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Settings.Core;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
-using eSigIoMask = ICD.Connect.Protocol.Sigs.eSigIoMask;
+using eSigIoMask = ICD.Connect.Telemetry.Crestron.eSigIoMask;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 
 namespace ICD.Connect.Telemetry.CrestronPro

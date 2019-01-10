@@ -5,11 +5,10 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Telemetry.Crestron;
 using ICD.Connect.Telemetry.Crestron.Assets;
-using ICD.Connect.Telemetry.CrestronPro.SigMappings;
+using ICD.Connect.Telemetry.Crestron.SigMappings;
 
-namespace ICD.Connect.Telemetry.CrestronPro
+namespace ICD.Connect.Telemetry.Crestron
 {
 	public sealed class FusionTelemetryMunger
 	{
@@ -104,6 +103,5 @@ namespace ICD.Connect.Telemetry.CrestronPro
 				bindingMatch.UpdateTelemetryNode();
 			}
         }
-
 	}
 }

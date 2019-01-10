@@ -4,13 +4,11 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Sigs;
-using ICD.Connect.Telemetry.Crestron;
-using ICD.Connect.Telemetry.CrestronPro.Assets;
+using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Service;
-using Newtonsoft.Json.Bson;
 
-namespace ICD.Connect.Telemetry.CrestronPro
+namespace ICD.Connect.Telemetry.Crestron
 {
 	public sealed class FusionTelemetryBinding : IDisposable
 	{
@@ -20,9 +18,9 @@ namespace ICD.Connect.Telemetry.CrestronPro
 		public IManagementTelemetryItem SetTelemetry { get; private set; }
 		public FusionSigMapping Mapping { get; private set; }
 		public IFusionRoom FusionRoom { get; private set; }
-		public FusionStaticAssetAdapter Asset { get; private set; }
+		public IFusionStaticAsset Asset { get; private set; }
 
-		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, FusionStaticAssetAdapter asset, FusionSigMapping mapping)
+		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, IFusionStaticAsset asset, FusionSigMapping mapping)
 		{
 			FusionRoom = fusionRoom;
 			GetTelemetry = getTelemetry as IFeedbackTelemetryItem;
@@ -165,7 +163,7 @@ namespace ICD.Connect.Telemetry.CrestronPro
 
 			fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
 
-			FusionStaticAssetAdapter asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset as FusionStaticAssetAdapter;
+			IFusionStaticAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset as IFusionStaticAsset;
 			return new FusionTelemetryBinding(fusionRoom, getTelemetryItem, setTelemetryItem, asset, mapping);
 		}
 

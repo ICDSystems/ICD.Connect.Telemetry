@@ -4,7 +4,7 @@ using ICD.Connect.Telemetry.Crestron.Assets;
 
 namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
-	public sealed class FusionStaticAssetAdapter : AbstractFusionAssetAdapter<FusionStaticAsset>
+	public sealed class FusionStaticAssetAdapter : AbstractFusionAssetAdapter<FusionStaticAsset>, IFusionStaticAsset
 	{
 		private readonly FusionStaticAsset m_Asset;
 		private readonly Dictionary<uint, bool> m_DigitalCache;

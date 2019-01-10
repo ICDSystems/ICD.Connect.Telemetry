@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 
-namespace ICD.Connect.Protocol.Sigs
+namespace ICD.Connect.Telemetry.Crestron
 {
 	[PublicAPI][Flags]
 	public enum eSigIoMask

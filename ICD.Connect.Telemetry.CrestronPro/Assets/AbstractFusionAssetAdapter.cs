@@ -1,7 +1,8 @@
 ﻿#if SIMPLSHARP
+using ICD.Connect.Telemetry.Crestron.Assets;
 using Crestron.SimplSharpPro.Fusion;
 
-namespace ICD.Connect.Telemetry.Crestron.Assets
+namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
 	public abstract class AbstractFusionAssetAdapter<TAsset> : IFusionAsset
 		where TAsset : FusionAssetBase
