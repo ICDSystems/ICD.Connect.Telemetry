@@ -472,30 +472,69 @@ namespace ICD.Connect.Telemetry.CrestronPro
 
 		private void FusionAssetStateChange(FusionBase device, FusionAssetStateEventArgs args)
 		{
-            //TODO: Parse out the userConfiguredSigDetail on the args to get the sig number
-
-			uint sigNumber = 0;
-			switch (args.EventId)
+            switch (args.EventId)
 			{
 				case FusionAssetEventId.StaticAssetAssetBoolAssetSigEventReceivedEventId:
-					OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
-																					  eSigType.Digital,
-																					  sigNumber));
+					RaiseSigUpdatedForDigitalSig(args);
 					break;
 				case FusionAssetEventId.StaticAssetAssetUshortAssetSigEventReceivedEventId:
-					OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
-																					  eSigType.Analog,
-																					  sigNumber));
+					RaiseSigUpdatedForAnalogSig(args);
 					break;
 				case FusionAssetEventId.StaticAssetAssetStringAssetSigEventReceivedEventId:
-					OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
-																					  eSigType.Serial,
-																					  sigNumber));
+					RaiseSigUpdatedForSerialSig(args);
+					break;
+				case FusionAssetEventId.StaticAssetPowerOnReceivedEventId:
+				case FusionAssetEventId.StaticAssetPowerOffReceivedEventId:
+					RaiseSigUpdatedForFixedNameSig(args);
 					break;
 				default:
 					return;
 			}
 				
+		}
+
+		private void RaiseSigUpdatedForDigitalSig(FusionAssetStateEventArgs args)
+		{
+			BooleanSigData data = args.UserConfiguredSigDetail as BooleanSigData;
+			if (data == null)
+				return;
+
+			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
+			                                                                  eSigType.Digital,
+			                                                                  data.Number));
+		}
+
+		private void RaiseSigUpdatedForAnalogSig(FusionAssetStateEventArgs args)
+		{
+			UShortSigData data = args.UserConfiguredSigDetail as UShortSigData;
+			if (data == null)
+				return;
+
+			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
+			                                                                  eSigType.Analog,
+			                                                                  data.Number));
+		}
+
+		private void RaiseSigUpdatedForSerialSig(FusionAssetStateEventArgs args)
+		{
+			StringSigData data = args.UserConfiguredSigDetail as StringSigData;
+			if (data == null)
+				return;
+
+			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
+																			  eSigType.Serial,
+																			  data.Number));
+		}
+
+		private void RaiseSigUpdatedForFixedNameSig(FusionAssetStateEventArgs args)
+		{
+			BooleanSigDataFixedName data = args.UserConfiguredSigDetail as BooleanSigDataFixedName;
+			if (data == null)
+				return;
+
+			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
+																			  eSigType.Digital,
+																			  data.Number));
 		}
 
 		/// <summary>
