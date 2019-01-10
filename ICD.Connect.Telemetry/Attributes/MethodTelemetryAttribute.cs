@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Linq;
+#if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
+#else
+using System.Reflection;
+#endif
 using ICD.Common.Utils;
 using ICD.Connect.Telemetry.Nodes;
 

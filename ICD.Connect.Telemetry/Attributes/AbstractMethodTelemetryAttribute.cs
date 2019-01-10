@@ -1,5 +1,9 @@
 ﻿using System;
+#if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
+#else
+using System.Reflection;
+#endif
 using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes

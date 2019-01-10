@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Crestron.SimplSharp.Reflection;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Nodes;
 #if SIMPLSHARP
-using Activator = Crestron.SimplSharp.Reflection.Activator;
+using Crestron.SimplSharp.Reflection;
 #else
-using Activator = System.Activator;
+using System.Reflection;
 #endif
 
 namespace ICD.Connect.Telemetry.Attributes

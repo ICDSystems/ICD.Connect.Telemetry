@@ -32,5 +32,9 @@
     <None Remove="ICD.SimplSharp.projectinfo" />
     <None Remove="Properties\ControlSystem.cfg" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_NetStandard.csproj" />
+  </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using Crestron.SimplSharpPro;
 
 namespace ICD.Connect.Telemetry.CrestronPro
@@ -39,38 +40,39 @@ namespace ICD.Connect.Telemetry.CrestronPro
 			}
 		}
 
-		public static eSigIoMask FromIcd(this Protocol.Sigs.eSigIoMask extends)
+		public static eSigIoMask FromIcd(this Crestron.eSigIoMask extends)
 		{
 			switch (extends)
 			{
-				case Protocol.Sigs.eSigIoMask.Na:
+				case Crestron.eSigIoMask.Na:
 					return eSigIoMask.NA;
-				case Protocol.Sigs.eSigIoMask.FusionToProgram:
+				case Crestron.eSigIoMask.FusionToProgram:
 					return eSigIoMask.InputSigOnly;
-				case Protocol.Sigs.eSigIoMask.ProgramToFusion:
+				case Crestron.eSigIoMask.ProgramToFusion:
 					return eSigIoMask.OutputSigOnly;
-				case Protocol.Sigs.eSigIoMask.BiDirectional:
+				case Crestron.eSigIoMask.BiDirectional:
 					return eSigIoMask.InputOutputSig;
 				default:
 					throw new ArgumentOutOfRangeException("extends");
 			}
 		}
 
-		public static Protocol.Sigs.eSigIoMask ToIcd(this eSigIoMask extends)
+		public static Crestron.eSigIoMask ToIcd(this eSigIoMask extends)
 		{
 			switch (extends)
 			{
 				case eSigIoMask.NA:
-					return Protocol.Sigs.eSigIoMask.Na;
+					return Crestron.eSigIoMask.Na;
 				case eSigIoMask.OutputSigOnly:
-					return Protocol.Sigs.eSigIoMask.ProgramToFusion;
+					return Crestron.eSigIoMask.ProgramToFusion;
 				case eSigIoMask.InputSigOnly:
-					return Protocol.Sigs.eSigIoMask.FusionToProgram;
+					return Crestron.eSigIoMask.FusionToProgram;
 				case eSigIoMask.InputOutputSig:
-					return Protocol.Sigs.eSigIoMask.BiDirectional;
+					return Crestron.eSigIoMask.BiDirectional;
 				default:
 					throw new ArgumentOutOfRangeException("extends");
 			}
 		}
 	}
 }
+#endif

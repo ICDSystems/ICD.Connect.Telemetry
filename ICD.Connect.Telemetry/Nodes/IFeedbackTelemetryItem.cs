@@ -2,7 +2,7 @@
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
-using System.Relfection;
+using System.Reflection;
 #endif
 
 namespace ICD.Connect.Telemetry.Nodes

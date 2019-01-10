@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharpPro;
@@ -6,7 +7,6 @@ using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Utils;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
-#if SIMPLSHARP
 
 namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {

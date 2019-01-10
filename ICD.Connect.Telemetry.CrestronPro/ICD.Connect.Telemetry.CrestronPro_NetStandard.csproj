@@ -39,6 +39,7 @@
     <ProjectReference Include="..\..\ICD.Connect.Panels\ICD.Connect.Panels\ICD.Connect.Panels_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_NetStandard.csproj" />
+    <ProjectReference Include="..\ICD.Connect.Telemetry.Crestron\ICD.Connect.Telemetry.Crestron_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Telemetry\ICD.Connect.Telemetry_NetStandard.csproj" />
   </ItemGroup>
 

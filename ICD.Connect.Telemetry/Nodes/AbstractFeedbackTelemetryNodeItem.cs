@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+#if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
+#else
+using System.Reflection;
+#endif
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -17,15 +21,13 @@ namespace ICD.Connect.Telemetry.Nodes
 		public Type ValueType { get { return typeof(T); } }
 		public PropertyInfo PropertyInfo { get { return m_PropertyInfo; } }
 
-
-
 		protected AbstractFeedbackTelemetryNodeItem(string name, PropertyInfo propertyInfo) 
 			: base(name)
 		{
 			m_PropertyInfo = propertyInfo;
 		}
 
-		#region Console
+#region Console
 
 		/// <summary>
 		/// Calls the delegate for each console status item.
@@ -55,6 +57,6 @@ namespace ICD.Connect.Telemetry.Nodes
 			return base.GetConsoleCommands();
 		}
 
-		#endregion
+#endregion
 	}
 }

@@ -1,29 +1,27 @@
-﻿using System.Collections.Generic;
-using ICD.Common.Utils.Extensions;
-using ICD.Connect.Telemetry.Crestron;
-using ICD.Connect.Telemetry.Crestron.Assets;
-using ICD.Connect.Telemetry.CrestronPro.Assets;
-#if SIMPLSHARP
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+#if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
-using ICD.Common.Properties;
-using ICD.Common.Utils;
-using ICD.Common.Utils.IO;
-using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Misc.CrestronPro;
 using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
-using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Telemetry.CrestronPro.Assets;
 #endif
-using System;
+using ICD.Common.Properties;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
+using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Settings.Core;
+using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Telemetry.Crestron.Devices;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
-using eSigIoMask = ICD.Connect.Protocol.Sigs.eSigIoMask;
+using eSigIoMask = ICD.Connect.Telemetry.Crestron.eSigIoMask;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 
-namespace ICD.Connect.Telemetry.CrestronPro
+namespace ICD.Connect.Telemetry.CrestronPro.Devices
 {
 	/// <summary>
 	/// Wrapper for the Crestron FusionRoom object.
