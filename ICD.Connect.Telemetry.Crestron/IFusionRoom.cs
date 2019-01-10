@@ -1,25 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Connect.Devices;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.Crestron
 {
 	public interface IFusionRoom : ISigDevice, IDevice
 	{
+		event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
+			
 		/// <summary>
 		/// Gets the user configurable assets.
 		/// </summary>
 		IFusionAssetDataCollection UserConfigurableAssetDetails { get; }
-
-		/// <summary>
-		/// Loads sigs from the xml file at the given path.
-		/// </summary>
-		/// <param name="path"></param>
-		[PublicAPI]
-		void LoadSigsFromPath(string path);
 
 		/// <summary>
 		/// Adds the asset to the fusion room.
@@ -59,5 +55,20 @@ namespace ICD.Connect.Telemetry
 		/// <param name="name"></param>
 		/// <param name="mask"></param>
 		void AddSig(uint assetId, eSigType sigType, uint number, string name, eSigIoMask mask);
+	}
+
+	public sealed class FusionAssetSigUpdatedArgs : EventArgs
+	{
+		public eSigType SigType { get; private set; }
+		public uint AssetId { get; private set; }
+		public uint Sig { get; private set; }
+
+		public FusionAssetSigUpdatedArgs(uint assetId, eSigType sigType, uint sigNumber)
+		{
+			AssetId = assetId;
+			SigType = sigType;
+			Sig = sigNumber;
+		}
+
 	}
 }

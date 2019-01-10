@@ -10,6 +10,6 @@ namespace ICD.Connect.Telemetry.Nodes
 
 		object Parent { get; }
 
-		void Invoke(object[] parameters);
+		void Invoke(params object[] parameters);
 	}
 }

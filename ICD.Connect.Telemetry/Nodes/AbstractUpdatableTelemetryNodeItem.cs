@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
@@ -11,19 +13,38 @@ namespace ICD.Connect.Telemetry.Nodes
 	public abstract class AbstractUpdatableTelemetryNodeItem<T> : AbstractFeedbackTelemetryNodeItem<T>, IUpdatableTelemetryNodeItem
 	{
 
-		private readonly PropertyInfo m_PropertyInfo;
 		private readonly object m_Parent;
-
+		
 		protected AbstractUpdatableTelemetryNodeItem(string name, object parent, PropertyInfo propertyInfo)
-			: base(name)
+			: base(name, propertyInfo)
 		{
-			m_PropertyInfo = propertyInfo;
 			m_Parent = parent;
 		}
 
+		public override void Dispose()
+		{
+			OnValueChanged = null;
+
+			base.Dispose();
+		}
+
+		public event EventHandler OnValueChanged;
+
 		public void Update()
 		{
-			Value = (T)m_PropertyInfo.GetValue(m_Parent, null);
+			T newValue = (T)PropertyInfo.GetValue(m_Parent, null);
+
+			// ReSharper disable CompareNonConstrainedGenericWithNull
+			if (Value == null && newValue == null)
+				return;
+
+			if (newValue != null && newValue.Equals(Value))
+				return;
+			// ReSharper restore CompareNonConstrainedGenericWithNull
+
+			Value = newValue;
+
+			OnValueChanged.Raise(this);
 		}
 
 		#region Console
@@ -43,7 +64,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
-		} 
+		}
 
 		#endregion
 	}

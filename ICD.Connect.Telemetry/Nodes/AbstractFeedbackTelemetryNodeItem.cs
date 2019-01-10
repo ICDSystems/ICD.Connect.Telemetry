@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Crestron.SimplSharp.Reflection;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Commands;
@@ -9,14 +10,19 @@ namespace ICD.Connect.Telemetry.Nodes
 {
 	public abstract class AbstractFeedbackTelemetryNodeItem<T> : AbstractTelemetryNodeItemBase, IFeedbackTelemetryItem<T>
 	{
+		private readonly PropertyInfo m_PropertyInfo;
+
 		object IFeedbackTelemetryItem.Value { get { return Value; } }
 		public T Value { get; protected set; }
 		public Type ValueType { get { return typeof(T); } }
+		public PropertyInfo PropertyInfo { get { return m_PropertyInfo; } }
 
-		protected AbstractFeedbackTelemetryNodeItem(string name) 
+
+
+		protected AbstractFeedbackTelemetryNodeItem(string name, PropertyInfo propertyInfo) 
 			: base(name)
 		{
-
+			m_PropertyInfo = propertyInfo;
 		}
 
 		#region Console

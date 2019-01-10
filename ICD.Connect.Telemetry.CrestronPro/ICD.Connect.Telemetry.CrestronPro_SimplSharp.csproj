@@ -85,22 +85,20 @@
     <None Include="ObfuscationSettings.cs" />
     <Compile Include="AbstractFusionSigCollectionAdapter.cs" />
     <Compile Include="Assets\AssetTypeExtensions.cs" />
-    <Compile Include="Assets\FusionAssetDetailsAdapter.cs" />
+    <Compile Include="Assets\CustomFusionAssetDataCollectionAdapter.cs" />
     <Compile Include="Assets\FusionOccupancySensorAdapter.cs" />
     <Compile Include="Assets\FusionRemoteOccupancySensorAdapter.cs" />
+    <Compile Include="Assets\FusionStaticAssetAdapter.cs" />
     <Compile Include="FusionRoomAdapter.cs" />
     <Compile Include="FusionRoomAdapterSettings.cs" />
     <Compile Include="FusionSigCollectionAdapters.cs" />
+    <Compile Include="FusionTelemetryBinding.cs" />
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SigExtensions.cs" />
     <Compile Include="SigMappings\IcdDisplayFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDisplayWithAudioFusionSigs.cs" />
     <Compile Include="SigMappings\IcdStandardFusionSigs.cs" />
-    <Compile Include="TelemetryAssets\AbstractDisplayFusionAssetFactory.cs" />
-    <Compile Include="TelemetryAssets\AbstractFusionAssetFactory.cs" />
-    <Compile Include="TelemetryAssets\DisplayFusionAssetFactory.cs" />
-    <Compile Include="TelemetryAssets\DisplayWithAudioFusionAssetFactory.cs" />
-    <Compile Include="TelemetryAssets\IFusionAssetFactory.cs" />
     <Compile Include="FusionTelemetryMunger.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

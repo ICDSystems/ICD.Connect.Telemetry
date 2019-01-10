@@ -1,4 +1,9 @@
 ﻿using System;
+#if SIMPLSHARP
+using Crestron.SimplSharp.Reflection;
+#else
+using System.Relfection;
+#endif
 
 namespace ICD.Connect.Telemetry.Nodes
 {
@@ -6,6 +11,7 @@ namespace ICD.Connect.Telemetry.Nodes
 	{
 		Type ValueType { get; }
 		object Value { get; }
+		PropertyInfo PropertyInfo { get; }
 	}
 
 	public interface IFeedbackTelemetryItem<T> : IFeedbackTelemetryItem

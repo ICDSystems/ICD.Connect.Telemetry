@@ -10,7 +10,7 @@ using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 
 namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
-	public sealed class FusionAssetDetailsAdapter : IFusionAssetDataCollection
+	public sealed class CustomFusionAssetDataCollectionAdapter : IFusionAssetDataCollection
 	{
 		private readonly CrestronCollection<CustomFusionAssetData> m_Collection;
 		private readonly Dictionary<uint, FusionAssetData> m_AdapterCache;
@@ -51,7 +51,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		/// Constructor.
 		/// </summary>
 		/// <param name="collection"></param>
-		public FusionAssetDetailsAdapter(CrestronCollection<CustomFusionAssetData> collection)
+		public CustomFusionAssetDataCollectionAdapter(CrestronCollection<CustomFusionAssetData> collection)
 		{
 			m_Collection = collection;
 			m_AdapterCache = new Dictionary<uint, FusionAssetData>();
@@ -111,6 +111,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 
 				case global::Crestron.SimplSharpPro.Fusion.eAssetType.RemoteOccupancySensor:
 					return new FusionRemoteOccupancySensorAdapter(asset as FusionRemoteOccupancySensor);
+				
+				case global::Crestron.SimplSharpPro.Fusion.eAssetType.StaticAsset:
+					return new FusionStaticAssetAdapter(asset as FusionStaticAsset);
 
 				case global::Crestron.SimplSharpPro.Fusion.eAssetType.NA:
 				case global::Crestron.SimplSharpPro.Fusion.eAssetType.DemandResponse:
@@ -125,7 +128,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 				case global::Crestron.SimplSharpPro.Fusion.eAssetType.RemoteRealTimePower:
 				case global::Crestron.SimplSharpPro.Fusion.eAssetType.ShadeLoad:
 				case global::Crestron.SimplSharpPro.Fusion.eAssetType.ShadePresets:
-				case global::Crestron.SimplSharpPro.Fusion.eAssetType.StaticAsset:
 					throw new NotImplementedException();
 
 				default:

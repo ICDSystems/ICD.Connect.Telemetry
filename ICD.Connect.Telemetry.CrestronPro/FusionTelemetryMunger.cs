@@ -1,82 +1,109 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Crestron.SimplSharp.Net;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.Services;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.Devices;
-using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron;
 using ICD.Connect.Telemetry.Crestron.Assets;
-using ICD.Connect.Telemetry.CrestronPro.TelemetryAssets;
-using ICD.Connect.Telemetry.Nodes;
-using ICD.Connect.Telemetry.Service;
+using ICD.Connect.Telemetry.CrestronPro.SigMappings;
 
 namespace ICD.Connect.Telemetry.CrestronPro
 {
 	public sealed class FusionTelemetryMunger
 	{
-		private ITelemetryService TelemetryService{get { return ServiceProvider.GetService<ITelemetryService>(); }}
-
-		private static readonly Dictionary<Type, IFusionAssetFactory> s_Factories
-			= new Dictionary<Type, IFusionAssetFactory>
+		private static readonly Dictionary<Type, IEnumerable<FusionSigMapping>> s_MappingsByType
+			= new Dictionary<Type, IEnumerable<FusionSigMapping>>
 			{
-				{typeof(IDisplayWithAudio), new DisplayWithAudioFusionAssetFactory()},
-				{typeof(IDisplay), new DisplayFusionAssetFactory()}
+				{typeof(IDisplayWithAudio), IcdDisplayWithAudioFusionSigs.Sigs},
+				{typeof(IDisplay), IcdDisplayFusionSigs.Sigs},
+				{typeof(IDevice), IcdStandardFusionSigs.Sigs}
 			};
 
+		private readonly IFusionRoom m_FusionRoom;
+		private readonly Dictionary<uint, List<FusionTelemetryBinding>> m_BindingsByAsset;
+		private readonly SafeCriticalSection m_BindingsSection;
+
+		public FusionTelemetryMunger(IFusionRoom fusionRoom)
+		{
+			m_FusionRoom = fusionRoom;
+			m_BindingsByAsset = new Dictionary<uint, List<FusionTelemetryBinding>>();
+			m_FusionRoom.OnFusionAssetSigUpdated += FusionRoomOnFusionAssetSigUpdated;
+			m_BindingsSection = new SafeCriticalSection();
+		}
 
 		/// <summary>
 		/// Adds the device as an asset to fusion and builds the sigs from the telemetry.
 		/// </summary>
-		/// <param name="fusionRoom"></param>
 		/// <param name="device"></param>
 		/// <returns></returns>
-		public uint AddAsset(IFusionRoom fusionRoom, IDevice device)
+		public void AddAsset(IDevice device)
 		{
-			// TODO - Validation
-			IFusionAssetFactory factory = s_Factories.First(kvp => device.GetType().IsAssignableTo(kvp.Key)).Value;
+			IEnumerable<FusionSigMapping> mappings =
+				s_MappingsByType.Where(kvp => device.GetType().IsAssignableTo(kvp.Key))
+						   .SelectMany(kvp => kvp.Value);
 
 			// First add the asset
-			uint assetId = fusionRoom.GetAssetIds().Max() + 1;
-			fusionRoom.AddAsset(eAssetType.StaticAsset, assetId, device.Name, device.GetType().Name, Guid.NewGuid().ToString());
+			uint assetId = m_FusionRoom.GetAssetIds().Any() ? m_FusionRoom.GetAssetIds().Max() + 1 : 4;
+			m_FusionRoom.AddAsset(eAssetType.StaticAsset, assetId, device.Name, device.GetType().Name, Guid.NewGuid().ToString());
 		
 			// Now add the sigs
-
 			List<FusionTelemetryBinding> bindings = new List<FusionTelemetryBinding>();
-			foreach (var mapping in factory.Mappings)
+			foreach (FusionSigMapping mapping in mappings)
 			{
-				TelemetryService.GetTelemetryForProvider(device, mapping.TelemetryGetName);
+				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, mapping, assetId);
+				bindings.Add(binding);
 			}
-
-
-			fusionRoom.AddSig(assetId, eSigType.Digital, 1, "name", eSigIoMask.ProgramToFusion);
-
-			return assetId;
+			
+			m_BindingsSection.Enter();
+			try
+			{
+				if (m_BindingsByAsset.ContainsKey(assetId))
+					m_BindingsByAsset[assetId].AddRange(bindings);
+				else
+					m_BindingsByAsset[assetId] = bindings;
+			}
+			finally
+			{
+				m_BindingsSection.Leave();
+			}
 		}
 
-		public void AddAssets(IFusionRoom room, IEnumerable<IDevice> devices)
+		public void AddAssets(IEnumerable<IDevice> devices)
 		{
-			foreach (var device in devices)
-				AddAsset(room, device);
+			foreach (IDevice device in devices)
+				AddAsset(device);
 		}
 
 		public void Clear()
 		{
-			throw new NotImplementedException();
+			m_BindingsSection.Enter();
+			try
+			{
+				foreach (var kvp in m_BindingsByAsset)
+				{
+					kvp.Value.Clear();
+				}
+			}
+			finally
+			{
+				m_BindingsSection.Leave();
+			}
 		}
-	}
 
-	public class FusionTelemetryBinding
-	{
-		public ITelemetryItem Telemetry { get; private set; }
-		public FusionSigMapping Mapping { get; private set; }
+        private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
+        {
+	        List<FusionTelemetryBinding> bindingsForAsset;
+			
+			if(!m_BindingsByAsset.TryGetValue(args.AssetId, out bindingsForAsset))
+				return;
 
-		public FusionTelemetryBinding(ITelemetryItem telemetry, FusionSigMapping mapping)
-		{
-			Telemetry = telemetry;
-			Mapping = mapping;
-		}
+			foreach(var bindingMatch in bindingsForAsset.Where(b=>b.Mapping.Sig == args.Sig && b.Mapping.SigType == args.SigType))
+			{
+				bindingMatch.UpdateTelemetryNode();
+			}
+        }
+
 	}
 }

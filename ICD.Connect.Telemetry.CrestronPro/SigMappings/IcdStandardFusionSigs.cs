@@ -13,7 +13,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.SigMappings
 
 		private static readonly IcdHashSet<FusionSigMapping> s_Sigs = new IcdHashSet<FusionSigMapping>
 		{
-			new FusionSigMapping
+			/*new FusionSigMapping
 			{
 				TelemetryGetName = OriginatorTelemetryNames.NAME,
 				TelemetrySetName = "",
@@ -45,7 +45,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.SigMappings
 				SigType = eSigType.Digital,
 				Sig = 0
 			},
-
+			*/
 		}; 
 	}
 }

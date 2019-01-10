@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Crestron;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.CrestronPro.Assets;
 #if SIMPLSHARP
-using System.Text;
 using System.Linq;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
@@ -30,6 +30,8 @@ namespace ICD.Connect.Telemetry.CrestronPro
 	/// </summary>
 	public sealed class FusionRoomAdapter : AbstractSigDevice<FusionRoomAdapterSettings>, IFusionRoom
 	{
+		public event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
+
 		private const uint MIN_SIG = 1;
 		private const uint MAX_SIG = 1001;
 		public const uint SIG_OFFSET = 49;
@@ -145,6 +147,8 @@ namespace ICD.Connect.Telemetry.CrestronPro
             }
 		}
 
+		
+
 		/// <summary>
 		/// Collection of user configured assets received from the device.
 		/// </summary>
@@ -154,7 +158,7 @@ namespace ICD.Connect.Telemetry.CrestronPro
 			{
 #if SIMPLSHARP
 				return m_FusionAssets ??
-					   (m_FusionAssets = new FusionAssetDetailsAdapter(m_FusionRoom.UserConfigurableAssetDetails));
+					   (m_FusionAssets = new CustomFusionAssetDataCollectionAdapter(m_FusionRoom.UserConfigurableAssetDetails));
 #else
                 throw new NotSupportedException();
 #endif
@@ -296,7 +300,7 @@ namespace ICD.Connect.Telemetry.CrestronPro
 		public void AddSig(uint assetId, eSigType sigType, uint number, string name, eSigIoMask mask)
 		{
 #if SIMPLSHARP
-			return m_FusionRoom.AddSig(assetId, sigType.FromIcd(), number, name, mask.FromIcd());
+			m_FusionRoom.AddSig(assetId, sigType.FromIcd(), number, name, mask.FromIcd());
 #else
 			throw new NotSupportedException();
 #endif
@@ -305,42 +309,10 @@ namespace ICD.Connect.Telemetry.CrestronPro
 		/// <summary>
 		/// Loads sigs from the xml file at the given path.
 		/// </summary>
-		/// <param name="path"></param>
-		public void LoadSigsFromPath(string path)
+		public void LoadSigs()
 		{
 #if SIMPLSHARP
-            m_FusionRoom.RemoveAllSigs();
-
-			m_FusionSigsPath = path;
-			string fullPath = PathUtils.GetDefaultConfigPath(path);
-
-			if (string.IsNullOrEmpty(fullPath) || !IcdFile.Exists(fullPath))
-			{
-				Log(eSeverity.Error, "Unable to find {0}", path);
-				return;
-			}
-
-			/*
-			string xml = IcdFile.ReadToEnd(fullPath, new UTF8Encoding(false));
-			xml = EncodingUtils.StripUtf8Bom(xml);
-
-			foreach (FusionXmlSig sig in FusionXmlSig.SigsFromXml(xml))
-			{
-				// S#Pro Fusion is the only place where joins start at 1 instead of 50.
-				// The FusionRoom class adds 49 to each number.
-				int number = (int)sig.Number - (int)SIG_OFFSET;
-				if (number < MIN_SIG || number > MAX_SIG)
-				{
-					Log(eSeverity.Warning, "Skipping FusionRoom sig {0} - joins start at 50.", sig);
-					continue;
-				}
-
-				m_FusionRoom.AddSig(sig.CrestronSigType, (uint)number, sig.Name, sig.CrestronSigMask);
-			}
-			 */
-
-			// TODO - Post fusion munger
-			FusionRVI.GenerateFileForAllFusionDevices();
+            FusionRVI.GenerateFileForAllFusionDevices();
 #else
             throw new NotImplementedException();
 #endif
@@ -402,7 +374,7 @@ namespace ICD.Connect.Telemetry.CrestronPro
 			
 			SetFusionRoom(fusionRoom);
 
-			LoadSigsFromPath(settings.FusionSigsPath);
+			LoadSigs();
 #else
             throw new NotImplementedException();
 #endif
@@ -436,6 +408,7 @@ namespace ICD.Connect.Telemetry.CrestronPro
 				return;
 
 			fusionRoom.FusionStateChange += FusionRoomOnFusionStateChange;
+			fusionRoom.FusionAssetStateChange += FusionAssetStateChange;
 			fusionRoom.OnlineStatusChange += FusionRoomOnlineStatusChange;
 		}
 
@@ -449,6 +422,7 @@ namespace ICD.Connect.Telemetry.CrestronPro
 				return;
 
 			fusionRoom.FusionStateChange -= FusionRoomOnFusionStateChange;
+			fusionRoom.FusionAssetStateChange -= FusionAssetStateChange;
 			fusionRoom.OnlineStatusChange -= FusionRoomOnlineStatusChange;
 		}
 
@@ -496,6 +470,34 @@ namespace ICD.Connect.Telemetry.CrestronPro
 			RaiseOutputSigChangeCallback(sigInfo);
 		}
 
+		private void FusionAssetStateChange(FusionBase device, FusionAssetStateEventArgs args)
+		{
+            //TODO: Parse out the userConfiguredSigDetail on the args to get the sig number
+
+			uint sigNumber = 0;
+			switch (args.EventId)
+			{
+				case FusionAssetEventId.StaticAssetAssetBoolAssetSigEventReceivedEventId:
+					OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
+																					  eSigType.Digital,
+																					  sigNumber));
+					break;
+				case FusionAssetEventId.StaticAssetAssetUshortAssetSigEventReceivedEventId:
+					OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
+																					  eSigType.Analog,
+																					  sigNumber));
+					break;
+				case FusionAssetEventId.StaticAssetAssetStringAssetSigEventReceivedEventId:
+					OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
+																					  eSigType.Serial,
+																					  sigNumber));
+					break;
+				default:
+					return;
+			}
+				
+		}
+
 		/// <summary>
 		/// Called when the fusion room changes online status.
 		/// </summary>
@@ -508,5 +510,7 @@ namespace ICD.Connect.Telemetry.CrestronPro
 #endif
 
 #endregion
+
+		
 	}
 }

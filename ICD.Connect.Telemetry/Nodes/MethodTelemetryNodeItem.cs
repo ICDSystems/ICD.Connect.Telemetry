@@ -29,7 +29,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		}
 
 		
-		public void Invoke(object[] parameters)
+		public void Invoke(params object[] parameters)
 		{
 			m_MethodInfo.Invoke(Parent, parameters);
 		}

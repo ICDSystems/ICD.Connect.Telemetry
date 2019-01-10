@@ -9,7 +9,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.SigMappings
 {
 	public static class IcdDisplayFusionSigs
 	{
-		public static IEnumerable<FusionSigMapping> Sigs {get { return IcdStandardFusionSigs.Sigs.Concat(s_Sigs); }}
+		public static IEnumerable<FusionSigMapping> Sigs {get { return s_Sigs; }}
 
 		private static readonly IcdHashSet<FusionSigMapping> s_Sigs = new IcdHashSet<FusionSigMapping>
 		{
