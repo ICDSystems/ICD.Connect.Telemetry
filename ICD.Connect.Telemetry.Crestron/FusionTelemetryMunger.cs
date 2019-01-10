@@ -6,6 +6,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 
 namespace ICD.Connect.Telemetry.Crestron

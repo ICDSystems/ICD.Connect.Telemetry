@@ -6,7 +6,7 @@ using ICD.Connect.Panels.Devices;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
 
-namespace ICD.Connect.Telemetry.Crestron
+namespace ICD.Connect.Telemetry.Crestron.Devices
 {
 	public interface IFusionRoom : ISigDevice, IDevice
 	{

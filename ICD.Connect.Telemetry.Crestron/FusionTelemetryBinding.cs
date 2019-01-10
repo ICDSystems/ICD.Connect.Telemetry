@@ -5,6 +5,7 @@ using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Service;
 
