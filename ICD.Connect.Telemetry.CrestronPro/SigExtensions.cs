@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using Crestron.SimplSharpPro;
 
 namespace ICD.Connect.Telemetry.CrestronPro
@@ -74,3 +75,4 @@ namespace ICD.Connect.Telemetry.CrestronPro
 		}
 	}
 }
+#endif

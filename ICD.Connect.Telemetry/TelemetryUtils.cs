@@ -93,7 +93,9 @@ namespace ICD.Connect.Telemetry
 			if (property == null)
 				throw new ArgumentNullException("property");
 
-			return property.GetCustomAttributes<IPropertyTelemetryAttribute>(true).FirstOrDefault();
+// ReSharper disable InvokeAsExtensionMethod
+			return ReflectionExtensions.GetCustomAttributes<IPropertyTelemetryAttribute>(property, true).FirstOrDefault();
+// ReSharper restore InvokeAsExtensionMethod
 		}
 
 		[CanBeNull]
@@ -102,7 +104,9 @@ namespace ICD.Connect.Telemetry
 			if(method == null)
 				throw new ArgumentException("method");
 
-			return method.GetCustomAttributes<IMethodTelemetryAttribute>(true).FirstOrDefault();
+// ReSharper disable InvokeAsExtensionMethod
+			return ReflectionExtensions.GetCustomAttributes<IMethodTelemetryAttribute>(method, true).FirstOrDefault();
+// ReSharper restore InvokeAsExtensionMethod
 		}
 	}
 }

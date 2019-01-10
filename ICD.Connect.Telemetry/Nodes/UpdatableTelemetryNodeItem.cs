@@ -1,6 +1,5 @@
-﻿using Crestron.SimplSharp.Reflection;
-#if SIMPLSHARP
-
+﻿#if SIMPLSHARP
+using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
 #endif

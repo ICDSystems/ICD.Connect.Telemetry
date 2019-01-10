@@ -1,22 +1,22 @@
-﻿#if SIMPLSHARP
-#endif
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+#if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
+using ICD.Connect.Misc.CrestronPro;
+using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
+using ICD.Connect.Telemetry.CrestronPro.Assets;
+#endif
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Misc.CrestronPro;
-using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Settings.Core;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
-using ICD.Connect.Telemetry.CrestronPro.Assets;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 using eSigIoMask = ICD.Connect.Telemetry.Crestron.eSigIoMask;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
