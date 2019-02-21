@@ -20,6 +20,7 @@ namespace ICD.Connect.Telemetry
 			TelemetryCollection collection = new TelemetryCollection();
 			InstantiatePropertyTelemetry(instance, collection);
 			InstantiateMethodTelemetry(instance, collection);
+			InstantiateExternalTelemetry(instance, collection);
 			return collection;
 		}
 
@@ -49,6 +50,34 @@ namespace ICD.Connect.Telemetry
 
 				collection.Add(attribute.InstantiateTelemetryItem(instance, method));
 			}
+		}
+
+		private static void InstantiateExternalTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
+		{
+			IEnumerable<IExternalTelemetryProvider> externalTelemetryProviders = GetExternalTelemetryProviders(instance);
+
+			foreach (IExternalTelemetryProvider provider in externalTelemetryProviders)
+			{
+				InstantiatePropertyTelemetry(provider, collection);
+				InstantiateMethodTelemetry(provider, collection);
+			}
+		}
+
+		private static IEnumerable<IExternalTelemetryProvider> GetExternalTelemetryProviders(ITelemetryProvider instance)
+		{
+			IEnumerable<ExternalTelemetryAttribute> externalTelemetryAttributes = GetExternalTelemetryAttributes(instance);
+
+			return externalTelemetryAttributes.Select(attr => BuildExternalTelemetryProviderFromAttribute(instance, attr));
+		}
+
+		private static IExternalTelemetryProvider BuildExternalTelemetryProviderFromAttribute(ITelemetryProvider instance, IExternalTelemetryAttribute attr)
+		{
+			return attr.InstantiateTelemetryItem(instance);
+		}
+
+		private static IEnumerable<ExternalTelemetryAttribute> GetExternalTelemetryAttributes(ITelemetryProvider instance)
+		{
+			return Attribute.GetCustomAttributes(instance.GetType()).OfType<ExternalTelemetryAttribute>();
 		}
 
 		private static IEnumerable<PropertyInfo> GetPropertiesWithTelemetryAttributes(Type type)
@@ -86,7 +115,7 @@ namespace ICD.Connect.Telemetry
 				    .Where(m => GetTelemetryAttribute(m) != null)
 				    .Distinct(TelemetryMethodInfoEqualityComparer.Instance);
 		}
-			
+
 		[CanBeNull]
 		private static IPropertyTelemetryAttribute GetTelemetryAttribute(PropertyInfo property)
 		{
@@ -101,7 +130,7 @@ namespace ICD.Connect.Telemetry
 		[CanBeNull]
 		private static IMethodTelemetryAttribute GetTelemetryAttribute(MethodInfo method)
 		{
-			if(method == null)
+			if (method == null)
 				throw new ArgumentException("method");
 
 // ReSharper disable InvokeAsExtensionMethod

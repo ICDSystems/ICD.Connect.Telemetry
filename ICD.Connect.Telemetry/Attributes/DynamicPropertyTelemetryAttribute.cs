@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Nodes;
 #if SIMPLSHARP
@@ -30,25 +31,15 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// <returns></returns>
 		public override IFeedbackTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
 		{
-			IEnumerable<Type> types = instance.GetType().GetAllTypes();
+			IcdHashSet<Type> types = instance.GetType().GetAllTypes().ToIcdHashSet();
 #if SIMPLSHARP
 			IEnumerable<CType> cTypes = types.Select(t => t.GetCType());
 			IEnumerable<EventInfo> eventInfos = cTypes.SelectMany(c => c.GetEvents());
 #else
 			IEnumerable<EventInfo> eventInfos = types.SelectMany(t=> t.GetEvents());
 #endif
-			EventInfo eventInfo = null;
-
-			foreach (EventInfo info in eventInfos)
-			{
-				IEnumerable<EventTelemetryAttribute> attributes = info.GetCustomAttributes<EventTelemetryAttribute>();
-				
-				if (attributes.All(attr => attr.Name != EventName))
-					continue;
-
-				eventInfo = info;
-				break;
-			}
+			EventInfo eventInfo = eventInfos.FirstOrDefault(info => info.GetCustomAttributes<EventTelemetryAttribute>()
+			                                                            .Any(attr => attr.Name == EventName));
 
 			if (eventInfo == null)
 				throw new InvalidOperationException(string.Format("Couldn't find event with name {0}", EventName));

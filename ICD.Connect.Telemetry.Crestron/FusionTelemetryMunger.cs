@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.Devices;
+using ICD.Connect.Routing.CrestronPro.ControlSystem;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
@@ -13,11 +14,12 @@ namespace ICD.Connect.Telemetry.Crestron
 {
 	public sealed class FusionTelemetryMunger
 	{
-		private static readonly Dictionary<Type, IEnumerable<FusionSigMapping>> s_MappingsByType
-			= new Dictionary<Type, IEnumerable<FusionSigMapping>>
+		private Dictionary<Type, IEnumerable<IFusionSigMapping>> m_MappingsByType
+			= new Dictionary<Type, IEnumerable<IFusionSigMapping>>
 			{
 				{typeof(IDisplayWithAudio), IcdDisplayWithAudioFusionSigs.Sigs},
 				{typeof(IDisplay), IcdDisplayFusionSigs.Sigs},
+				{typeof(IControlSystemDevice), IcdControlSystemFusionSigs.Sigs},
 				{typeof(IDevice), IcdStandardFusionSigs.Sigs}
 			};
 
@@ -40,8 +42,8 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <returns></returns>
 		public void AddAsset(IDevice device)
 		{
-			IEnumerable<FusionSigMapping> mappings =
-				s_MappingsByType.Where(kvp => device.GetType().IsAssignableTo(kvp.Key))
+			IEnumerable<IFusionSigMapping> mappings =
+				m_MappingsByType.Where(kvp => device.GetType().IsAssignableTo(kvp.Key))
 						   .SelectMany(kvp => kvp.Value);
 
 			// First add the asset
@@ -92,6 +94,16 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
+		public void RegisterMappingSet(Type type, IEnumerable<FusionSigMapping> mappings)
+		{
+			if (m_MappingsByType.ContainsKey(type))
+			{
+				throw new ArgumentException("type", string.Format("Cannot Register Mapping Set for type {0}, type already registered.", type));
+			}
+			
+			//m_MappingsByType.Add(type, mappings);
+		} 
+
         private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
         {
 	        List<FusionTelemetryBinding> bindingsForAsset;
@@ -99,10 +111,10 @@ namespace ICD.Connect.Telemetry.Crestron
 			if(!m_BindingsByAsset.TryGetValue(args.AssetId, out bindingsForAsset))
 				return;
 
-			foreach(var bindingMatch in bindingsForAsset.Where(b=>b.Mapping.Sig == args.Sig && b.Mapping.SigType == args.SigType))
-			{
-				bindingMatch.UpdateTelemetryNode();
-			}
+			//foreach(var bindingMatch in bindingsForAsset.Where(b=>b.Mapping.Sig == args.Sig && b.Mapping.SigType == args.SigType))
+			//{
+			//	bindingMatch.UpdateTelemetryNode();
+			//}
         }
 	}
 }

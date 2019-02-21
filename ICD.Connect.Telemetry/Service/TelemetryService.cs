@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
-using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Nodes;
 
@@ -74,7 +73,7 @@ namespace ICD.Connect.Telemetry.Service
 			return GetTelemetryForProvider(provider).GetChildByName(name);
 		}
 
-		private void ProviderOnRequestTelemetryRebuild(object sender, EventArgs eventArgs)
+		private void ProviderOnRequestTelemetryRebuild(object sender, System.EventArgs eventArgs)
 		{
 			var provider = sender as ITelemetryProvider;
 			if (provider == null || !m_Telemetries.ContainsKey(provider))

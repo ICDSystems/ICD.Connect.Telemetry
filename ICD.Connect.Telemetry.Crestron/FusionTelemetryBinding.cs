@@ -6,6 +6,7 @@ using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
+using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Service;
 
@@ -17,11 +18,11 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		public IFeedbackTelemetryItem GetTelemetry { get; private set; }
 		public IManagementTelemetryItem SetTelemetry { get; private set; }
-		public FusionSigMapping Mapping { get; private set; }
+		public IFusionSigMapping Mapping { get; private set; }
 		public IFusionRoom FusionRoom { get; private set; }
 		public IFusionStaticAsset Asset { get; private set; }
 
-		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, IFusionStaticAsset asset, FusionSigMapping mapping)
+		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, IFusionStaticAsset asset, IFusionSigMapping mapping)
 		{
 			FusionRoom = fusionRoom;
 			GetTelemetry = getTelemetry as IFeedbackTelemetryItem;
@@ -57,20 +58,32 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void UpdateDigitalTelemetry()
 		{
-			bool digital = Asset.ReadDigitalSig(Mapping.Sig);
+			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
+			if(singleMapping == null)
+				return;
+
+			bool digital = Asset.ReadDigitalSig(singleMapping.Sig);
 			SetTelemetry.Invoke(digital);
 		}
 
 		private void UpdateAnalogTelemetry()
 		{
-			ushort analog = Asset.ReadAnalogSig(Mapping.Sig);
+			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
+			if (singleMapping == null)
+				return;
+
+			ushort analog = Asset.ReadAnalogSig(singleMapping.Sig);
 			object rescaledValue = GetRescaledAnalogValue(analog);
 			SetTelemetry.Invoke(rescaledValue);
 		}
 
 		private void UpdateSerialTelemetry()
 		{
-			string serial = Asset.ReadSerialSig(Mapping.Sig);
+			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
+			if (singleMapping == null)
+				return;
+
+			string serial = Asset.ReadSerialSig(singleMapping.Sig);
 			SetTelemetry.Invoke(serial);
 		}
 
@@ -102,20 +115,32 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void UpdateDigitalSig()
 		{
+			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
+			if (singleMapping == null)
+				return;
+
 			bool digital = (bool)GetTelemetry.Value;
-			Asset.UpdateDigitalSig(Mapping.Sig, digital);
+			Asset.UpdateDigitalSig(singleMapping.Sig, digital);
 		}
 
 		private void UpdateAnalogSig()
 		{
+			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
+			if (singleMapping == null)
+				return;
+
 			ushort analog = GetNewAnalogValue();
-			Asset.UpdateAnalogSig(Mapping.Sig, analog);
+			Asset.UpdateAnalogSig(singleMapping.Sig, analog);
 		}
 
 		private void UpdateSerialSig()
 		{
+			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
+			if (singleMapping == null)
+				return;
+
 			string serial = GetTelemetry.Value.ToString();
-			Asset.UpdateSerialSig(Mapping.Sig, serial);
+			Asset.UpdateSerialSig(singleMapping.Sig, serial);
 		}
 
 		private object GetRescaledAnalogValue(ushort analog)
@@ -139,7 +164,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			{
 				//Cast value to double, since we only care about decimal types here 
 				//and all decimal types can be converted to double
-				return rangeAttribute.RemapRangeToUShort((double)GetTelemetry.Value);
+				return rangeAttribute.RemapRangeToUshort((double)GetTelemetry.Value);
 			}
 
 			ServiceProvider.GetService<ILoggerService>()

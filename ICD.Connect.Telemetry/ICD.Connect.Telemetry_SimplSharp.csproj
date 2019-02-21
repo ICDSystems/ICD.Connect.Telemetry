@@ -71,7 +71,9 @@
     <Compile Include="Attributes\AbstractPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractUpdatablePropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\ExternalTelemetryAttribute.cs" />
     <Compile Include="Attributes\IEventTelemetryAttribute.cs" />
+    <Compile Include="Attributes\IExternalTelemetryAttribute.cs" />
     <Compile Include="Attributes\IMethodTelemetryAttribute.cs" />
     <Compile Include="Attributes\ITelemetryAttribute.cs" />
     <Compile Include="Attributes\IPropertyTelemetryAttribute.cs" />
@@ -80,6 +82,10 @@
     <Compile Include="Attributes\MethodTelemetryAttribute.cs" />
     <Compile Include="Attributes\DynamicPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\EventTelemetryAttribute.cs" />
+    <Compile Include="EventArguments\IndexedBooleanEventArgs.cs" />
+    <Compile Include="EventArguments\IndexedStringEventArgs.cs" />
+    <Compile Include="EventArguments\IndexedUshortEventArgs.cs" />
+    <Compile Include="IExternalTelemetryProvider.cs" />
     <Compile Include="ITelemetryCollection.cs" />
     <Compile Include="ITelemetryProvider.cs" />
     <Compile Include="Nodes\AbstractFeedbackTelemetryNodeItem.cs" />
