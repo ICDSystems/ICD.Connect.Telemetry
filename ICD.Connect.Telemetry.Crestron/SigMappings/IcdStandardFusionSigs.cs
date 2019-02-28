@@ -1,15 +1,18 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
+using ICD.Connect.Devices;
+using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Settings;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
 	public static class IcdStandardFusionSigs
 	{
-		public static IEnumerable<IFusionSigMapping> Sigs { get { return s_Sigs; } }
+		public static IEnumerable<FusionSigMapping> Sigs { get { return s_Sigs; } }
 
-		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>
+		private static readonly IcdHashSet<FusionSigMapping> s_Sigs = new IcdHashSet<FusionSigMapping>
 		{
-			/*new FusionSigMapping
+			new FusionSigMapping
 			{
 				TelemetryGetName = OriginatorTelemetryNames.NAME,
 				TelemetrySetName = "",
@@ -41,7 +44,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				SigType = eSigType.Digital,
 				Sig = 0
 			},
-			*/
 		}; 
 	}
 }

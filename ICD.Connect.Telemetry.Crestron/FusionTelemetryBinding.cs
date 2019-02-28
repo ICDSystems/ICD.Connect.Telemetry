@@ -18,11 +18,11 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		public IFeedbackTelemetryItem GetTelemetry { get; private set; }
 		public IManagementTelemetryItem SetTelemetry { get; private set; }
-		public IFusionSigMapping Mapping { get; private set; }
+		public FusionSigMapping Mapping { get; private set; }
 		public IFusionRoom FusionRoom { get; private set; }
 		public IFusionStaticAsset Asset { get; private set; }
 
-		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, IFusionStaticAsset asset, IFusionSigMapping mapping)
+		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, IFusionStaticAsset asset, FusionSigMapping mapping)
 		{
 			FusionRoom = fusionRoom;
 			GetTelemetry = getTelemetry as IFeedbackTelemetryItem;

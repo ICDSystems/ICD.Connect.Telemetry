@@ -14,8 +14,8 @@ namespace ICD.Connect.Telemetry.Crestron
 {
 	public sealed class FusionTelemetryMunger
 	{
-		private Dictionary<Type, IEnumerable<IFusionSigMapping>> m_MappingsByType
-			= new Dictionary<Type, IEnumerable<IFusionSigMapping>>
+		private readonly Dictionary<Type, IEnumerable<FusionSigMapping>> m_MappingsByType
+			= new Dictionary<Type, IEnumerable<FusionSigMapping>>
 			{
 				{typeof(IDisplayWithAudio), IcdDisplayWithAudioFusionSigs.Sigs},
 				{typeof(IDisplay), IcdDisplayFusionSigs.Sigs},
@@ -42,7 +42,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <returns></returns>
 		public void AddAsset(IDevice device)
 		{
-			IEnumerable<IFusionSigMapping> mappings =
+			IEnumerable<FusionSigMapping> mappings =
 				m_MappingsByType.Where(kvp => device.GetType().IsAssignableTo(kvp.Key))
 						   .SelectMany(kvp => kvp.Value);
 
@@ -101,7 +101,7 @@ namespace ICD.Connect.Telemetry.Crestron
 				throw new ArgumentException("type", string.Format("Cannot Register Mapping Set for type {0}, type already registered.", type));
 			}
 			
-			//m_MappingsByType.Add(type, mappings);
+			m_MappingsByType.Add(type, mappings);
 		} 
 
         private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
@@ -111,10 +111,10 @@ namespace ICD.Connect.Telemetry.Crestron
 			if(!m_BindingsByAsset.TryGetValue(args.AssetId, out bindingsForAsset))
 				return;
 
-			//foreach(var bindingMatch in bindingsForAsset.Where(b=>b.Mapping.Sig == args.Sig && b.Mapping.SigType == args.SigType))
-			//{
-			//	bindingMatch.UpdateTelemetryNode();
-			//}
+			foreach(var bindingMatch in bindingsForAsset.Where(b=>b.Mapping.Sig == args.Sig && b.Mapping.SigType == args.SigType))
+			{
+				bindingMatch.UpdateTelemetryNode();
+			}
         }
 	}
 }

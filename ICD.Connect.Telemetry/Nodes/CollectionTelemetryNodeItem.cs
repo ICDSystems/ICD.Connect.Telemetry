@@ -5,6 +5,7 @@ using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
+
 	public sealed class CollectionTelemetryNodeItem : AbstractTelemetryCollection, ICollectionTelemetryItem
 	{
 		public CollectionTelemetryNodeItem(string name, IEnumerable<ITelemetryItem> childNodes)
