@@ -30,11 +30,17 @@ namespace ICD.Connect.Telemetry
 
 			foreach (PropertyInfo property in properties)
 			{
-				IPropertyTelemetryAttribute attribute = GetTelemetryAttribute(property);
+				ITelemetryAttribute attribute = GetTelemetryAttribute(property);
 				if (attribute == null)
 					continue;
 
-				collection.Add(attribute.InstantiateTelemetryItem(instance, property));
+				IPropertyTelemetryAttribute singleTelemetryAttribute = attribute as IPropertyTelemetryAttribute;
+				if(singleTelemetryAttribute != null)
+					collection.Add(singleTelemetryAttribute.InstantiateTelemetryItem(instance, property));
+
+				ICollectionTelemetryAttribute multiTelemetryAttribute = attribute as ICollectionTelemetryAttribute;
+				if(multiTelemetryAttribute != null)
+					collection.Add(multiTelemetryAttribute.InstantiateTelemetryItem(instance, property));
 			}
 		}
 
@@ -117,13 +123,13 @@ namespace ICD.Connect.Telemetry
 		}
 
 		[CanBeNull]
-		private static IPropertyTelemetryAttribute GetTelemetryAttribute(PropertyInfo property)
+		private static ITelemetryAttribute GetTelemetryAttribute(PropertyInfo property)
 		{
 			if (property == null)
 				throw new ArgumentNullException("property");
 
 // ReSharper disable InvokeAsExtensionMethod
-			return ReflectionExtensions.GetCustomAttributes<IPropertyTelemetryAttribute>(property, true).FirstOrDefault();
+			return ReflectionExtensions.GetCustomAttributes<ITelemetryAttribute>(property, true).FirstOrDefault();
 // ReSharper restore InvokeAsExtensionMethod
 		}
 
