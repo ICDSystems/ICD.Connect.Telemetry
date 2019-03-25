@@ -35,7 +35,7 @@ namespace ICD.Connect.Telemetry.Attributes
 			IcdHashSet<Type> types = instance.GetType().GetAllTypes().ToIcdHashSet();
 #if SIMPLSHARP
 			IEnumerable<CType> cTypes = types.Select(t => t.GetCType());
-			IEnumerable<EventInfo> eventInfos = cTypes.SelectMany(c => c.GetEvents());
+			IcdHashSet<EventInfo> eventInfos = cTypes.SelectMany(c => c.GetEvents()).ToIcdHashSet();
 #else
 			IEnumerable<EventInfo> eventInfos = types.SelectMany(t=> t.GetEvents());
 #endif
@@ -43,10 +43,21 @@ namespace ICD.Connect.Telemetry.Attributes
 			                                                            .Any(attr => attr.Name == EventName));
 
 			if (eventInfo == null)
+			{
+				foreach (var evInfo in eventInfos)
+				{
+					IEnumerable<EventTelemetryAttribute> attrs = evInfo.GetCustomAttributes<EventTelemetryAttribute>();
+					foreach (var attr in attrs)
+					{
+						IcdConsole.PrintLine(eConsoleColor.Magenta, attr.Name);
+					}
+				}
 				throw new InvalidOperationException(string.Format("Couldn't find event with name {0}", EventName));
+			}
 
 			Type type = typeof(DynamicTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
 
+			IcdConsole.PrintLine(eConsoleColor.Green, "Telemetry created for {0} with event {1}", propertyInfo.Name, eventInfo.Name);
 			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new object[] {Name, instance, eventInfo, propertyInfo});
 		}
 	}

@@ -21,8 +21,8 @@ namespace ICD.Connect.Telemetry.Nodes
 		public Type ValueType { get { return typeof(T); } }
 		public PropertyInfo PropertyInfo { get { return m_PropertyInfo; } }
 
-		protected AbstractFeedbackTelemetryNodeItem(string name, PropertyInfo propertyInfo) 
-			: base(name)
+		protected AbstractFeedbackTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo) 
+			: base(name, parent)
 		{
 			m_PropertyInfo = propertyInfo;
 		}

@@ -1,4 +1,7 @@
-﻿#if SIMPLSHARP
+﻿using System;
+using Crestron.SimplSharpPro;
+using ICD.Common.Utils.EventArguments;
+#if SIMPLSHARP
 using System.Collections.Generic;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Telemetry.Crestron.Assets;
@@ -23,6 +26,16 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 			m_DigitalCache = new Dictionary<uint, bool>();
 			m_AnalogCache = new Dictionary<uint, ushort>();
 			m_SerialCache = new Dictionary<uint, string>();
+		}
+
+		public void SetOnlineState(bool connected)
+		{
+			m_Asset.Connected.InputSig.BoolValue = connected;
+		}
+
+		public void SetPoweredState(bool powered)
+		{
+			m_Asset.PowerOn.InputSig.BoolValue = powered;
 		}
 
 		public void UpdateDigitalSig(uint sig, bool newValue)

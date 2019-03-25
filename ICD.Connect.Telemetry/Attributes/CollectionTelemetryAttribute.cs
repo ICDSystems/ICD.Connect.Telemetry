@@ -5,11 +5,12 @@ using System.Linq;
 using Crestron.SimplSharp.Reflection;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
-	public class CollectionTelemetryAttribute : AbstractTelemetryAttribute, ICollectionTelemetryAttribute
+	public sealed class CollectionTelemetryAttribute : AbstractTelemetryAttribute, ICollectionTelemetryAttribute
 	{
 		public CollectionTelemetryAttribute(string name) : base(name)
 		{
@@ -23,8 +24,8 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// <returns></returns>
 		public ICollectionTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
 		{
-			if(propertyInfo.PropertyType != typeof(IEnumerable))
-				throw new InvalidOperationException(string.Format("Cannot generate collection telemetry for non-enumerable property {0}", propertyInfo.Name));
+			if (!typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType))
+				throw new InvalidOperationException(string.Format("Cannot generate collection telemetry for non-enumerable property {0}, {1}", propertyInfo.Name, propertyInfo.PropertyType));
             
 			IEnumerable<ITelemetryProvider> childrenProviders =
 				((IEnumerable)propertyInfo.GetValue(instance, null)).OfType<ITelemetryProvider>();
@@ -34,11 +35,11 @@ namespace ICD.Connect.Telemetry.Attributes
 			foreach (var provider in childrenProviders)
 			{
 				ITelemetryCollection innerTelemetry = TelemetryUtils.InstantiateTelemetry(provider);
-				listItemNodes.Add(new CollectionTelemetryNodeItem(string.Format("{0}[{1}]", Name, index), innerTelemetry));
+				listItemNodes.Add(new CollectionTelemetryNodeItem(string.Format("{0}[{1}]", Name, index), instance, innerTelemetry));
 				index++;
 			}
 
-			return (ICollectionTelemetryItem)ReflectionUtils.CreateInstance(typeof(CollectionTelemetryNodeItem), Name, listItemNodes);
+			return (ICollectionTelemetryItem)ReflectionUtils.CreateInstance(typeof(CollectionTelemetryNodeItem), Name, instance, listItemNodes);
 		}
 	}
 }

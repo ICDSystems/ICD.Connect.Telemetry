@@ -8,8 +8,8 @@ namespace ICD.Connect.Telemetry.Nodes
  {
 	public sealed class StaticTelemetryNodeItem<T> : AbstractFeedbackTelemetryNodeItem<T>
 	{
-		public StaticTelemetryNodeItem(string name, T value, PropertyInfo propertyInfo)
-			: base(name, propertyInfo)
+		public StaticTelemetryNodeItem(string name, T value, ITelemetryProvider parent, PropertyInfo propertyInfo)
+			: base(name, parent, propertyInfo)
 		{
 			Value = value;
 		}

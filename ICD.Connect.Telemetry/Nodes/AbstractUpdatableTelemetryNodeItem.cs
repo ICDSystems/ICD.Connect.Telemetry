@@ -15,8 +15,8 @@ namespace ICD.Connect.Telemetry.Nodes
 
 		private readonly object m_Parent;
 		
-		protected AbstractUpdatableTelemetryNodeItem(string name, object parent, PropertyInfo propertyInfo)
-			: base(name, propertyInfo)
+		protected AbstractUpdatableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo)
+			: base(name, parent, propertyInfo)
 		{
 			m_Parent = parent;
 		}

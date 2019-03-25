@@ -1,8 +1,11 @@
 using System;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Attributes;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Common.Utils.Timers;
+using ICD.Connect.Devices;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
@@ -58,8 +61,11 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void UpdateDigitalTelemetry()
 		{
-			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
+			FusionSigMapping singleMapping = Mapping;
 			if(singleMapping == null)
+				return;
+
+			if (Mapping.Sig == 0)
 				return;
 
 			bool digital = Asset.ReadDigitalSig(singleMapping.Sig);
@@ -68,8 +74,11 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void UpdateAnalogTelemetry()
 		{
-			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
+			FusionSigMapping singleMapping = Mapping;
 			if (singleMapping == null)
+				return;
+
+			if (Mapping.Sig == 0)
 				return;
 
 			ushort analog = Asset.ReadAnalogSig(singleMapping.Sig);
@@ -79,8 +88,11 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void UpdateSerialTelemetry()
 		{
-			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
+			FusionSigMapping singleMapping = Mapping;
 			if (singleMapping == null)
+				return;
+
+			if (Mapping.Sig == 0)
 				return;
 
 			string serial = Asset.ReadSerialSig(singleMapping.Sig);
@@ -96,6 +108,12 @@ namespace ICD.Connect.Telemetry.Crestron
 		{
 			if (GetTelemetry == null)
 				return;
+
+			if (Mapping.Sig == 0)
+			{
+				UpdateReservedSig();
+				return;
+			}
 
 			switch (Mapping.SigType)
 			{
@@ -113,10 +131,26 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
+		private void UpdateReservedSig()
+		{
+			if (Mapping.TelemetryGetName == DeviceTelemetryNames.ONLINE_STATE)
+			{
+				bool value = (bool)GetTelemetry.Value;
+				Asset.SetOnlineState(value);
+				return;
+			}
+			if (Mapping.TelemetryGetName == DeviceTelemetryNames.POWER_STATE)
+			{
+				bool value = (bool)GetTelemetry.Value;
+				Asset.SetPoweredState(value);
+				return;
+			}
+		}
+
 		private void UpdateDigitalSig()
 		{
-			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
-			if (singleMapping == null)
+			FusionSigMapping singleMapping = Mapping;
+			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
 				return;
 
 			bool digital = (bool)GetTelemetry.Value;
@@ -125,8 +159,8 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void UpdateAnalogSig()
 		{
-			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
-			if (singleMapping == null)
+			FusionSigMapping singleMapping = Mapping;
+			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
 				return;
 
 			ushort analog = GetNewAnalogValue();
@@ -135,8 +169,8 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void UpdateSerialSig()
 		{
-			FusionSigMapping singleMapping = Mapping as FusionSigMapping;
-			if (singleMapping == null)
+			FusionSigMapping singleMapping = Mapping;
+			if (singleMapping == null || GetTelemetry == null ||GetTelemetry.Value == null)
 				return;
 
 			string serial = GetTelemetry.Value.ToString();
@@ -152,19 +186,25 @@ namespace ICD.Connect.Telemetry.Crestron
 		private ushort GetNewAnalogValue()
 		{
 			if (!GetTelemetry.ValueType.IsDecimalNumeric())
-				return (ushort)GetTelemetry.Value;
+			{
+				return (ushort)Convert.ChangeType(GetTelemetry.Value, typeof(ushort), null);
+			}
 
 			RangeAttribute rangeAttribute = GetTelemetry.PropertyInfo
 			                                            .GetCustomAttributes<RangeAttribute>()
 			                                            .FirstOrDefault(null);
 			if (rangeAttribute == null)
-				return (ushort)GetTelemetry.Value;
+			{
+				return (ushort)Convert.ChangeType(GetTelemetry.Value, typeof(ushort), null);
+			}
 
 			if (rangeAttribute.IsInRange(GetTelemetry.Value))
 			{
+				double value = (double)Convert.ChangeType(GetTelemetry.Value, typeof(double), null);
+
 				//Cast value to double, since we only care about decimal types here 
 				//and all decimal types can be converted to double
-				return rangeAttribute.RemapRangeToUshort((double)GetTelemetry.Value);
+				return rangeAttribute.RemapRangeToUshort(value);
 			}
 
 			ServiceProvider.GetService<ILoggerService>()
@@ -176,18 +216,26 @@ namespace ICD.Connect.Telemetry.Crestron
 			return 0;
 		}
 
-		public static FusionTelemetryBinding Bind(IFusionRoom fusionRoom, FusionSigMapping mapping, uint assetId)
+		public static FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryProvider provider, FusionSigMapping mapping, uint assetId)
 		{
 			if (fusionRoom == null)
 				throw new ArgumentNullException("fusionRoom");
 
+			if(provider == null)
+				throw new ArgumentException("provider");
+
 			if (mapping == null)
 				throw new ArgumentNullException("mapping");
 
-			ITelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(fusionRoom, mapping.TelemetryGetName);
-			ITelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(fusionRoom, mapping.TelemetrySetName);
+			ITelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName);
+			ITelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName);
 
-			fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
+			// If the sig number is 0, that indicates that the sig is special-handling
+			if (mapping.Sig != 0)
+			{
+				IcdConsole.PrintLine(eConsoleColor.Magenta, "Device {0}, Asset {1}, Sig {2}, Name {3}, Type {4}", provider.GetType().ToString(), assetId, mapping.Sig, mapping.FusionSigName, mapping.SigType);
+				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
+			}
 
 			IFusionStaticAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset as IFusionStaticAsset;
 			return new FusionTelemetryBinding(fusionRoom, getTelemetryItem, setTelemetryItem, asset, mapping);

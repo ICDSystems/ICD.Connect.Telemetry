@@ -71,7 +71,9 @@
     <Compile Include="Attributes\AbstractPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractUpdatablePropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\CollectionTelemetryAttribute.cs" />
     <Compile Include="Attributes\ExternalTelemetryAttribute.cs" />
+    <Compile Include="Attributes\ICollectionTelemetryAttribute.cs" />
     <Compile Include="Attributes\IEventTelemetryAttribute.cs" />
     <Compile Include="Attributes\IExternalTelemetryAttribute.cs" />
     <Compile Include="Attributes\IMethodTelemetryAttribute.cs" />
@@ -91,10 +93,13 @@
     <Compile Include="Nodes\AbstractFeedbackTelemetryNodeItem.cs" />
     <Compile Include="Nodes\AbstractTelemetryNodeItemBase.cs" />
     <Compile Include="Nodes\AbstractUpdatableTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\CollectionTelemetryNodeItem.cs" />
     <Compile Include="Nodes\DynamicTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\ICollectionTelemetryItem.cs" />
     <Compile Include="Nodes\IFeedbackTelemetryItem.cs" />
     <Compile Include="Nodes\IManagementTelemetryItem.cs" />
     <Compile Include="Nodes\ITelemetryItem.cs" />
+    <Compile Include="Nodes\ITelemetryNodeItem.cs" />
     <Compile Include="Nodes\IUpdatableTelemetryNodeItem.cs" />
     <Compile Include="Nodes\MethodTelemetryNodeItem.cs" />
     <Compile Include="Nodes\StaticTelemetryNodeItem.cs" />
@@ -102,6 +107,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ITelemetryService.cs" />
     <Compile Include="Service\TelemetryService.cs" />
+    <Compile Include="AbstractTelemetryCollection.cs" />
     <Compile Include="TelemetryCollection.cs" />
     <Compile Include="TelemetryConsole.cs" />
     <Compile Include="TelemetryMethodInfoEqualityComparer.cs" />

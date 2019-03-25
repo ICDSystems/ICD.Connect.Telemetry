@@ -8,9 +8,10 @@ namespace ICD.Connect.Telemetry.Nodes
 
 	public sealed class CollectionTelemetryNodeItem : AbstractTelemetryCollection, ICollectionTelemetryItem
 	{
-		public CollectionTelemetryNodeItem(string name, IEnumerable<ITelemetryItem> childNodes)
+		public CollectionTelemetryNodeItem(string name, ITelemetryProvider parent, IEnumerable<ITelemetryItem> childNodes)
 		{
 			Name = name;
+			Parent = parent;
 
 			foreach (ITelemetryItem item in childNodes)
 			{
@@ -19,6 +20,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		}
 
 		public string Name { get; private set; }
+		public ITelemetryProvider Parent { get; private set; }
 
 		#region Console
 

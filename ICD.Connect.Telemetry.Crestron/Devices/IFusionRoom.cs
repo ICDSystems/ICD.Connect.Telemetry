@@ -11,6 +11,7 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 	public interface IFusionRoom : ISigDevice, IDevice
 	{
 		event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
+		event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated;
 			
 		/// <summary>
 		/// Gets the user configurable assets.
@@ -20,12 +21,15 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// <summary>
 		/// Adds the asset to the fusion room.
 		/// </summary>
-		/// <param name="assetType"></param>
-		/// <param name="number"></param>
-		/// <param name="name"></param>
-		/// <param name="type"></param>
-		/// <param name="instanceId"></param>
-		void AddAsset(eAssetType assetType, uint number, string name, string type, string instanceId);
+		void AddAsset(AssetInfo asset);
+
+		/// <summary>
+		/// Adds the assets to the fusion room.
+		/// </summary>
+		/// <param name="assets"></param>
+		void AddAssets(IEnumerable<AssetInfo> assets);
+
+		void RebuildRvi();
 
 		/// <summary>
 		/// Sets the fusion error message.
@@ -70,5 +74,17 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 			Sig = sigNumber;
 		}
 
+	}
+
+	public sealed class FusionAssetPowerStateUpdatedArgs : EventArgs
+	{
+		public uint AssetId { get; private set; }
+		public bool Powered { get; private set; }
+
+		public FusionAssetPowerStateUpdatedArgs(uint assetId, bool powered)
+		{
+			AssetId = assetId;
+			Powered = powered;
+		}
 	}
 }

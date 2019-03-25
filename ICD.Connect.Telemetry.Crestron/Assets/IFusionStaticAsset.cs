@@ -1,7 +1,14 @@
+using System;
+using ICD.Common.Utils.EventArguments;
+
 namespace ICD.Connect.Telemetry.Crestron.Assets
 {
 	public interface IFusionStaticAsset : IFusionAsset
 	{
+		void SetPoweredState(bool powered);
+
+		void SetOnlineState(bool connected);
+
 		void UpdateDigitalSig(uint sig, bool newValue);
 
 		bool ReadDigitalSig(uint sig);

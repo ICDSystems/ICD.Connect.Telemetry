@@ -36,16 +36,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			}
 		}
 
-		public ushort GetNextSig()
-		{
-			if(m_CurrentSig > LastSig)
-				throw new IndexOutOfRangeException("Sigs have exceeded maximum range allowed by mapping.");
-
-			var sig = m_CurrentSig;
-			m_CurrentSig++;
-			return sig;
-		}
-
 		public string GetNameFromTemplate(ushort sigNumber)
 		{
 			if(sigNumber < m_FirstSig || sigNumber > m_LastSig)

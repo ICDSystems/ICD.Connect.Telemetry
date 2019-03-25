@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils;
+using ICD.Common.Utils.Timers;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Misc.CrestronPro;
-using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
 using ICD.Connect.Telemetry.CrestronPro.Assets;
+using ICD.Connect.Misc.CrestronPro.Utils.Extensions;
 #endif
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
@@ -17,7 +19,6 @@ using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Settings.Core;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
-using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 using eSigIoMask = ICD.Connect.Telemetry.Crestron.eSigIoMask;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 
@@ -29,6 +30,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 	public sealed class FusionRoomAdapter : AbstractSigDevice<FusionRoomAdapterSettings>, IFusionRoom
 	{
 		public event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
+		public event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated; 
 
 		private const uint MIN_SIG = 1;
 		private const uint MAX_SIG = 1001;
@@ -231,20 +233,31 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		/// <summary>
 		/// Adds the asset to the fusion room.
 		/// </summary>
-		/// <param name="assetType"></param>
-		/// <param name="number"></param>
-		/// <param name="name"></param>
-		/// <param name="type"></param>
-		/// <param name="instanceId"></param>
-		public void AddAsset(eAssetType assetType, uint number, string name, string type, string instanceId)
+		/// <param name="asset"></param>
+		public void AddAsset(AssetInfo asset)
 		{
 #if SIMPLSHARP
-			m_FusionRoom.AddAsset(assetType.FromIcd(), number, name, type, instanceId);
-			m_FusionRoom.ReRegister();
-			FusionRVI.GenerateFileForAllFusionDevices();
+			IcdStopwatch.Profile(()=>
+				m_FusionRoom.AddAsset(asset.AssetType.FromIcd(), asset.Number, asset.Name, asset.Type, asset.InstanceId), "AddAsset");
 #else
 			throw new NotSupportedException();
 #endif
+		}
+
+		/// <summary>
+		/// Adds the assets to the fusion room.
+		/// </summary>
+		/// <param name="assets"></param>
+		public void AddAssets(IEnumerable<AssetInfo> assets)
+		{
+			foreach (AssetInfo asset in assets)
+				AddAsset(asset);
+		}
+
+		public void RebuildRvi()
+		{
+			m_FusionRoom.ReRegister();
+			FusionRVI.GenerateFileForAllFusionDevices();
 		}
 
 		/// <summary>
@@ -470,7 +483,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 		private void FusionAssetStateChange(FusionBase device, FusionAssetStateEventArgs args)
 		{
-            switch (args.EventId)
+			switch (args.EventId)
 			{
 				case FusionAssetEventId.StaticAssetAssetBoolAssetSigEventReceivedEventId:
 					RaiseSigUpdatedForDigitalSig(args);
@@ -481,14 +494,10 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 				case FusionAssetEventId.StaticAssetAssetStringAssetSigEventReceivedEventId:
 					RaiseSigUpdatedForSerialSig(args);
 					break;
-				case FusionAssetEventId.StaticAssetPowerOnReceivedEventId:
-				case FusionAssetEventId.StaticAssetPowerOffReceivedEventId:
+				default:
 					RaiseSigUpdatedForFixedNameSig(args);
 					break;
-				default:
-					return;
 			}
-				
 		}
 
 		private void RaiseSigUpdatedForDigitalSig(FusionAssetStateEventArgs args)
@@ -499,7 +508,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
 			                                                                  eSigType.Digital,
-			                                                                  data.Number));
+			                                                                  data.Number - SIG_OFFSET));
 		}
 
 		private void RaiseSigUpdatedForAnalogSig(FusionAssetStateEventArgs args)
@@ -510,7 +519,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
 			                                                                  eSigType.Analog,
-			                                                                  data.Number));
+			                                                                  data.Number - SIG_OFFSET));
 		}
 
 		private void RaiseSigUpdatedForSerialSig(FusionAssetStateEventArgs args)
@@ -521,18 +530,21 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
 																			  eSigType.Serial,
-																			  data.Number));
+																			  data.Number - SIG_OFFSET));
 		}
 
 		private void RaiseSigUpdatedForFixedNameSig(FusionAssetStateEventArgs args)
 		{
-			BooleanSigDataFixedName data = args.UserConfiguredSigDetail as BooleanSigDataFixedName;
-			if (data == null)
-				return;
-
-			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
-																			  eSigType.Digital,
-																			  data.Number));
+			int data = args.EventId;
+			switch (data)
+			{
+				case FusionAssetEventId.StaticAssetPowerOffReceivedEventId:
+					OnFusionAssetPowerStateUpdated.Raise(this, new FusionAssetPowerStateUpdatedArgs(args.UserConfigurableAssetDetailIndex, false));
+					return;
+				case FusionAssetEventId.StaticAssetPowerOnReceivedEventId:
+					OnFusionAssetPowerStateUpdated.Raise(this, new FusionAssetPowerStateUpdatedArgs(args.UserConfigurableAssetDetailIndex, true));
+					return;
+			}
 		}
 
 		/// <summary>
@@ -547,7 +559,5 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #endif
 
 #endregion
-
-		
 	}
 }

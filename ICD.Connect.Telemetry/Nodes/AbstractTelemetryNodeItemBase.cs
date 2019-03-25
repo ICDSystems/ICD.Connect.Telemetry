@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
@@ -11,9 +12,12 @@ namespace ICD.Connect.Telemetry.Nodes
 	{
 		public string Name { get; private set; }
 
-		protected AbstractTelemetryNodeItemBase(string name)
+		public ITelemetryProvider Parent { get; private set; }
+
+		protected AbstractTelemetryNodeItemBase(string name, ITelemetryProvider parent)
 		{
 			Name = name;
+			Parent = parent;
 		}
 
 		public virtual void Dispose()
@@ -60,5 +64,13 @@ namespace ICD.Connect.Telemetry.Nodes
 		}
 
 		#endregion
+
+		public override string ToString()
+		{
+			var x = new ReprBuilder(this);
+			x.AppendProperty("Name", Name);
+			x.AppendProperty("Parent", Parent);
+			return x.ToString();
+		}
 	}
 }

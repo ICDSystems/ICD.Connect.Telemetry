@@ -17,12 +17,10 @@ namespace ICD.Connect.Telemetry.Nodes
 
 		public int ParameterCount { get { return ParameterTypes.Length; } }
 		public Type[] ParameterTypes { get; private set; }
-		public object Parent { get; private set; }
 
-		public MethodTelemetryNodeItem(string name, object parent ,MethodInfo info) : base(name)
+		public MethodTelemetryNodeItem(string name, ITelemetryProvider parent ,MethodInfo info) : base(name, parent)
 		{
 			m_MethodInfo = info;
-			Parent = parent;
 
 			ParameterTypes = m_MethodInfo.GetParameters().Select(p => (Type)p.ParameterType).ToArray();
 		}

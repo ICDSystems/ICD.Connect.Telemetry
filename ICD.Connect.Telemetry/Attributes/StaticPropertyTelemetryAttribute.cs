@@ -25,7 +25,7 @@ namespace ICD.Connect.Telemetry.Attributes
 		{
 			Type type = typeof(StaticTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
 
-			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new[] { Name, propertyInfo.GetValue(instance, null), propertyInfo});
+			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new[] { Name, propertyInfo.GetValue(instance, null), instance, propertyInfo });
 		}
 	}
 }

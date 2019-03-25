@@ -8,8 +8,6 @@ namespace ICD.Connect.Telemetry.Nodes
 
 		Type[] ParameterTypes { get; }
 
-		object Parent { get; }
-
 		void Invoke(params object[] parameters);
 	}
 }
