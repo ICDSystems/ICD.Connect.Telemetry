@@ -12,13 +12,10 @@ namespace ICD.Connect.Telemetry.Nodes
 {
 	public abstract class AbstractUpdatableTelemetryNodeItem<T> : AbstractFeedbackTelemetryNodeItem<T>, IUpdatableTelemetryNodeItem
 	{
-
-		private readonly object m_Parent;
-		
 		protected AbstractUpdatableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo)
 			: base(name, parent, propertyInfo)
 		{
-			m_Parent = parent;
+
 		}
 
 		public override void Dispose()
@@ -32,7 +29,7 @@ namespace ICD.Connect.Telemetry.Nodes
 
 		public void Update()
 		{
-			T newValue = (T)PropertyInfo.GetValue(m_Parent, null);
+			T newValue = (T)PropertyInfo.GetValue(Parent, null);
 
 			// ReSharper disable CompareNonConstrainedGenericWithNull
 			if (Value == null && newValue == null)

@@ -87,7 +87,7 @@
     <Compile Include="FusionTelemetryMunger.cs" />
     <Compile Include="Devices\IFusionRoom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SigMappings\FusionSigRangeMapping.cs" />
+    <Compile Include="SigMappings\FusionSigMultiMapping.cs" />
     <Compile Include="SigMappings\IcdControlSystemFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDisplayFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDisplayWithAudioFusionSigs.cs" />

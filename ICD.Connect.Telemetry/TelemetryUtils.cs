@@ -66,6 +66,7 @@ namespace ICD.Connect.Telemetry
 			{
 				InstantiatePropertyTelemetry(provider, collection);
 				InstantiateMethodTelemetry(provider, collection);
+				InstantiateExternalTelemetry(provider, collection);
 			}
 		}
 
@@ -73,17 +74,15 @@ namespace ICD.Connect.Telemetry
 		{
 			IEnumerable<ExternalTelemetryAttribute> externalTelemetryAttributes = GetExternalTelemetryAttributes(instance);
 
-			return externalTelemetryAttributes.Select(attr => BuildExternalTelemetryProviderFromAttribute(instance, attr));
-		}
-
-		private static IExternalTelemetryProvider BuildExternalTelemetryProviderFromAttribute(ITelemetryProvider instance, IExternalTelemetryAttribute attr)
-		{
-			return attr.InstantiateTelemetryItem(instance);
+			return externalTelemetryAttributes.Select(attr => attr.InstantiateTelemetryItem(instance));
 		}
 
 		private static IEnumerable<ExternalTelemetryAttribute> GetExternalTelemetryAttributes(ITelemetryProvider instance)
 		{
-			return Attribute.GetCustomAttributes(instance.GetType()).OfType<ExternalTelemetryAttribute>();
+			return instance.GetType()
+			               .GetAllTypes()
+			               .SelectMany(type => Attribute.GetCustomAttributes(type)
+			                                            .OfType<ExternalTelemetryAttribute>());
 		}
 
 		private static IEnumerable<PropertyInfo> GetPropertiesWithTelemetryAttributes(Type type)

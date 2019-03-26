@@ -57,7 +57,6 @@ namespace ICD.Connect.Telemetry.Attributes
 
 			Type type = typeof(DynamicTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
 
-			IcdConsole.PrintLine(eConsoleColor.Green, "Telemetry created for {0} with event {1}", propertyInfo.Name, eventInfo.Name);
 			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new object[] {Name, instance, eventInfo, propertyInfo});
 		}
 	}

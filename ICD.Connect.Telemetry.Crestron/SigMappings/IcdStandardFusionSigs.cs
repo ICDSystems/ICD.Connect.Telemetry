@@ -14,6 +14,14 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		{
 			new FusionSigMapping
 			{
+				TelemetryGetName = OriginatorTelemetryNames.ID,
+				TelemetrySetName = "",
+				FusionSigName = "Id",
+				SigType = eSigType.Serial,
+				Sig = 24951
+			},
+			new FusionSigMapping
+			{
 				TelemetryGetName = OriginatorTelemetryNames.NAME,
 				TelemetrySetName = "",
 				FusionSigName = "ComponentName",

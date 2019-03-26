@@ -26,9 +26,12 @@ namespace ICD.Connect.Telemetry.Attributes
 		{
 			if (!typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType))
 				throw new InvalidOperationException(string.Format("Cannot generate collection telemetry for non-enumerable property {0}, {1}", propertyInfo.Name, propertyInfo.PropertyType));
-            
-			IEnumerable<ITelemetryProvider> childrenProviders =
-				((IEnumerable)propertyInfo.GetValue(instance, null)).OfType<ITelemetryProvider>();
+
+			IEnumerable childInstance = (IEnumerable)propertyInfo.GetValue(instance, null);
+			if (childInstance == null)
+				throw new InvalidProgramException(string.Format("Property {0} value is null", propertyInfo.Name));
+
+			IEnumerable<ITelemetryProvider> childrenProviders = childInstance.OfType<ITelemetryProvider>();
 
 			IcdHashSet<ITelemetryItem> listItemNodes = new IcdHashSet<ITelemetryItem>();
 			int index = 0;
@@ -39,7 +42,7 @@ namespace ICD.Connect.Telemetry.Attributes
 				index++;
 			}
 
-			return (ICollectionTelemetryItem)ReflectionUtils.CreateInstance(typeof(CollectionTelemetryNodeItem), Name, instance, listItemNodes);
+			return new CollectionTelemetryNodeItem(Name, instance, listItemNodes);
 		}
 	}
 }

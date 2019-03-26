@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
-	public sealed class FusionSigRangeMapping : FusionSigMappingBase, IEquatable<FusionSigRangeMapping>
+	public sealed class FusionSigMultiMapping : FusionSigMappingBase, IEquatable<FusionSigMultiMapping>
 	{
 		private ushort m_FirstSig;
 		private ushort m_CurrentSig;
@@ -56,7 +56,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			return string.Format(FusionSigName, positionInRange.ToString("D5"));
 		}
 
-		public bool Equals(FusionSigRangeMapping other)
+		public bool Equals(FusionSigMultiMapping other)
 		{
 			return other != null &&
 				   TelemetrySetName == other.TelemetrySetName &&

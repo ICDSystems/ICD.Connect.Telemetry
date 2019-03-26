@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Crestron.SimplSharp.Net;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
@@ -53,7 +52,8 @@ namespace ICD.Connect.Telemetry.Crestron
 		public void BuildAsset(IDevice device)
 		{
 			uint assetId = m_FusionRoom.GetAssetIds().Any() ? m_FusionRoom.GetAssetIds().Max() + 1 : 4;
-			AssetInfo asset = new AssetInfo(eAssetType.StaticAsset, assetId, device.Name, device.GetType().Name, Guid.NewGuid().ToString());
+			AssetInfo asset = new AssetInfo(eAssetType.StaticAsset, assetId, device.Name, device.GetType().Name,
+			                                Guid.NewGuid().ToString());
 			m_FusionRoom.AddAsset(asset);
 
 			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
@@ -75,52 +75,64 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
-		private IEnumerable<FusionTelemetryBinding> BuildBindingsRecursive(IDevice device, ITelemetryCollection nodes, 
-																		   uint assetId, RangeMappingUsageTracker mappingUsage)
+		private IFusionSigMapping GetMapping(ITelemetryItem node)
 		{
-			foreach (ITelemetryItem node in nodes)
+			return m_MappingsByType/*.Where(kvp => node.Parent.GetType().IsAssignableTo(kvp.Key))*/
+										.SelectMany(kvp => kvp.Value)
+										.FirstOrDefault(m => node.Name == m.TelemetryGetName || node.Name == m.TelemetrySetName);
+		}
+
+		private IEnumerable<FusionTelemetryBinding> BuildBindingsRecursive(IDevice device, ITelemetryCollection nodes,
+		                                                                   uint assetId, RangeMappingUsageTracker mappingUsage)
+		{
+			IEnumerable<ITelemetryCollection> childCollections = nodes.OfType<ITelemetryCollection>();
+			foreach (ITelemetryCollection collection in childCollections)
 			{
-				IcdConsole.PrintLine(eConsoleColor.Green, node.ToString());
-				if (node is ITelemetryCollection)
-				{
-					ITelemetryCollection collection = node as ITelemetryCollection;
-					IEnumerable<FusionTelemetryBinding> children = BuildBindingsRecursive(device, collection, assetId, mappingUsage);
-					foreach (FusionTelemetryBinding child in children)
-						yield return child;
-				}
-				else
-				{
-					IEnumerable<IFusionSigMapping> mappings =
-						m_MappingsByType.Where(kvp => node.Parent.GetType().IsAssignableTo(kvp.Key))
-						                .SelectMany(kvp => kvp.Value)
-										.Distinct();
-
-					foreach (IFusionSigMapping mapping in mappings)
-					{
-						FusionSigMapping singleMapping = mapping as FusionSigMapping;
-						if (singleMapping != null)
-						{
-							FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, device, singleMapping, assetId);
-							yield return binding;
-						}
-
-						FusionSigRangeMapping multiMapping = mapping as FusionSigRangeMapping;
-						if (multiMapping != null)
-						{
-							FusionSigMapping tempMapping = new FusionSigMapping
-							{
-								FusionSigName = multiMapping.FusionSigName,
-								Sig = mappingUsage.GetNextSig(multiMapping),
-								SigType = multiMapping.SigType,
-								TelemetryGetName = multiMapping.TelemetryGetName,
-								TelemetrySetName = multiMapping.TelemetrySetName
-							};
-							FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, device, tempMapping, assetId);
-							yield return binding;
-						}
-					}
-				}
+				IEnumerable<FusionTelemetryBinding> children = BuildBindingsRecursive(device, collection, assetId, mappingUsage);
+				foreach (FusionTelemetryBinding child in children)
+					yield return child;
 			}
+
+
+			foreach (var nodeMappingPair in nodes.Where(n => !n.GetType().IsAssignableTo(typeof(ITelemetryCollection)))
+												 .Select(n=> new {Node = n, Mapping = GetMapping(n)})
+												 .Distinct(a => a.Mapping))
+			{
+				FusionTelemetryBinding output = Bind(device, nodeMappingPair.Mapping, assetId, mappingUsage);
+
+				if (output == null)
+					IcdConsole.PrintLine(eConsoleColor.YellowOnRed, "No Mapping Found for {0} on {1}", nodeMappingPair.Node.Name, nodeMappingPair.Node.Parent);
+				else
+					yield return output;
+			}
+		}
+
+		[CanBeNull]
+		private FusionTelemetryBinding Bind(IDevice device, IFusionSigMapping mapping, uint assetId, RangeMappingUsageTracker mappingUsage)
+		{
+			FusionSigMapping singleMapping = mapping as FusionSigMapping;
+			if (singleMapping != null)
+			{
+				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, device, singleMapping, assetId);
+				return binding;
+			}
+
+			FusionSigMultiMapping multiMapping = mapping as FusionSigMultiMapping;
+			if (multiMapping != null)
+			{
+				FusionSigMapping tempMapping = new FusionSigMapping
+				{
+					FusionSigName = multiMapping.FusionSigName,
+					Sig = mappingUsage.GetNextSig(multiMapping),
+					SigType = multiMapping.SigType,
+					TelemetryGetName = multiMapping.TelemetryGetName,
+					TelemetrySetName = multiMapping.TelemetrySetName
+				};
+				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, device, tempMapping, assetId);
+				return binding;
+			}
+
+			return null;
 		}
 
 		public void AddAssets(IEnumerable<IDevice> devices)
@@ -137,9 +149,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			try
 			{
 				foreach (KeyValuePair<uint, IcdHashSet<FusionTelemetryBinding>> kvp in m_BindingsByAsset)
-				{
 					kvp.Value.Clear();
-				}
 			}
 			finally
 			{
@@ -151,24 +161,25 @@ namespace ICD.Connect.Telemetry.Crestron
 		{
 			if (m_MappingsByType.ContainsKey(type))
 			{
-				throw new ArgumentException("type", string.Format("Cannot Register Mapping Set for type {0}, type already registered.", type));
+				throw new ArgumentException("type",
+				                            string.Format("Cannot Register Mapping Set for type {0}, type already registered.", type));
 			}
-			
-			m_MappingsByType.Add(type, mappings);
-		} 
 
-        private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
-        {
-	        IcdHashSet<FusionTelemetryBinding> bindingsForAsset;
-			
-			if(!m_BindingsByAsset.TryGetValue(args.AssetId, out bindingsForAsset))
+			m_MappingsByType.Add(type, mappings);
+		}
+
+		private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
+		{
+			IcdHashSet<FusionTelemetryBinding> bindingsForAsset;
+
+			if (!m_BindingsByAsset.TryGetValue(args.AssetId, out bindingsForAsset))
 				return;
 
-			foreach(FusionTelemetryBinding bindingMatch in bindingsForAsset.Where(b=>b.Mapping.Sig == args.Sig && b.Mapping.SigType == args.SigType))
-			{
+			foreach (
+				FusionTelemetryBinding bindingMatch in
+					bindingsForAsset.Where(b => b.Mapping.Sig == args.Sig && b.Mapping.SigType == args.SigType))
 				bindingMatch.UpdateTelemetryNode();
-			}
-        }
+		}
 
 		private void FusionRoomOnFusionAssetPowerStateUpdated(object sender, FusionAssetPowerStateUpdatedArgs args)
 		{
@@ -179,10 +190,10 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			if (args.Powered)
 			{
-				FusionTelemetryBinding binding = 
+				FusionTelemetryBinding binding =
 					bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetrySetName == DeviceTelemetryNames.POWER_ON);
 
-				if(binding != null)
+				if (binding != null)
 					binding.SetTelemetry.Invoke();
 			}
 			else

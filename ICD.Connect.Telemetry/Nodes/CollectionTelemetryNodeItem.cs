@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
@@ -62,5 +63,13 @@ namespace ICD.Connect.Telemetry.Nodes
 		}
 
 		#endregion
+
+		public override string ToString()
+		{
+			var x = new ReprBuilder(this);
+			x.AppendProperty("Name", Name);
+			x.AppendProperty("Parent", Parent);
+			return x.ToString();
+		}
 	}
 }

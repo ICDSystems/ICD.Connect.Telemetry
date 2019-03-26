@@ -5,9 +5,9 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
 	public sealed class RangeMappingUsageTracker
 	{
-		private readonly Dictionary<FusionSigRangeMapping, ushort> m_Ranges = new Dictionary<FusionSigRangeMapping, ushort>();
+		private readonly Dictionary<FusionSigMultiMapping, ushort> m_Ranges = new Dictionary<FusionSigMultiMapping, ushort>();
 
-		public ushort GetNextSig(FusionSigRangeMapping mapping)
+		public ushort GetNextSig(FusionSigMultiMapping mapping)
 		{
 			ushort currentSig;
 			if (!m_Ranges.TryGetValue(mapping, out currentSig))
@@ -23,7 +23,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			return currentSig;
 		}
 
-		private void AddMappingType(FusionSigRangeMapping mapping)
+		private void AddMappingType(FusionSigMultiMapping mapping)
 		{
 			if (m_Ranges.ContainsKey(mapping))
 				return;
