@@ -12,7 +12,12 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 	{
 		event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
 		event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated;
-			
+		
+		/// <summary>
+		/// Gets the GUID for the Room ID.
+		/// </summary>
+		string RoomId { get; }
+
 		/// <summary>
 		/// Gets the user configurable assets.
 		/// </summary>
