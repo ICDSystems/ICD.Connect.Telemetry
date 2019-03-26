@@ -53,7 +53,9 @@ namespace ICD.Connect.Telemetry.Crestron
 		public void BuildAsset(IDevice device)
 		{
 			uint assetId = m_FusionRoom.GetAssetIds().Any() ? m_FusionRoom.GetAssetIds().Max() + 1 : 4;
-			AssetInfo asset = new AssetInfo(eAssetType.StaticAsset, assetId, device.Name, device.GetType().Name, Guid.NewGuid().ToString());
+			string instanceId = AssembleInstanceId(device);
+
+			AssetInfo asset = new AssetInfo(eAssetType.StaticAsset, assetId, device.Name, device.GetType().Name, instanceId);
 			m_FusionRoom.AddAsset(asset);
 
 			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
@@ -73,6 +75,25 @@ namespace ICD.Connect.Telemetry.Crestron
 			{
 				m_BindingsSection.Leave();
 			}
+		}
+
+		private string AssembleInstanceId(IDevice device)
+		{
+			if (device == null)
+				throw new ArgumentNullException("device");
+
+			int stableHash;
+
+			unchecked
+			{
+				stableHash = 17;
+				stableHash = stableHash * 23 + device.Id;
+				stableHash = stableHash * 23 + device.GetType().Name.GetStableHashCode();
+				stableHash = stableHash * 23 + m_FusionRoom.RoomId.GetStableHashCode();
+			}
+
+			Guid seeded = GuidUtils.GenerateSeeded(stableHash);
+			return seeded.ToString();
 		}
 
 		private IEnumerable<FusionTelemetryBinding> BuildBindingsRecursive(IDevice device, ITelemetryCollection nodes, 
