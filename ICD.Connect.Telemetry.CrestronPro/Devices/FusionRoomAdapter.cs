@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Utils;
 using ICD.Common.Utils.Timers;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
@@ -147,7 +146,20 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
             }
 		}
 
-		
+		/// <summary>
+		/// Gets the GUID for the Room ID.
+		/// </summary>
+		public string RoomId
+		{
+			get
+			{
+#if SIMPLSHARP
+				return m_FusionRoom == null ? null : m_FusionRoom.ParameterInstanceID;
+#else
+                throw new NotSupportedException();
+#endif
+			}
+		}
 
 		/// <summary>
 		/// Collection of user configured assets received from the device.
