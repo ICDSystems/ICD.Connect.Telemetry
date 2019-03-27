@@ -52,7 +52,7 @@ namespace ICD.Connect.Telemetry.Attributes
 						IcdConsole.PrintLine(eConsoleColor.Magenta, attr.Name);
 					}
 				}
-				throw new InvalidOperationException(string.Format("Couldn't find event with name {0}", EventName));
+				throw new InvalidOperationException(string.Format("Couldn't find event with name {0} on instance {1}", EventName, instance));
 			}
 
 			Type type = typeof(DynamicTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
