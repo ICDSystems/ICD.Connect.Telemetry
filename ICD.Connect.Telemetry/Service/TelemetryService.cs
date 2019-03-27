@@ -55,10 +55,10 @@ namespace ICD.Connect.Telemetry.Service
 		[NotNull]
 		public ITelemetryCollection GetTelemetryForProvider(ITelemetryProvider provider)
 		{
-			if (m_Telemetries.ContainsKey(provider))
-				return m_Telemetries[provider] ?? (m_Telemetries[provider] = TelemetryUtils.InstantiateTelemetry(provider));
+			if (!m_Telemetries.ContainsKey(provider))
+				AddTelemetryProvider(provider);
 			
-			throw new KeyNotFoundException("Provider not added to the telemetry service.");
+			return m_Telemetries[provider] ?? (m_Telemetries[provider] = TelemetryUtils.InstantiateTelemetry(provider));
 		}
 
 		/// <summary>
