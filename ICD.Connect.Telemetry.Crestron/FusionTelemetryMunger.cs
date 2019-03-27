@@ -117,7 +117,7 @@ namespace ICD.Connect.Telemetry.Crestron
 												 .Select(n=> new {Node = n, Mapping = GetMapping(n)})
 												 .Distinct(a => a.Mapping))
 			{
-				FusionTelemetryBinding output = Bind(device, nodeMappingPair.Mapping, assetId, mappingUsage);
+				FusionTelemetryBinding output = Bind(nodeMappingPair.Node, nodeMappingPair.Mapping, assetId, mappingUsage);
 
 				if (output == null)
 					IcdConsole.PrintLine(eConsoleColor.YellowOnRed, "No Mapping Found for {0} on {1}", nodeMappingPair.Node.Name, nodeMappingPair.Node.Parent);
@@ -127,12 +127,12 @@ namespace ICD.Connect.Telemetry.Crestron
 		}
 
 		[CanBeNull]
-		private FusionTelemetryBinding Bind(IDevice device, IFusionSigMapping mapping, uint assetId, RangeMappingUsageTracker mappingUsage)
+		private FusionTelemetryBinding Bind(ITelemetryItem node, IFusionSigMapping mapping, uint assetId, RangeMappingUsageTracker mappingUsage)
 		{
 			FusionSigMapping singleMapping = mapping as FusionSigMapping;
 			if (singleMapping != null)
 			{
-				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, device, singleMapping, assetId);
+				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, node.Parent, singleMapping, assetId);
 				return binding;
 			}
 
@@ -141,13 +141,13 @@ namespace ICD.Connect.Telemetry.Crestron
 			{
 				FusionSigMapping tempMapping = new FusionSigMapping
 				{
-					FusionSigName = multiMapping.FusionSigName,
+					FusionSigName = string.Format(multiMapping.FusionSigName, mappingUsage.GetCurrentOffset(multiMapping) + 1),
 					Sig = mappingUsage.GetNextSig(multiMapping),
 					SigType = multiMapping.SigType,
 					TelemetryGetName = multiMapping.TelemetryGetName,
 					TelemetrySetName = multiMapping.TelemetrySetName
 				};
-				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, device, tempMapping, assetId);
+				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, node.Parent, tempMapping, assetId);
 				return binding;
 			}
 
