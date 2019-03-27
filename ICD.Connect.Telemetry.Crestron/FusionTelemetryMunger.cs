@@ -9,7 +9,9 @@ using ICD.Common.Utils.Services;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.Devices;
 using ICD.Connect.Routing.Controls;
+#if SIMPLSHARP
 using ICD.Connect.Routing.CrestronPro.ControlSystem;
+#endif
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
@@ -25,10 +27,12 @@ namespace ICD.Connect.Telemetry.Crestron
 			{
 				{typeof(IDisplayWithAudio), IcdDisplayWithAudioFusionSigs.Sigs},
 				{typeof(IDisplay), IcdDisplayFusionSigs.Sigs},
-				{typeof(IControlSystemDevice), IcdControlSystemFusionSigs.Sigs},
 				{typeof(IRouteSwitcherControl), IcdSwitcherFusionSigs.Sigs},
 				{typeof(InputOutputPortBase), IcdSwitcherFusionSigs.InputOutputSigs},
-				{typeof(IDevice), IcdStandardFusionSigs.Sigs}
+				{typeof(IDevice), IcdStandardFusionSigs.Sigs},
+#if SIMPLSHARP
+				{typeof(IControlSystemDevice), IcdControlSystemFusionSigs.Sigs}
+#endif
 			};
 
 		private readonly IFusionRoom m_FusionRoom;

@@ -268,8 +268,12 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 		public void RebuildRvi()
 		{
+#if SIMPLSHARP
 			m_FusionRoom.ReRegister();
 			FusionRVI.GenerateFileForAllFusionDevices();
+#else
+			throw new NotSupportedException();
+#endif
 		}
 
 		/// <summary>

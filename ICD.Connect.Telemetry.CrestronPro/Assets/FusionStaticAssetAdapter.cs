@@ -1,7 +1,7 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using Crestron.SimplSharpPro;
 using ICD.Common.Utils.EventArguments;
-#if SIMPLSHARP
 using System.Collections.Generic;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Telemetry.Crestron.Assets;
