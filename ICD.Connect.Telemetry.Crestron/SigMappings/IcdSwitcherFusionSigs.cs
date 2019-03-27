@@ -77,7 +77,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.VIDEO_INPUT_SYNC,
 				TelemetrySetName = "",
-				FusionSigName = "Video Input {0} Sync",
+				FusionSigName = "Input {0} Video Sync",
 				FirstSig = 11001,
 				LastSig = 11999,
 				SigType = eSigType.Digital
@@ -86,7 +86,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.VIDEO_OUTPUT_SYNC,
 				TelemetrySetName = "",
-				FusionSigName = "Video Output {0} Sync",
+				FusionSigName = "Output {0} Video Sync",
 				FirstSig = 12001,
                 LastSig = 12999,
 				SigType = eSigType.Digital
@@ -95,7 +95,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.AUDIO_OUTPUT_MUTE,
 				TelemetrySetName = SwitcherTelemetryNames.AUDIO_OUTPUT_MUTE_COMMAND,
-				FusionSigName = "Audio Output {0} Mute",
+				FusionSigName = "Output {0} Audio Mute",
 				FirstSig = 21001,
                 LastSig = 21999,
 				SigType = eSigType.Digital
@@ -104,7 +104,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = "",
 				TelemetrySetName = SwitcherTelemetryNames.AUDIO_OUTPUT_UNMUTE_COMMAND,
-				FusionSigName = "Audio Output {0} Mute Off",
+				FusionSigName = "Output {0} Mute Audio Off",
 				FirstSig = 22001,
                 LastSig = 22999,
 				SigType = eSigType.Digital
@@ -113,7 +113,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.AUDIO_OUTPUT_VOLUME,
 				TelemetrySetName = SwitcherTelemetryNames.AUDIO_OUTPUT_VOLUME_COMMAND,
-				FusionSigName = "Audio Output {0} Volume",
+				FusionSigName = "Output {0} Audio Volume",
 				FirstSig = 21001,
                 LastSig = 21999,
 				SigType = eSigType.Analog
@@ -140,7 +140,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.VIDEO_INPUT_SYNC_TYPE,
 				TelemetrySetName = "",
-				FusionSigName = "Video Input {0} Sync Type",
+				FusionSigName = "Input {0} Video Sync Type",
 				FirstSig = 13001,
                 LastSig = 13999,
 				SigType = eSigType.Serial
@@ -149,7 +149,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.VIDEO_INPUT_RESOLUTION,
 				TelemetrySetName = "",
-				FusionSigName = "Video Input {0} Resolution",
+				FusionSigName = "Input {0} Video Resolution",
 				FirstSig = 14001,
                 LastSig = 14999,
 				SigType = eSigType.Serial
@@ -176,7 +176,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.VIDEO_OUTPUT_SYNC_TYPE,
 				TelemetrySetName = "",
-				FusionSigName = "Video Output {0} Sync Type",
+				FusionSigName = "Output {0} Video Sync Type",
 				FirstSig = 17001,
                 LastSig = 17999,
 				SigType = eSigType.Serial
@@ -185,7 +185,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.VIDEO_OUTPUT_RESOLUTION,
 				TelemetrySetName = "",
-				FusionSigName = "Video Output {0} Resolution",
+				FusionSigName = "Output {0} Video Resolution",
 				FirstSig = 18001,
                 LastSig = 18999,
 				SigType = eSigType.Serial
@@ -194,7 +194,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.VIDEO_OUTPUT_ENCODING,
 				TelemetrySetName = "",
-				FusionSigName = "Video Output {0} Encoding",
+				FusionSigName = "Output {0} Video Encoding",
 				FirstSig = 19001,
                 LastSig = 19999,
 				SigType = eSigType.Serial
@@ -203,7 +203,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.VIDEO_OUTPUT_SOURCE,
 				TelemetrySetName = "",
-				FusionSigName = "Video Output {0} Name",
+				FusionSigName = "Output {0} Video Source",
 				FirstSig = 20001,
                 LastSig = 20999,
 				SigType = eSigType.Serial
@@ -212,7 +212,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.AUDIO_OUTPUT_SOURCE,
 				TelemetrySetName = "",
-				FusionSigName = "Audio Output {0} Name",
+				FusionSigName = "Output {0} Audio Source",
 				FirstSig = 21001,
                 LastSig = 21999,
 				SigType = eSigType.Serial
@@ -221,7 +221,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.AUDIO_OUTPUT_FORMAT,
 				TelemetrySetName = "",
-				FusionSigName = "Audio Output {0} Format",
+				FusionSigName = "Output {0} Audio Format",
 				FirstSig = 22001,
                 LastSig = 22999,
 				SigType = eSigType.Serial
@@ -230,7 +230,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			{
 				TelemetryGetName = SwitcherTelemetryNames.USB_OUTPUT_ID,
 				TelemetrySetName = "",
-				FusionSigName = "USB Output {0} Id",
+				FusionSigName = "Output {0} USB Id",
 				FirstSig = 23001,
                 LastSig = 23999,
 				SigType = eSigType.Serial
