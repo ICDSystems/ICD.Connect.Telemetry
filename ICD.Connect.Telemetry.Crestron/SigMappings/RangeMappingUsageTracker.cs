@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
@@ -9,18 +10,22 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 
 		public ushort GetNextSig(FusionSigMultiMapping mapping)
 		{
-			ushort currentSig;
-			if (!m_Ranges.TryGetValue(mapping, out currentSig))
+			ushort offset;
+			if (!m_Ranges.TryGetValue(mapping, out offset))
 			{
 				AddMappingType(mapping);
-				currentSig = mapping.FirstSig;
 			}
 
-			if (currentSig > mapping.LastSig)
+			if (offset + mapping.FirstSig > mapping.LastSig)
 				throw new IndexOutOfRangeException("Sigs have exceeded maximum range allowed by mapping.");
 
-			m_Ranges[mapping] = (ushort)(currentSig + 1);
-			return currentSig;
+			m_Ranges[mapping] = (ushort)(offset + 1);
+			return (ushort)(mapping.FirstSig + offset);
+		}
+
+		public ushort GetCurrentOffset(FusionSigMultiMapping mapping)
+		{
+			return m_Ranges.GetDefault(mapping);
 		}
 
 		private void AddMappingType(FusionSigMultiMapping mapping)
@@ -28,7 +33,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			if (m_Ranges.ContainsKey(mapping))
 				return;
 
-			m_Ranges.Add(mapping, mapping.FirstSig);
+			m_Ranges.Add(mapping, 0);
 		}
 	}
 }
