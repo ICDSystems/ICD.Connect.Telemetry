@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if SIMPLSHARP
+using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Routing.CrestronPro.ControlSystem;
@@ -142,3 +143,4 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		};
 	}
 }
+#endif

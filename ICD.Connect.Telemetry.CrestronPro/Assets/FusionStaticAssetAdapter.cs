@@ -1,7 +1,7 @@
-﻿using ICD.Common.Utils;
+﻿﻿using ICD.Common.Utils;
 using ICD.Connect.Telemetry.CrestronPro.Devices;
-#if SIMPLSHARP
 using System.Collections.Generic;
+#if SIMPLSHARP
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Telemetry.Crestron.Assets;
 
