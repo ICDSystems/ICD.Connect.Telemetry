@@ -230,6 +230,9 @@ namespace ICD.Connect.Telemetry.Crestron
 			ITelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName);
 			ITelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName);
 
+			if(getTelemetryItem == null && setTelemetryItem == null)
+				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
+
 			// If the sig number is 0, that indicates that the sig is special-handling
 			if (mapping.Sig != 0)
 			{
