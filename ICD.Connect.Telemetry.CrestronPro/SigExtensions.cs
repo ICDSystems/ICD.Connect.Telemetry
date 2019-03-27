@@ -47,9 +47,9 @@ namespace ICD.Connect.Telemetry.CrestronPro
 				case Crestron.eSigIoMask.Na:
 					return eSigIoMask.NA;
 				case Crestron.eSigIoMask.FusionToProgram:
-					return eSigIoMask.InputSigOnly;
-				case Crestron.eSigIoMask.ProgramToFusion:
 					return eSigIoMask.OutputSigOnly;
+				case Crestron.eSigIoMask.ProgramToFusion:
+					return eSigIoMask.InputSigOnly;
 				case Crestron.eSigIoMask.BiDirectional:
 					return eSigIoMask.InputOutputSig;
 				default:
@@ -64,9 +64,9 @@ namespace ICD.Connect.Telemetry.CrestronPro
 				case eSigIoMask.NA:
 					return Crestron.eSigIoMask.Na;
 				case eSigIoMask.OutputSigOnly:
-					return Crestron.eSigIoMask.ProgramToFusion;
-				case eSigIoMask.InputSigOnly:
 					return Crestron.eSigIoMask.FusionToProgram;
+				case eSigIoMask.InputSigOnly:
+					return Crestron.eSigIoMask.ProgramToFusion;
 				case eSigIoMask.InputOutputSig:
 					return Crestron.eSigIoMask.BiDirectional;
 				default:
