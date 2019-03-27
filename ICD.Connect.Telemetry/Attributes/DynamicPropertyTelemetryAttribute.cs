@@ -35,7 +35,8 @@ namespace ICD.Connect.Telemetry.Attributes
 			IcdHashSet<Type> types = instance.GetType().GetAllTypes().ToIcdHashSet();
 #if SIMPLSHARP
 			IEnumerable<CType> cTypes = types.Select(t => t.GetCType());
-			IcdHashSet<EventInfo> eventInfos = cTypes.SelectMany(c => c.GetEvents()).ToIcdHashSet();
+			IcdHashSet<EventInfo> eventInfos =
+				cTypes.SelectMany(c => c.GetEvents()).ToIcdHashSet();
 #else
 			IEnumerable<EventInfo> eventInfos = types.SelectMany(t=> t.GetEvents());
 #endif
