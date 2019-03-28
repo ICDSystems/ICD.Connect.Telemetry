@@ -42,8 +42,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 			if(m_DigitalCache.ContainsKey(sig) && m_DigitalCache[sig] == newValue)
 				return;
 
-			IcdConsole.PrintLine(eConsoleColor.Green, "Asset {2}: Digital Sig {0}, set to {1}", sig, newValue, Name);
-
 			m_Asset.FusionGenericAssetDigitalsAsset1.BooleanInput[sig + FusionRoomAdapter.SIG_OFFSET].BoolValue = newValue;
 			m_DigitalCache[sig] = newValue;
 		}
@@ -58,8 +56,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 			if(m_AnalogCache.ContainsKey(sig) && m_AnalogCache[sig] == newValue)
 				return;
 
-			IcdConsole.PrintLine(eConsoleColor.Green, "Asset {2}: Analog Sig {0}, set to {1}", sig, newValue, Name);
-
 			m_Asset.FusionGenericAssetAnalogsAsset2.UShortInput[sig + FusionRoomAdapter.SIG_OFFSET].UShortValue = newValue;
 			m_AnalogCache[sig] = newValue;
 		}
@@ -73,8 +69,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		{
 			if(m_SerialCache.ContainsKey(sig) && m_SerialCache[sig] == newValue)
 				return;
-
-			IcdConsole.PrintLine(eConsoleColor.Green, "Asset {2}: Serial Sig {0}, set to {1}", sig, newValue, Name);
 
 			m_Asset.FusionGenericAssetSerialsAsset3.StringInput[sig + FusionRoomAdapter.SIG_OFFSET].StringValue = newValue;
 			m_SerialCache[sig] = newValue;

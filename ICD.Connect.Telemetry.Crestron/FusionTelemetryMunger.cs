@@ -118,14 +118,11 @@ namespace ICD.Connect.Telemetry.Crestron
 
 
 			foreach (var nodeMappingPair in nodes.Where(n => !n.GetType().IsAssignableTo(typeof(ITelemetryCollection)))
-												 .Select(n=> new {Node = n, Mapping = GetMapping(n)})
+												 .Select(n => new {Node = n, Mapping = GetMapping(n)})
 												 .Distinct(a => a.Mapping))
 			{
 				FusionTelemetryBinding output = Bind(nodeMappingPair.Node, nodeMappingPair.Mapping, assetId, mappingUsage);
-
-				if (output == null)
-					IcdConsole.PrintLine(eConsoleColor.YellowOnRed, "No Mapping Found for {0} on {1}", nodeMappingPair.Node.Name, nodeMappingPair.Node.Parent);
-				else
+				if (output != null)
 					yield return output;
 			}
 		}

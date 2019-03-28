@@ -235,10 +235,7 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			// If the sig number is 0, that indicates that the sig is special-handling
 			if (mapping.Sig != 0)
-			{
-				IcdConsole.PrintLine(eConsoleColor.Magenta, "Device {0}, Asset {1}, Sig {2}, Name {3}, Type {4}", provider.GetType().ToString(), assetId, mapping.Sig, mapping.FusionSigName, mapping.SigType);
 				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
-			}
 
 			IFusionStaticAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset as IFusionStaticAsset;
 			return new FusionTelemetryBinding(fusionRoom, getTelemetryItem, setTelemetryItem, asset, mapping);
