@@ -89,6 +89,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SigMappings\FusionSigMultiMapping.cs" />
     <Compile Include="SigMappings\IcdControlSystemFusionSigs.cs" />
+    <Compile Include="SigMappings\IcdDialingDeviceFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDisplayFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDisplayWithAudioFusionSigs.cs" />
     <Compile Include="SigMappings\IcdStandardFusionSigs.cs" />
@@ -105,6 +106,10 @@
     <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_SimplSharp.csproj">
       <Project>{727F5820-5A61-440D-8899-E454FE8238D7}</Project>
       <Name>ICD.Connect.API_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Conferencing\ICD.Connect.Conferencing\ICD.Connect.Conferencing_SimplSharp.csproj">
+      <Project>{1CCA89DA-1F1C-4997-A94F-ABCE878BD6DE}</Project>
+      <Name>ICD.Connect.Conferencing_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_SimplSharp.csproj">
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
