@@ -23,8 +23,8 @@ namespace ICD.Connect.Telemetry.Crestron
 {
 	public sealed class FusionTelemetryMunger
 	{
-		private readonly Dictionary<Type, IEnumerable<IFusionSigMapping>> m_MappingsByType
-			= new Dictionary<Type, IEnumerable<IFusionSigMapping>>
+		private static readonly Dictionary<Type, IEnumerable<IFusionSigMapping>> s_MappingsByType =
+			new Dictionary<Type, IEnumerable<IFusionSigMapping>>
 			{
 				{typeof(IDisplayWithAudio), IcdDisplayWithAudioFusionSigs.Sigs},
 				{typeof(IDisplay), IcdDisplayFusionSigs.Sigs},
@@ -37,17 +37,23 @@ namespace ICD.Connect.Telemetry.Crestron
 #endif
 			};
 
-		private readonly IFusionRoom m_FusionRoom;
 		private readonly Dictionary<uint, IcdHashSet<FusionTelemetryBinding>> m_BindingsByAsset;
 		private readonly SafeCriticalSection m_BindingsSection;
+		private readonly IFusionRoom m_FusionRoom;
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="fusionRoom"></param>
 		public FusionTelemetryMunger(IFusionRoom fusionRoom)
 		{
-			m_FusionRoom = fusionRoom;
 			m_BindingsByAsset = new Dictionary<uint, IcdHashSet<FusionTelemetryBinding>>();
+			m_BindingsSection = new SafeCriticalSection();
+
+			m_FusionRoom = fusionRoom;
+
 			m_FusionRoom.OnFusionAssetSigUpdated += FusionRoomOnFusionAssetSigUpdated;
 			m_FusionRoom.OnFusionAssetPowerStateUpdated += FusionRoomOnFusionAssetPowerStateUpdated;
-			m_BindingsSection = new SafeCriticalSection();
 		}
 
 		/// <summary>
@@ -57,17 +63,20 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <returns></returns>
 		public void BuildAsset(IDevice device)
 		{
+			// Add the asset to fusion
 			uint assetId = m_FusionRoom.GetAssetIds().Any() ? m_FusionRoom.GetAssetIds().Max() + 1 : 4;
 			string instanceId = AssembleInstanceId(device);
 			AssetInfo asset = new AssetInfo(eAssetType.StaticAsset, assetId, device.Name, device.GetType().Name, instanceId);
 			m_FusionRoom.AddAsset(asset);
 
+			// Create the sig bindings
 			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
 
 			RangeMappingUsageTracker mappingUsage = new RangeMappingUsageTracker();
-			IEnumerable<FusionTelemetryBinding> bindings = BuildBindingsRecursive(device, nodes, assetId, mappingUsage);
+			IEnumerable<FusionTelemetryBinding> bindings = BuildBindingsRecursive(nodes, assetId, mappingUsage);
 
 			m_BindingsSection.Enter();
+
 			try
 			{
 				if (m_BindingsByAsset.ContainsKey(assetId))
@@ -102,18 +111,24 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private IFusionSigMapping GetMapping(ITelemetryItem node)
 		{
-			return m_MappingsByType/*.Where(kvp => node.Parent.GetType().IsAssignableTo(kvp.Key))*/
+			return s_MappingsByType/*.Where(kvp => node.Parent.GetType().IsAssignableTo(kvp.Key))*/
 										.SelectMany(kvp => kvp.Value)
 										.FirstOrDefault(m => node.Name == m.TelemetryGetName || node.Name == m.TelemetrySetName);
 		}
 
-		private IEnumerable<FusionTelemetryBinding> BuildBindingsRecursive(IDevice device, ITelemetryCollection nodes,
+		private IEnumerable<FusionTelemetryBinding> BuildBindingsRecursive(ITelemetryCollection nodes,
 		                                                                   uint assetId, RangeMappingUsageTracker mappingUsage)
 		{
+			if (nodes == null)
+				throw new ArgumentNullException("nodes");
+
+			if (mappingUsage == null)
+				throw new ArgumentNullException("mappingUsage");
+
 			IEnumerable<ITelemetryCollection> childCollections = nodes.OfType<ITelemetryCollection>();
 			foreach (ITelemetryCollection collection in childCollections)
 			{
-				IEnumerable<FusionTelemetryBinding> children = BuildBindingsRecursive(device, collection, assetId, mappingUsage);
+				IEnumerable<FusionTelemetryBinding> children = BuildBindingsRecursive(collection, assetId, mappingUsage);
 				foreach (FusionTelemetryBinding child in children)
 					yield return child;
 			}
@@ -181,13 +196,13 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		public void RegisterMappingSet(Type type, IEnumerable<IFusionSigMapping> mappings)
 		{
-			if (m_MappingsByType.ContainsKey(type))
+			if (s_MappingsByType.ContainsKey(type))
 			{
 				throw new ArgumentException("type",
 				                            string.Format("Cannot Register Mapping Set for type {0}, type already registered.", type));
 			}
 
-			m_MappingsByType.Add(type, mappings);
+			s_MappingsByType.Add(type, mappings);
 		}
 
 		private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
