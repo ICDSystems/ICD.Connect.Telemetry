@@ -92,6 +92,8 @@
     <Compile Include="SigMappings\IcdDialingDeviceFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDisplayFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDisplayWithAudioFusionSigs.cs" />
+    <Compile Include="SigMappings\IcdDspFusionSigs.cs" />
+    <Compile Include="SigMappings\IcdOccupancyFusionSigs.cs" />
     <Compile Include="SigMappings\IcdStandardFusionSigs.cs" />
     <Compile Include="SigMappings\IcdSwitcherFusionSigs.cs" />
     <Compile Include="SigMappings\IFusionSigMapping.cs" />
@@ -106,6 +108,14 @@
     <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_SimplSharp.csproj">
       <Project>{727F5820-5A61-440D-8899-E454FE8238D7}</Project>
       <Name>ICD.Connect.API_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Audio\ICD.Connect.Audio.Biamp\ICD.Connect.Audio.Biamp_SimplSharp.csproj">
+      <Project>{6BF0A721-22BF-481E-9055-87E5507B6B8A}</Project>
+      <Name>ICD.Connect.Audio.Biamp_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Audio\ICD.Connect.Audio\ICD.Connect.Audio_SimplSharp.csproj">
+      <Project>{8ED25D96-E9A5-4E9A-A890-B4EF3AB62041}</Project>
+      <Name>ICD.Connect.Audio_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Conferencing\ICD.Connect.Conferencing\ICD.Connect.Conferencing_SimplSharp.csproj">
       <Project>{1CCA89DA-1F1C-4997-A94F-ABCE878BD6DE}</Project>
