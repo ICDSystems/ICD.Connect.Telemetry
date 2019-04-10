@@ -5,7 +5,6 @@ using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Misc.CrestronPro;
 using System.Linq;
-using ICD.Common.Utils.Timers;
 using ICD.Connect.Misc.CrestronPro.Extensions;
 using ICD.Connect.Telemetry.CrestronPro.Assets;
 using ICD.Common.Properties;
@@ -18,6 +17,7 @@ using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Settings.Core;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
+using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 using eSigIoMask = ICD.Connect.Telemetry.Crestron.eSigIoMask;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 
@@ -28,6 +28,26 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 	/// </summary>
 	public sealed class FusionRoomAdapter : AbstractSigDevice<FusionRoomAdapterSettings>, IFusionRoom
 	{
+		private static readonly Dictionary<eAssetType, string> s_AssetNameSuffixByType = new Dictionary<eAssetType, string>
+		{
+			{eAssetType.Na, ""},
+			{eAssetType.DemandResponse, ""},
+			{eAssetType.DynamicAsset, ""},
+			{eAssetType.EnergyLoad, ""},
+			{eAssetType.EnergySupply, ""},
+			{eAssetType.HvacZone, ""},
+			{eAssetType.LightingLoad, ""},
+			{eAssetType.LightingScenes, ""},
+			{eAssetType.Logging, ""},
+			{eAssetType.OccupancySensor, "(Occupancy Sensor)"},
+			{eAssetType.PhotocellSensor, ""},
+			{eAssetType.RemoteOccupancySensor, ""},
+			{eAssetType.RemoteRealTimePower, ""},
+			{eAssetType.ShadeLoad, ""},
+			{eAssetType.ShadePresets, ""},
+			{eAssetType.StaticAsset, ""},
+		};
+
 		public event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
 		public event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated; 
 
@@ -249,8 +269,11 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		public void AddAsset(AssetInfo asset)
 		{
 #if SIMPLSHARP
-			IcdStopwatch.Profile(()=>
-				m_FusionRoom.AddAsset(asset.AssetType.FromIcd(), asset.Number, asset.Name, asset.Type, asset.InstanceId), "AddAsset");
+			m_FusionRoom.AddAsset(asset.AssetType.FromIcd(),
+			                      asset.Number,
+			                      string.Format("{0} {1}", asset.Name, s_AssetNameSuffixByType[asset.AssetType]),
+			                      asset.Type,
+			                      asset.InstanceId);
 #else
 			throw new NotSupportedException();
 #endif

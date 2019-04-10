@@ -9,6 +9,7 @@ using ICD.Common.Utils.Services;
 using ICD.Connect.Conferencing.Controls.Dialing;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.Devices;
+using ICD.Connect.Misc.Occupancy;
 using ICD.Connect.Routing.Controls;
 #if SIMPLSHARP
 using ICD.Connect.Routing.CrestronPro.ControlSystem;
@@ -32,6 +33,7 @@ namespace ICD.Connect.Telemetry.Crestron
 				{typeof(InputOutputPortBase), IcdSwitcherFusionSigs.InputOutputSigs},
 				{typeof(IDevice), IcdStandardFusionSigs.Sigs},
 				{typeof(IDialingDeviceExternalTelemetryProvider), IcdDialingDeviceFusionSigs.Sigs},
+				{typeof(IOccupancySensorControl), IcdOccupancyFusionSigs.Sigs},
 #if SIMPLSHARP
 				{typeof(IControlSystemDevice), IcdControlSystemFusionSigs.Sigs}
 #endif
@@ -61,28 +63,83 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// </summary>
 		/// <param name="device"></param>
 		/// <returns></returns>
-		public void BuildAsset(IDevice device)
+		public void BuildAssets(IDevice device)
 		{
-			// Add the asset to fusion
-			uint assetId = m_FusionRoom.GetAssetIds().Any() ? m_FusionRoom.GetAssetIds().Max() + 1 : 4;
-			string instanceId = AssembleInstanceId(device);
-			AssetInfo asset = new AssetInfo(eAssetType.StaticAsset, assetId, device.Name, device.GetType().Name, instanceId);
-			m_FusionRoom.AddAsset(asset);
-
 			// Create the sig bindings
 			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
 
-			RangeMappingUsageTracker mappingUsage = new RangeMappingUsageTracker();
-			IEnumerable<FusionTelemetryBinding> bindings = BuildBindingsRecursive(nodes, assetId, mappingUsage);
+			// Add the assets to fusion
+			if (device.Controls.GetControls<IOccupancySensorControl>().Any())
+			{
+				GenerateOccupancySensorAsset(device);
+			}
 
+			GenerateStaticAsset(device, nodes);
+		}
+
+		private void GenerateStaticAsset(IDevice device, ITelemetryCollection nodes)
+		{
+			uint staticAssetId = GetNextAssetId();
+			AssetInfo staticAssetInfo = new AssetInfo(eAssetType.StaticAsset,
+			                                          staticAssetId,
+			                                          device.Name,
+			                                          device.GetType().Name,
+			                                          AssembleInstanceId(device, eAssetType.StaticAsset));
+
+			m_FusionRoom.AddAsset(staticAssetInfo);
+
+			RangeMappingUsageTracker mappingUsage = new RangeMappingUsageTracker();
+			IEnumerable<FusionTelemetryBinding> bindings = BuildBindingsRecursive(nodes, staticAssetId, mappingUsage);
+
+			AddBindingsToCollection(staticAssetId, bindings);
+		}
+
+		private void GenerateOccupancySensorAsset(IDevice device)
+		{
+			AssetInfo occAssetInfo = new AssetInfo(eAssetType.OccupancySensor,
+			                                       GetNextAssetId(),
+			                                       device.Name,
+			                                       device.GetType().Name,
+			                                       AssembleInstanceId(device, eAssetType.OccupancySensor));
+			m_FusionRoom.AddAsset(occAssetInfo);
+
+			IOccupancySensorControl control = device.Controls.GetControl<IOccupancySensorControl>();
+			if(control == null)
+				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, control not found.");
+
+			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(control);
+			if (nodes == null || !nodes.Any())
+				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, nodes not found.");
+
+			DynamicTelemetryNodeItem<eOccupancyState> node = nodes.OfType<DynamicTelemetryNodeItem<eOccupancyState>>().First();
+			if (node == null)
+				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, matching node not found.");
+
+			IFusionSigMapping mapping =
+				s_MappingsByType[typeof(IOccupancySensorControl)].First(m =>
+				                                                        m.TelemetryGetName ==
+				                                                        OccupancyTelemetryNames.OCCUPANCY_STATE);
+
+			if (mapping == null)
+				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, mapping not found.");
+
+			FusionTelemetryBinding binding = Bind(node, mapping, occAssetInfo.Number, null);
+			if (binding == null)
+				return;
+
+			AddBindingsToCollection(occAssetInfo.Number, new[] {binding});
+		}
+
+		private void AddBindingsToCollection(uint staticAssetId, IEnumerable<FusionTelemetryBinding> bindings)
+		{
 			m_BindingsSection.Enter();
 
 			try
 			{
-				if (m_BindingsByAsset.ContainsKey(assetId))
-					m_BindingsByAsset[assetId].AddRange(bindings);
+				if (m_BindingsByAsset.ContainsKey(staticAssetId))
+					m_BindingsByAsset[staticAssetId].AddRange(bindings);
 				else
-					m_BindingsByAsset[assetId] = bindings.ToIcdHashSet();
+					m_BindingsByAsset[staticAssetId] = bindings.ToIcdHashSet();
 			}
 			finally
 			{
@@ -90,7 +147,12 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
-		private string AssembleInstanceId(IDevice device)
+		private uint GetNextAssetId()
+		{
+			return m_FusionRoom.GetAssetIds().Any() ? m_FusionRoom.GetAssetIds().Max() + 1 : 4;
+		}
+
+		private string AssembleInstanceId(IDevice device, eAssetType staticAsset)
 		{
 			if (device == null)
 				throw new ArgumentNullException("device");
@@ -103,6 +165,7 @@ namespace ICD.Connect.Telemetry.Crestron
 				stableHash = stableHash * 23 + device.Id;
 				stableHash = stableHash * 23 + device.GetType().Name.GetStableHashCode();
 				stableHash = stableHash * 23 + m_FusionRoom.RoomId.GetStableHashCode();
+				stableHash = stableHash * 23 + (int)staticAsset;
 			}
 
 			Guid seeded = GuidUtils.GenerateSeeded(stableHash);
@@ -175,7 +238,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		public void AddAssets(IEnumerable<IDevice> devices)
 		{
 			foreach (IDevice device in devices)
-				BuildAsset(device);
+				BuildAssets(device);
 
 			m_FusionRoom.RebuildRvi();
 		}

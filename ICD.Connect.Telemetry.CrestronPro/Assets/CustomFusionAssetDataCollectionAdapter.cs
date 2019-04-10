@@ -29,7 +29,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public FusionAssetData GetAssetData(Crestron.Assets.eAssetType type)
+		public FusionAssetData GetAssetData(eAssetType type)
 		{
 			m_Section.Enter();
 
