@@ -71,7 +71,16 @@ namespace ICD.Connect.Telemetry.Crestron
 				return;
 
 			bool digital = ((IFusionStaticAsset)Asset).ReadDigitalSig(singleMapping.Sig);
-			SetTelemetry.Invoke(digital);
+
+			//Handle case where two seperate digitals are used to set true and false
+			if (SetTelemetry.ParameterCount == 0 && digital)
+			{
+				SetTelemetry.Invoke();
+			}
+			else
+			{
+				SetTelemetry.Invoke(digital);
+			}
 		}
 
 		private void UpdateAnalogTelemetry()
