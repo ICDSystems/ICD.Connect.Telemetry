@@ -24,6 +24,8 @@ namespace ICD.Connect.Telemetry.Crestron
 {
 	public sealed class FusionTelemetryMunger
 	{
+		private const int SIG_OFFSET = 49;
+
 		private static readonly Dictionary<Type, IEnumerable<IFusionSigMapping>> s_MappingsByType =
 			new Dictionary<Type, IEnumerable<IFusionSigMapping>>
 			{
@@ -277,7 +279,7 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			foreach (
 				FusionTelemetryBinding bindingMatch in
-					bindingsForAsset.Where(b => b.Mapping.Sig == args.Sig && b.Mapping.SigType == args.SigType))
+					bindingsForAsset.Where(b => b.Mapping.Sig == (args.Sig + SIG_OFFSET) && b.Mapping.SigType == args.SigType))
 				bindingMatch.UpdateTelemetryNode();
 		}
 
