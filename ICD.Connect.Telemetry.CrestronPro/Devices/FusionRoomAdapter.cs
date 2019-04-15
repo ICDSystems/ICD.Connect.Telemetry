@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils.EventArguments;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
@@ -49,7 +50,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		};
 
 		public event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
-		public event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated; 
+		public event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated;
+		public event EventHandler<BoolEventArgs> OnFusionSystemPowerChangeEvent;
+		public event EventHandler<BoolEventArgs> OnFusionDisplayPowerChangeEvent;
 
 		private const uint MIN_SIG = 1;
 		private const uint MAX_SIG = 1001;
@@ -313,6 +316,45 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		}
 
 		/// <summary>
+		/// Sends the string as device usage.
+		/// </summary>
+		/// <param name="usage"></param>
+		public void SendDeviceUsage(string usage)
+		{
+#if SIMPLSHARP
+			m_FusionRoom.DeviceUsage.InputSig.StringValue = usage;
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		/// <summary>
+		/// Sets the system power on/off state for the room
+		/// </summary>
+		/// <param name="powered"></param>
+		public void SetSystemPower(bool powered)
+		{
+#if SIMPLSHARP
+			m_FusionRoom.SystemPowerOn.InputSig.BoolValue = powered;
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		/// <summary>
+		/// Sets the display power on/off state for the room.
+		/// </summary>
+		/// <param name="powered"></param>
+		public void SetDisplayPower(bool powered)
+		{
+#if SIMPLSHARP
+			m_FusionRoom.DisplayPowerOn.InputSig.BoolValue = powered;
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		/// <summary>
 		/// Removes the asset with the given id.
 		/// </summary>
 		/// <param name="assetId"></param>
@@ -483,20 +525,56 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		/// <param name="args"></param>
 		private void FusionRoomOnFusionStateChange(FusionBase device, FusionStateEventArgs args)
 		{
-			object detail = args.UserConfiguredSigDetail;
-
-			BooleanSigData boolData = detail as BooleanSigData;
-			if (boolData != null)
-				RaiseOutputSigChangeCallback(boolData.Number, n => BooleanOutput[n]);
-
-			StringSigData stringData = detail as StringSigData;
-			if (stringData != null)
-				RaiseOutputSigChangeCallback(stringData.Number, n => StringOutput[n]);
-
-			UShortSigData ushortData = detail as UShortSigData;
-			if (ushortData != null)
-				RaiseOutputSigChangeCallback(ushortData.Number, n => UShortOutput[n]);
+			switch (args.EventId)
+			{
+				case FusionEventIds.UserConfiguredBoolSigChangeEventId:
+					BooleanSigData boolData = args.UserConfiguredSigDetail as BooleanSigData;
+					if (boolData != null)
+						RaiseOutputSigChangeCallback(boolData.Number, n => BooleanOutput[n]);
+					break;
+				case FusionEventIds.UserConfiguredUShortSigChangeEventId:
+					StringSigData stringData = args.UserConfiguredSigDetail as StringSigData;
+					if (stringData != null)
+						RaiseOutputSigChangeCallback(stringData.Number, n => StringOutput[n]);
+					break;
+				case FusionEventIds.UserConfiguredStringSigChangeEventId:
+					UShortSigData ushortData = args.UserConfiguredSigDetail as UShortSigData;
+					if (ushortData != null)
+						RaiseOutputSigChangeCallback(ushortData.Number, n => UShortOutput[n]);
+					break;
+				case FusionEventIds.SystemPowerOffReceivedEventId:
+					RaiseSystemPowerChange(false);
+					break;
+				case FusionEventIds.SystemPowerOnReceivedEventId:
+					RaiseSystemPowerChange(true);
+					break;
+				case FusionEventIds.DisplayPowerOffReceivedEventId:
+					RaiseDisplayPowerChange(false);
+					break;
+				case FusionEventIds.DisplayPowerOnReceivedEventId:
+					RaiseDisplayPowerChange(true);
+					break;
+			}
 		}
+
+		/// <summary>
+		/// Raises the OnFusionSystemPowerChangeEvent with the given system power state
+		/// </summary>
+		/// <param name="state"></param>
+		private void RaiseSystemPowerChange(bool state)
+		{
+			OnFusionSystemPowerChangeEvent.Raise(this, new BoolEventArgs(state));
+		}
+
+		/// <summary>
+		/// Raises the OnFusionDisplayPowerChangeEvent with the given display power state
+		/// </summary>
+		/// <param name="state"></param>
+		private void RaiseDisplayPowerChange(bool state)
+		{
+			OnFusionDisplayPowerChangeEvent.Raise(this, new BoolEventArgs(state));
+		}
+
 
 		/// <summary>
 		/// Gets the ISig from the collection, passing to the base class to be raised via delegate.

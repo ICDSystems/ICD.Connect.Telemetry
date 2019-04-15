@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Properties;
+using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Devices;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Protocol.Sigs;
@@ -12,6 +13,8 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 	{
 		event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
 		event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated;
+		event EventHandler<BoolEventArgs> OnFusionSystemPowerChangeEvent;
+		event EventHandler<BoolEventArgs> OnFusionDisplayPowerChangeEvent;
 		
 		/// <summary>
 		/// Gets the GUID for the Room ID.
@@ -42,6 +45,28 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// <param name="message"></param>
 		[PublicAPI]
 		void SetErrorMessage(string message);
+
+		/// <summary>
+		/// Sends the string as device usage.
+		/// </summary>
+		/// <param name="usage"></param>
+		[PublicAPI]
+		void SendDeviceUsage(string usage);
+
+		/// <summary>
+		/// Sets the system power on/off state for the room.
+		/// </summary>
+		/// <param name="powered"></param>
+		[PublicAPI]
+		void SetSystemPower(bool powered);
+
+		/// <summary>
+		/// Sets the display power on/off state for the room.
+		/// </summary>
+		/// <param name="powered"></param>
+		[PublicAPI]
+		void SetDisplayPower(bool powered);
+
 
 		/// <summary>
 		/// Removes the asset with the given id.
