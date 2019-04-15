@@ -39,6 +39,15 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 
 		void RebuildRvi();
 
+		[PublicAPI]
+		void UpdateDigitalSig(uint sig, bool newValue);
+
+		[PublicAPI]
+		void UpdateAnalogSig(uint sig, ushort newValue);
+
+		[PublicAPI]
+		void UpdateSerialSig(uint sig, string newValue);
+
 		/// <summary>
 		/// Sets the fusion error message.
 		/// </summary>
@@ -79,6 +88,15 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// </summary>
 		/// <returns></returns>
 		IEnumerable<uint> GetAssetIds();
+
+		/// <summary>
+		/// Adds the sig for the room itself
+		/// </summary>
+		/// <param name="sigType"></param>
+		/// <param name="number"></param>
+		/// <param name="name"></param>
+		/// <param name="mask"></param>
+		void AddSig(eSigType sigType, uint number, string name, eSigIoMask mask);
 
 		/// <summary>
 		/// Adds the sig for the given asset id.

@@ -302,6 +302,49 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #endif
 		}
 
+		public void UpdateDigitalSig(uint sig, bool newValue)
+		{
+#if SIMPLSHARP
+			// todo: add cache
+			BooleanSigData data;
+			if (m_FusionRoom.UserDefinedBooleanSigDetails.TryGetValue(sig - SIG_OFFSET, out data))
+				data.InputSig.BoolValue = newValue;
+			else
+				throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined bool sigs", sig));
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		public void UpdateAnalogSig(uint sig, ushort newValue)
+		{
+#if SIMPLSHARP
+			// todo: add cache
+			UShortSigData data;
+			if (m_FusionRoom.UserDefinedUShortSigDetails.TryGetValue(sig - SIG_OFFSET, out data))
+				data.InputSig.UShortValue = newValue;
+			else
+				throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined ushort sigs", sig));
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		public void UpdateSerialSig(uint sig, string newValue)
+		{
+#if SIMPLSHARP
+			// todo: add cache
+			StringSigData data;
+			if (m_FusionRoom.UserDefinedStringSigDetails.TryGetValue(sig - SIG_OFFSET, out data))
+				data.InputSig.StringValue = newValue;
+			else
+				throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined string sigs", sig));
+#else
+			throw new NotSupportedException();
+#endif
+		}
+		
+
 		/// <summary>
 		/// Sets the fusion error message.
 		/// </summary>
@@ -379,6 +422,23 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #else
 			throw new NotSupportedException();
 #endif
+		}
+
+		/// <summary>
+		/// Adds the sig for the room itself
+		/// </summary>
+		/// <param name="sigType"></param>
+		/// <param name="number"></param>
+		/// <param name="name"></param>
+		/// <param name="mask"></param>
+		public void AddSig(eSigType sigType, uint number, string name, eSigIoMask mask)
+		{
+#if SIMPLSHARP
+			m_FusionRoom.AddSig(sigType.FromIcd(), number, name, mask.FromIcd());
+#else
+			throw new NotSupportedException()
+#endif
+
 		}
 
 		/// <summary>
