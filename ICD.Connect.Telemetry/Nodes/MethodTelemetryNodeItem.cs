@@ -28,7 +28,14 @@ namespace ICD.Connect.Telemetry.Nodes
 		
 		public void Invoke(params object[] parameters)
 		{
-			m_MethodInfo.Invoke(Parent, parameters);
+			try
+			{
+				m_MethodInfo.Invoke(Parent, parameters);
+			}
+			catch (ArgumentException ex)
+			{
+				throw new ArgumentException(String.Format("Exception invoking telemetry method Name:{0} Parent:{1}",Name, Parent),ex);
+			}
 		}
 
 		/// <summary>
