@@ -436,7 +436,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
 			m_FusionRoom.AddSig(sigType.FromIcd(), number, name, mask.FromIcd());
 #else
-			throw new NotSupportedException()
+			throw new NotSupportedException();
 #endif
 
 		}
