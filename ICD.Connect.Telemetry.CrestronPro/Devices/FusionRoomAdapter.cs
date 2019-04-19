@@ -307,7 +307,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
 			// todo: add cache
 			BooleanSigData data;
-			if (m_FusionRoom.UserDefinedBooleanSigDetails.TryGetValue(sig - SIG_OFFSET, out data))
+			if (m_FusionRoom.UserDefinedBooleanSigDetails.TryGetValue(sig, out data))
 				data.InputSig.BoolValue = newValue;
 			else
 				throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined bool sigs", sig));
@@ -321,7 +321,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
 			// todo: add cache
 			UShortSigData data;
-			if (m_FusionRoom.UserDefinedUShortSigDetails.TryGetValue(sig - SIG_OFFSET, out data))
+			if (m_FusionRoom.UserDefinedUShortSigDetails.TryGetValue(sig, out data))
 				data.InputSig.UShortValue = newValue;
 			else
 				throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined ushort sigs", sig));
@@ -335,7 +335,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
 			// todo: add cache
 			StringSigData data;
-			if (m_FusionRoom.UserDefinedStringSigDetails.TryGetValue(sig - SIG_OFFSET, out data))
+			if (m_FusionRoom.UserDefinedStringSigDetails.TryGetValue(sig, out data))
 				data.InputSig.StringValue = newValue;
 			else
 				throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined string sigs", sig));
