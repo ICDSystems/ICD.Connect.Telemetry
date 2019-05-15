@@ -6,6 +6,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
+using ICD.Connect.Audio.Biamp;
 using ICD.Connect.Conferencing.Controls.Dialing;
 using ICD.Connect.Devices;
 using ICD.Connect.Displays.Devices;
