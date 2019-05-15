@@ -36,6 +36,7 @@ namespace ICD.Connect.Telemetry.Crestron
 				{typeof(IDevice), IcdStandardFusionSigs.Sigs},
 				{typeof(IDialingDeviceExternalTelemetryProvider), IcdDialingDeviceFusionSigs.Sigs},
 				{typeof(IOccupancySensorControl), IcdOccupancyFusionSigs.Sigs},
+				{typeof(BiampTesiraDevice), IcdDspFusionSigs.Sigs},
 #if SIMPLSHARP
 				{typeof(IControlSystemDevice), IcdControlSystemFusionSigs.Sigs}
 #endif
