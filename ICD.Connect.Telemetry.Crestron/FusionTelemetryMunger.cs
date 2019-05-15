@@ -36,6 +36,7 @@ namespace ICD.Connect.Telemetry.Crestron
 				{typeof(IDevice), IcdStandardFusionSigs.Sigs},
 				{typeof(IDialingDeviceExternalTelemetryProvider), IcdDialingDeviceFusionSigs.Sigs},
 				{typeof(IOccupancySensorControl), IcdOccupancyFusionSigs.Sigs},
+				{typeof(BiampTesiraDevice), IcdDspFusionSigs.Sigs},
 #if SIMPLSHARP
 				{typeof(IControlSystemDevice), IcdControlSystemFusionSigs.Sigs}
 #endif
@@ -65,7 +66,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// </summary>
 		/// <param name="device"></param>
 		/// <returns></returns>
-		public void BuildAssets(IDevice device)
+		public void BuildAssets(IDeviceBase device)
 		{
 			// Create the sig bindings
 			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
@@ -79,7 +80,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			GenerateStaticAsset(device, nodes);
 		}
 
-		private void GenerateStaticAsset(IDevice device, ITelemetryCollection nodes)
+		private void GenerateStaticAsset(IDeviceBase device, ITelemetryCollection nodes)
 		{
 			uint staticAssetId = GetNextAssetId();
 			AssetInfo staticAssetInfo = new AssetInfo(eAssetType.StaticAsset,
@@ -96,7 +97,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			AddBindingsToCollection(staticAssetId, bindings);
 		}
 
-		private void GenerateOccupancySensorAsset(IDevice device)
+		private void GenerateOccupancySensorAsset(IDeviceBase device)
 		{
 			AssetInfo occAssetInfo = new AssetInfo(eAssetType.OccupancySensor,
 			                                       GetNextAssetId(),
@@ -154,7 +155,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			return m_FusionRoom.GetAssetIds().Any() ? m_FusionRoom.GetAssetIds().Max() + 1 : 4;
 		}
 
-		private string AssembleInstanceId(IDevice device, eAssetType staticAsset)
+		private string AssembleInstanceId(IDeviceBase device, eAssetType staticAsset)
 		{
 			if (device == null)
 				throw new ArgumentNullException("device");
@@ -237,9 +238,9 @@ namespace ICD.Connect.Telemetry.Crestron
 			return null;
 		}
 
-		public void AddAssets(IEnumerable<IDevice> devices)
+		public void AddAssets(IEnumerable<IDeviceBase> devices)
 		{
-			foreach (IDevice device in devices)
+			foreach (IDeviceBase device in devices)
 				BuildAssets(device);
 
 			m_FusionRoom.RebuildRvi();
