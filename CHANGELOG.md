@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Added telemetry nodes and collections for describing telemetry features as a hierarchy
  - Added Fusion static asset support to interfaces and abstractions
  - Added mappings and bindings for feeding telemetry data to/from Fusion
+ - Added Fusion Room sig support
 
 ## [4.0.0] - 2018-10-18
 ### Changed
