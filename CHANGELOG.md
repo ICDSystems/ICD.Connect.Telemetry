@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.0.0] - 2019-05-16
 ### Added
  - Added attributes for decorating telemetry properties, methods and events
  - Added telemetry nodes and collections for describing telemetry features as a hierarchy
