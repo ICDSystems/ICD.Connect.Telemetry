@@ -69,7 +69,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
         private FusionRoom m_FusionRoom;
 #endif
-		private string m_FusionSigsPath;
 
 #region Properties
 
@@ -466,7 +465,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
             FusionRVI.GenerateFileForAllFusionDevices();
 #else
-            throw new NotImplementedException();
+            throw new NotSupportedException();
 #endif
         }
 
@@ -491,7 +490,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
             settings.RoomName = null;
             settings.RoomId = null;
 #endif
-            settings.FusionSigsPath = m_FusionSigsPath;
 		}
 
 		/// <summary>
@@ -504,7 +502,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
             SetFusionRoom(null);
 #endif
-			m_FusionSigsPath = null;
 		}
 
 		/// <summary>
@@ -528,9 +525,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 			LoadSigs();
 #else
-            throw new NotImplementedException();
+            throw new NotSupportedException();
 #endif
-        }
+		}
 
 #endregion
 

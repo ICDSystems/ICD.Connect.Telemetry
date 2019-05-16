@@ -9,14 +9,12 @@ namespace ICD.Connect.Telemetry
 	{
 		private readonly List<ITelemetryItem> m_Children;
 
-		public AbstractTelemetryCollection()
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractTelemetryCollection()
 		{
 			m_Children = new List<ITelemetryItem>();
-		}
-
-		public void Dispose()
-		{
-			m_Children.Clear();
 		}
 
 		public IEnumerable<ITelemetryItem> GetChildren()

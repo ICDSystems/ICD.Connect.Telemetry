@@ -15,7 +15,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = OriginatorTelemetryNames.ID,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Id",
 				SigType = eSigType.Serial,
 				Sig = 24951
@@ -23,7 +23,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = OriginatorTelemetryNames.NAME,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "ComponentName",
 				SigType = eSigType.Serial,
 				Sig = 0
@@ -31,7 +31,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DeviceTelemetryNames.ONLINE_STATE,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Connected",
 				SigType = eSigType.Digital,
 				Sig = 0
@@ -46,7 +46,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = "",
+				TelemetryGetName = string.Empty,
 				TelemetrySetName = DeviceTelemetryNames.POWER_OFF,
 				FusionSigName = "PowerOff",
 				SigType = eSigType.Digital,

@@ -7,16 +7,19 @@ using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
 #endif
-using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
-using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
 	public sealed class CollectionTelemetryAttribute : AbstractTelemetryAttribute, ICollectionTelemetryAttribute
 	{
-		public CollectionTelemetryAttribute(string name) : base(name)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		public CollectionTelemetryAttribute(string name)
+			: base(name)
 		{
 		}
 
@@ -29,7 +32,9 @@ namespace ICD.Connect.Telemetry.Attributes
 		public ICollectionTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
 		{
 			if (!typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType))
-				throw new InvalidOperationException(string.Format("Cannot generate collection telemetry for non-enumerable property {0}, {1}", propertyInfo.Name, propertyInfo.PropertyType));
+				throw new InvalidOperationException(
+					string.Format("Cannot generate collection telemetry for non-enumerable property {0}, {1}", propertyInfo.Name,
+					              propertyInfo.PropertyType));
 
 			IEnumerable childInstance = (IEnumerable)propertyInfo.GetValue(instance, null);
 			if (childInstance == null)

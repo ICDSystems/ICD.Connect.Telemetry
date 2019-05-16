@@ -15,7 +15,7 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated;
 		event EventHandler<BoolEventArgs> OnFusionSystemPowerChangeEvent;
 		event EventHandler<BoolEventArgs> OnFusionDisplayPowerChangeEvent;
-		
+
 		/// <summary>
 		/// Gets the GUID for the Room ID.
 		/// </summary>
@@ -76,7 +76,6 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		[PublicAPI]
 		void SetDisplayPower(bool powered);
 
-
 		/// <summary>
 		/// Removes the asset with the given id.
 		/// </summary>
@@ -121,7 +120,6 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 			SigType = sigType;
 			Sig = sigNumber;
 		}
-
 	}
 
 	public sealed class FusionAssetPowerStateUpdatedArgs : EventArgs

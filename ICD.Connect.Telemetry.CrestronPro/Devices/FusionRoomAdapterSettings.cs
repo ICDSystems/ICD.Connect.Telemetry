@@ -16,12 +16,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		private const string IPID_ELEMENT = "IPID";
 		private const string ROOM_NAME_ELEMENT = "RoomName";
 		private const string ROOM_ID_ELEMENT = "RoomId";
-		private const string FUSION_SIGS_ELEMENT = "FusionSigsPath";
-
-		private const string DEFAULT_FUSION_SIGS_PATH = "FusionSigs.xml";
 
 		private string m_RoomId;
-		private string m_FusionSigsPath;
 
 		#region Properties
 
@@ -44,21 +40,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			set { m_RoomId = value; }
 		}
 
-		/// <summary>
-		/// Gets/sets the fusion sigs path. Returns the default path if it has not been set.
-		/// </summary>
-		[PathSettingsProperty(".xml")]
-		public string FusionSigsPath
-		{
-			get
-			{
-				if (string.IsNullOrEmpty(m_FusionSigsPath))
-					m_FusionSigsPath = DEFAULT_FUSION_SIGS_PATH;
-				return m_FusionSigsPath;
-			}
-			set { m_FusionSigsPath = value; }
-		}
-
 		#endregion
 
 		#region Methods
@@ -74,7 +55,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			writer.WriteElementString(IPID_ELEMENT, Ipid == null ? null : StringUtils.ToIpIdString(Ipid.Value));
 			writer.WriteElementString(ROOM_NAME_ELEMENT, RoomName);
 			writer.WriteElementString(ROOM_ID_ELEMENT, RoomId);
-			writer.WriteElementString(FUSION_SIGS_ELEMENT, FusionSigsPath);
 		}
 
 		/// <summary>
@@ -88,12 +68,10 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			byte ipid = XmlUtils.ReadChildElementContentAsByte(xml, IPID_ELEMENT);
 			string roomName = XmlUtils.ReadChildElementContentAsString(xml, ROOM_NAME_ELEMENT);
 			string roomId = XmlUtils.TryReadChildElementContentAsString(xml, ROOM_ID_ELEMENT);
-			string fusionSigsPath = XmlUtils.TryReadChildElementContentAsString(xml, FUSION_SIGS_ELEMENT);
 
 			Ipid = ipid;
 			RoomName = roomName;
 			RoomId = roomId;
-			FusionSigsPath = fusionSigsPath;
 		}
 
 		#endregion

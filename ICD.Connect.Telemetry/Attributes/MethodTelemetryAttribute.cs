@@ -1,21 +1,22 @@
 ﻿using System;
-using System.Linq;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
 #endif
-using ICD.Common.Utils;
 using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
-	public class MethodTelemetryAttribute : AbstractMethodTelemetryAttribute
+	public sealed class MethodTelemetryAttribute : AbstractMethodTelemetryAttribute
 	{
-		public MethodTelemetryAttribute(string name) 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		public MethodTelemetryAttribute(string name)
 			: base(name)
 		{
-			
 		}
 
 		/// <summary>
@@ -28,7 +29,7 @@ namespace ICD.Connect.Telemetry.Attributes
 		{
 			ParameterInfo[] parameters = methodInfo.GetParameters();
 
-			if(parameters.Length > 1)
+			if (parameters.Length > 1)
 				throw new NotSupportedException("Method Telemetry is unsupported for methods with 2 or more parameters");
 
 			return new MethodTelemetryNodeItem(Name, instance, methodInfo);

@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
-	public sealed class FusionSigMultiMapping : FusionSigMappingBase, IEquatable<FusionSigMultiMapping>
+	public sealed class FusionSigMultiMapping : AbstractFusionSigMapping, IEquatable<FusionSigMultiMapping>
 	{
 		private ushort m_FirstSig;
 		private ushort m_CurrentSig;
@@ -10,10 +10,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 
 		public ushort FirstSig
 		{
-			get
-			{
-				return m_FirstSig;
-			}
+			get { return m_FirstSig; }
 			set
 			{
 				m_CurrentSig = value;
@@ -23,13 +20,10 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 
 		public ushort LastSig
 		{
-			get
-			{
-				return m_LastSig;
-			}
+			get { return m_LastSig; }
 			set
 			{
-				if(value < m_FirstSig)
+				if (value < m_FirstSig)
 					throw new ArgumentOutOfRangeException("value", "Last Sig in range must be greater than the first Sig in range.");
 
 				m_LastSig = value;
@@ -38,7 +32,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 
 		public string GetNameFromTemplate(ushort sigNumber)
 		{
-			if(sigNumber < m_FirstSig || sigNumber > m_LastSig)
+			if (sigNumber < m_FirstSig || sigNumber > m_LastSig)
 				throw new ArgumentOutOfRangeException("sigNumber", "sigNumber outside specified range.");
 
 			int rangeSize = m_LastSig - m_FirstSig;
@@ -59,12 +53,12 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		public bool Equals(FusionSigMultiMapping other)
 		{
 			return other != null &&
-				   TelemetrySetName == other.TelemetrySetName &&
-				   TelemetryGetName == other.TelemetryGetName &&
-				   FusionSigName == other.FusionSigName &&
-				   FirstSig == other.FirstSig &&
-				   LastSig == other.LastSig &&
-				   SigType == other.SigType;
+			       TelemetrySetName == other.TelemetrySetName &&
+			       TelemetryGetName == other.TelemetryGetName &&
+			       FusionSigName == other.FusionSigName &&
+			       FirstSig == other.FirstSig &&
+			       LastSig == other.LastSig &&
+			       SigType == other.SigType;
 		}
 
 		public override int GetHashCode()

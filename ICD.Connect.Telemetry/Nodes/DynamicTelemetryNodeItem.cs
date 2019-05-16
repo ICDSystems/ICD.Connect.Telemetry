@@ -34,11 +34,20 @@ namespace ICD.Connect.Telemetry.Nodes
 			}
 		}
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="parent"></param>
+		/// <param name="eventInfo"></param>
+		/// <param name="propertyInfo"></param>
 		public DynamicTelemetryNodeItem(string name, ITelemetryProvider parent, EventInfo eventInfo, PropertyInfo propertyInfo)
 			: base(name, parent, propertyInfo)
 		{
-			if(propertyInfo.PropertyType != typeof(T))
-				throw new InvalidOperationException(string.Format("Cannot instantiate a telemetry node item of type {0} for property with type {1}", typeof(T), propertyInfo.PropertyType));
+			if (propertyInfo.PropertyType != typeof(T))
+				throw new InvalidOperationException(
+					string.Format("Cannot instantiate a telemetry node item of type {0} for property with type {1}", typeof(T),
+					              propertyInfo.PropertyType));
 
 			m_EventInfo = eventInfo;
 			m_Delegate = ReflectionUtils.SubscribeEvent(parent, m_EventInfo, this, CallbackMethodInfo);

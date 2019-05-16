@@ -11,7 +11,12 @@ namespace ICD.Connect.Telemetry.Attributes
 	[AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 	public abstract class AbstractPropertyTelemetryAttribute : AbstractTelemetryAttribute, IPropertyTelemetryAttribute
 	{
-		protected AbstractPropertyTelemetryAttribute(string name) : base(name)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		protected AbstractPropertyTelemetryAttribute(string name)
+			: base(name)
 		{
 		}
 

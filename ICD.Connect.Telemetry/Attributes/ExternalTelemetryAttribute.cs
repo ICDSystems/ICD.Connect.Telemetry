@@ -8,7 +8,13 @@ namespace ICD.Connect.Telemetry.Attributes
 	{
 		private readonly Type m_ExternalTelemetryProviderType;
 
-		public ExternalTelemetryAttribute(string name, Type type) : base(name)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="type"></param>
+		public ExternalTelemetryAttribute(string name, Type type)
+			: base(name)
 		{
 			m_ExternalTelemetryProviderType = type;
 		}

@@ -2,7 +2,7 @@
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
-	public sealed class FusionSigMapping : FusionSigMappingBase, IEquatable<FusionSigMapping>
+	public sealed class FusionSigMapping : AbstractFusionSigMapping, IEquatable<FusionSigMapping>
 	{
 		public uint Sig { get; set; }
 

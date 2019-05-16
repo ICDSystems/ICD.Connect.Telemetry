@@ -1,6 +1,3 @@
-using System;
-using ICD.Common.Utils.EventArguments;
-
 namespace ICD.Connect.Telemetry.Crestron.Assets
 {
 	public interface IFusionStaticAsset : IFusionAsset

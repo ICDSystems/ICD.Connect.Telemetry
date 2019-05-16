@@ -11,7 +11,12 @@ namespace ICD.Connect.Telemetry.Attributes
 {
 	public sealed class StaticPropertyTelemetryAttribute : AbstractPropertyTelemetryAttribute
 	{
-		public StaticPropertyTelemetryAttribute(string name) : base(name)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		public StaticPropertyTelemetryAttribute(string name)
+			: base(name)
 		{
 		}
 

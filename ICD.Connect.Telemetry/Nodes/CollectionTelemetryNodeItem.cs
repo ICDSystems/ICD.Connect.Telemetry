@@ -9,19 +9,23 @@ namespace ICD.Connect.Telemetry.Nodes
 
 	public sealed class CollectionTelemetryNodeItem : AbstractTelemetryCollection, ICollectionTelemetryItem
 	{
+		public string Name { get; private set; }
+		public ITelemetryProvider Parent { get; private set; }
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="parent"></param>
+		/// <param name="childNodes"></param>
 		public CollectionTelemetryNodeItem(string name, ITelemetryProvider parent, IEnumerable<ITelemetryItem> childNodes)
 		{
 			Name = name;
 			Parent = parent;
 
 			foreach (ITelemetryItem item in childNodes)
-			{
 				Add(item);
-			}
 		}
-
-		public string Name { get; private set; }
-		public ITelemetryProvider Parent { get; private set; }
 
 		#region Console
 

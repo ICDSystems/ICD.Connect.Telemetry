@@ -85,8 +85,6 @@
     <Compile Include="Attributes\DynamicPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\EventTelemetryAttribute.cs" />
     <Compile Include="EventArguments\IndexedBooleanEventArgs.cs" />
-    <Compile Include="EventArguments\IndexedStringEventArgs.cs" />
-    <Compile Include="EventArguments\IndexedUshortEventArgs.cs" />
     <Compile Include="IExternalTelemetryProvider.cs" />
     <Compile Include="ITelemetryCollection.cs" />
     <Compile Include="ITelemetryProvider.cs" />

@@ -15,7 +15,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DspTelemetryNames.FIRMWARE_VERSION,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Firmware Version",
 				Sig = 300,
 				SigType = eSigType.Serial
@@ -23,7 +23,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DspTelemetryNames.CALL_ACTIVE,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "ATC Call Active",
 				Sig = 301,
 				SigType = eSigType.Digital
@@ -31,7 +31,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DspTelemetryNames.ACTIVE_FAULTS,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Active Faults",
 				Sig = 300,
 				SigType = eSigType.Digital
@@ -39,7 +39,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMultiMapping
 			{
 				TelemetryGetName = ControlTelemetryNames.NAME,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Volume Control {0} Name",
 				FirstSig = 10000,
 				LastSig = 10999,

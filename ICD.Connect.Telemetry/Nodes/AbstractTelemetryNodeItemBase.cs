@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
@@ -14,6 +12,11 @@ namespace ICD.Connect.Telemetry.Nodes
 
 		public ITelemetryProvider Parent { get; private set; }
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="parent"></param>
 		protected AbstractTelemetryNodeItemBase(string name, ITelemetryProvider parent)
 		{
 			Name = name;
@@ -22,10 +25,10 @@ namespace ICD.Connect.Telemetry.Nodes
 
 		public virtual void Dispose()
 		{
-			
 		}
 
 		#region Console
+
 		/// <summary>
 		/// Gets the name of the node.
 		/// </summary>

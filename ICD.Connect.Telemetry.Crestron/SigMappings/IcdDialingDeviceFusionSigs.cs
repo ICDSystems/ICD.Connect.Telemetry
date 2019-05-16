@@ -14,14 +14,14 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DialingTelemetryNames.CALL_IN_PROGRESS,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Call In Progress",
 				Sig = 201,
 				SigType = eSigType.Digital
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = "",
+				TelemetryGetName = string.Empty,
 				TelemetrySetName = DialingTelemetryNames.END_CALL_COMMAND,
 				FusionSigName = "End Call",
 				Sig = 203,
@@ -30,7 +30,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DialingTelemetryNames.SIP_ENABLED,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Sip Enabled",
 				Sig = 204,
 				SigType = eSigType.Digital
@@ -38,7 +38,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DialingTelemetryNames.CALL_TYPE,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Call Type",
 				Sig = 201,
 				SigType = eSigType.Serial
@@ -46,7 +46,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DialingTelemetryNames.CALL_NUMBER,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Call Number",
 				Sig = 202,
 				SigType = eSigType.Serial
@@ -54,7 +54,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DialingTelemetryNames.SIP_LOCAL_NAME,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Sip Name",
 				Sig = 206,
 				SigType = eSigType.Serial
@@ -62,7 +62,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			new FusionSigMapping
 			{
 				TelemetryGetName = DialingTelemetryNames.SIP_STATUS,
-				TelemetrySetName = "",
+				TelemetrySetName = string.Empty,
 				FusionSigName = "Sip Registration Status",
 				Sig = 210,
 				SigType = eSigType.Serial

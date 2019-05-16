@@ -15,12 +15,22 @@ namespace ICD.Connect.Telemetry.Attributes
 {
 	public sealed class DynamicPropertyTelemetryAttribute : AbstractPropertyTelemetryAttribute
 	{
-		public string EventName { get; private set; }
+		private readonly string m_EventName;
 
+		/// <summary>
+		/// Gets the associated event name for this attribute.
+		/// </summary>
+		public string EventName { get { return m_EventName; } }
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="updateEventName"></param>
 		public DynamicPropertyTelemetryAttribute(string name, string updateEventName) 
 			: base(name)
 		{
-			EventName = updateEventName;
+			m_EventName = updateEventName;
 		}
 
 		/// <summary>

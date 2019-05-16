@@ -2,6 +2,9 @@
 {
 	public interface ITelemetryAttribute
 	{
+		/// <summary>
+		/// Gets the name for the attribute.
+		/// </summary>
 		string Name { get; }
 	}
 }

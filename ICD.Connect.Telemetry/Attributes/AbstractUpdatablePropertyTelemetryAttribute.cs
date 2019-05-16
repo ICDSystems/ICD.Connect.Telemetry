@@ -2,7 +2,12 @@
 {
 	public abstract class AbstractUpdatablePropertyTelemetryAttribute : AbstractPropertyTelemetryAttribute
 	{
-		public AbstractUpdatablePropertyTelemetryAttribute(string name) : base(name)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		protected AbstractUpdatablePropertyTelemetryAttribute(string name)
+			: base(name)
 		{
 		}
 	}

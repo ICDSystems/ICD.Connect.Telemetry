@@ -11,7 +11,12 @@ namespace ICD.Connect.Telemetry.Attributes
 {
 	public sealed class UpdatablePropertyTelemetryAttribute : AbstractUpdatablePropertyTelemetryAttribute
 	{
-		public UpdatablePropertyTelemetryAttribute(string name) : base(name)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		public UpdatablePropertyTelemetryAttribute(string name)
+			: base(name)
 		{
 		}
 

@@ -1,5 +1,4 @@
-﻿using System;
-using ICD.Connect.Telemetry.Nodes;
+﻿using ICD.Connect.Telemetry.Nodes;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else

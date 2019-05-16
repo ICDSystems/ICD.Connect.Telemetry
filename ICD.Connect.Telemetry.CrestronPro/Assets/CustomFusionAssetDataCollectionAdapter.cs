@@ -128,7 +128,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 				case global::Crestron.SimplSharpPro.Fusion.eAssetType.RemoteRealTimePower:
 				case global::Crestron.SimplSharpPro.Fusion.eAssetType.ShadeLoad:
 				case global::Crestron.SimplSharpPro.Fusion.eAssetType.ShadePresets:
-					throw new NotImplementedException();
+					throw new NotSupportedException();
 
 				default:
 					throw new ArgumentOutOfRangeException();

@@ -1,5 +1,4 @@
 ﻿using ICD.Common.Properties;
-using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes
 {

@@ -6,7 +6,7 @@ using ICD.Connect.Telemetry.Crestron.Assets;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
-	public abstract class FusionSigMappingBase : IFusionSigMapping
+	public abstract class AbstractFusionSigMapping : IFusionSigMapping
 	{
 		public string TelemetrySetName { get; set; }
 		public string TelemetryGetName { get; set; }
@@ -30,11 +30,15 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		}
 
 		public eSigType SigType { get; set; }
-		public override abstract int GetHashCode();
 
-		public FusionSigMappingBase()
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		protected AbstractFusionSigMapping()
 		{
 			TargetAssetTypes = new IcdHashSet<Type> {typeof(IFusionStaticAsset)};
 		}
+
+		public override abstract int GetHashCode();
 	}
 }

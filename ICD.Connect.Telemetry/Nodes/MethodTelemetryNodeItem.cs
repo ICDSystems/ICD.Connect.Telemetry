@@ -18,14 +18,20 @@ namespace ICD.Connect.Telemetry.Nodes
 		public int ParameterCount { get { return ParameterTypes.Length; } }
 		public Type[] ParameterTypes { get; private set; }
 
-		public MethodTelemetryNodeItem(string name, ITelemetryProvider parent ,MethodInfo info) : base(name, parent)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="parent"></param>
+		/// <param name="info"></param>
+		public MethodTelemetryNodeItem(string name, ITelemetryProvider parent, MethodInfo info)
+			: base(name, parent)
 		{
 			m_MethodInfo = info;
 
 			ParameterTypes = m_MethodInfo.GetParameters().Select(p => (Type)p.ParameterType).ToArray();
 		}
 
-		
 		public void Invoke(params object[] parameters)
 		{
 			try
@@ -34,7 +40,8 @@ namespace ICD.Connect.Telemetry.Nodes
 			}
 			catch (ArgumentException ex)
 			{
-				throw new ArgumentException(String.Format("Exception invoking telemetry method Name:{0} Parent:{1}",Name, Parent),ex);
+				throw new ArgumentException(String.Format("Exception invoking telemetry method Name:{0} Parent:{1}", Name, Parent),
+				                            ex);
 			}
 		}
 
@@ -48,7 +55,7 @@ namespace ICD.Connect.Telemetry.Nodes
 
 			addRow("Parameter Count", ParameterCount);
 
-			if(ParameterCount == 0)
+			if (ParameterCount == 0)
 				return;
 
 			addRow("Parameter Types", "");
@@ -69,10 +76,11 @@ namespace ICD.Connect.Telemetry.Nodes
 			foreach (var command in GetBaseConsoleCommands())
 				yield return command;
 
-			if(ParameterCount == 0)
-				yield return new ConsoleCommand("Invoke", "Invokes this parameterless command", ()=> Invoke(new object[0]));
+			if (ParameterCount == 0)
+				yield return new ConsoleCommand("Invoke", "Invokes this parameterless command", () => Invoke(new object[0]));
 			else
-				yield return new ParamsConsoleCommand("Invoke", "Invokes this command with the given parameters", a => ConsoleParseCommand(a));
+				yield return
+					new ParamsConsoleCommand("Invoke", "Invokes this command with the given parameters", a => ConsoleParseCommand(a));
 		}
 
 		private void ConsoleParseCommand(IEnumerable<string> args)
@@ -92,6 +100,6 @@ namespace ICD.Connect.Telemetry.Nodes
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
-		} 
+		}
 	}
 }

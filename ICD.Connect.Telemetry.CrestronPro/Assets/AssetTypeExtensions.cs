@@ -57,7 +57,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		/// </summary>
 		/// <param name="extends"></param>
 		/// <returns></returns>
-		public static global::Crestron.SimplSharpPro.Fusion.eAssetType FromIcd(this ICD.Connect.Telemetry.Crestron.Assets.eAssetType extends)
+		public static global::Crestron.SimplSharpPro.Fusion.eAssetType FromIcd(this eAssetType extends)
 		{
 			switch (extends)
 			{
