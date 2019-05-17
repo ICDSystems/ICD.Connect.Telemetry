@@ -27,19 +27,19 @@ namespace ICD.Connect.Telemetry.Crestron
 	{
 		private const int SIG_OFFSET = 49;
 
-		private static readonly Dictionary<Type, IEnumerable<IFusionSigMapping>> s_MappingsByType =
-			new Dictionary<Type, IEnumerable<IFusionSigMapping>>
+		private static readonly Dictionary<Type, IcdHashSet<IFusionSigMapping>> s_MappingsByType =
+			new Dictionary<Type, IcdHashSet<IFusionSigMapping>>
 			{
-				{typeof(IDisplayWithAudio), IcdDisplayWithAudioFusionSigs.Sigs},
-				{typeof(IDisplay), IcdDisplayFusionSigs.Sigs},
-				{typeof(IRouteSwitcherControl), IcdSwitcherFusionSigs.Sigs},
-				{typeof(InputOutputPortBase), IcdSwitcherFusionSigs.InputOutputSigs},
-				{typeof(IDevice), IcdStandardFusionSigs.Sigs},
-				{typeof(IDialingDeviceExternalTelemetryProvider), IcdDialingDeviceFusionSigs.Sigs},
-				{typeof(IOccupancySensorControl), IcdOccupancyFusionSigs.Sigs},
-				{typeof(BiampTesiraDevice), IcdDspFusionSigs.Sigs},
+				{typeof(IDisplayWithAudio), IcdDisplayWithAudioFusionSigs.Sigs.ToIcdHashSet()},
+				{typeof(IDisplay), IcdDisplayFusionSigs.Sigs.ToIcdHashSet()},
+				{typeof(IRouteSwitcherControl), IcdSwitcherFusionSigs.Sigs.ToIcdHashSet()},
+				{typeof(InputOutputPortBase), IcdSwitcherFusionSigs.InputOutputSigs.ToIcdHashSet()},
+				{typeof(IDevice), IcdStandardFusionSigs.Sigs.ToIcdHashSet()},
+				{typeof(IDialingDeviceExternalTelemetryProvider), IcdDialingDeviceFusionSigs.Sigs.ToIcdHashSet()},
+				{typeof(IOccupancySensorControl), IcdOccupancyFusionSigs.Sigs.ToIcdHashSet()},
+				{typeof(BiampTesiraDevice), IcdDspFusionSigs.Sigs.ToIcdHashSet()},
 #if SIMPLSHARP
-				{typeof(IControlSystemDevice), IcdControlSystemFusionSigs.Sigs}
+				{typeof(IControlSystemDevice), IcdControlSystemFusionSigs.Sigs.ToIcdHashSet()}
 #endif
 			};
 
@@ -261,15 +261,16 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
-		public void RegisterMappingSet(Type type, IEnumerable<IFusionSigMapping> mappings)
+		public static void RegisterMappingSet(Type type, IEnumerable<IFusionSigMapping> mappings)
 		{
-			if (s_MappingsByType.ContainsKey(type))
+			IcdHashSet<IFusionSigMapping> stored;
+			if (!s_MappingsByType.TryGetValue(type, out stored))
 			{
-				throw new ArgumentException("type",
-				                            string.Format("Cannot Register Mapping Set for type {0}, type already registered.", type));
+				stored = new IcdHashSet<IFusionSigMapping>();
+				s_MappingsByType.Add(type, stored);
 			}
 
-			s_MappingsByType.Add(type, mappings);
+			stored.AddRange(mappings);
 		}
 
 		private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
