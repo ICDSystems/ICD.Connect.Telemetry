@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Settings;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
@@ -15,7 +16,6 @@ using ICD.Connect.Protocol.Sigs;
 #endif
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
-using ICD.Connect.Settings.Core;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
