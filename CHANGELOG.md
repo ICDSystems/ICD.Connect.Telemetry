@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
  - FusionTelemetryMunger supports registering multiple mapping sets under existing mapping types
+ - Added util method for converting a log item into fusion log text format
 
 ## [5.0.0] - 2019-05-16
 ### Added
