@@ -57,18 +57,60 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\ProgramData\Crestron\SDK\SimplSharpHelperInterface.dll</HintPath>
     </Reference>
+    <Reference Include="SimplSharpReflectionInterface, Version=1.0.5583.25238, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\ProgramData\Crestron\SDK\SimplSharpReflectionInterface.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\eAssetType.cs" />
-    <Compile Include="Assets\FusionAssetData.cs" />
-    <Compile Include="Assets\IFusionAsset.cs" />
-    <Compile Include="Assets\IFusionAssetDataCollection.cs" />
-    <Compile Include="IFusionRoom.cs" />
     <None Include="ObfuscationSettings.cs" />
+    <Compile Include="Attributes\AbstractMethodTelemetryAttribute.cs" />
+    <Compile Include="Attributes\AbstractPropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\AbstractTelemetryAttribute.cs" />
+    <Compile Include="Attributes\AbstractUpdatablePropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\CollectionTelemetryAttribute.cs" />
+    <Compile Include="Attributes\ExternalTelemetryAttribute.cs" />
+    <Compile Include="Attributes\ICollectionTelemetryAttribute.cs" />
+    <Compile Include="Attributes\IEventTelemetryAttribute.cs" />
+    <Compile Include="Attributes\IExternalTelemetryAttribute.cs" />
+    <Compile Include="Attributes\IMethodTelemetryAttribute.cs" />
+    <Compile Include="Attributes\ITelemetryAttribute.cs" />
+    <Compile Include="Attributes\IPropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\StaticPropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\UpdatablePropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\MethodTelemetryAttribute.cs" />
+    <Compile Include="Attributes\DynamicPropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\EventTelemetryAttribute.cs" />
+    <Compile Include="EventArguments\IndexedBooleanEventArgs.cs" />
+    <Compile Include="IExternalTelemetryProvider.cs" />
+    <Compile Include="ITelemetryCollection.cs" />
+    <Compile Include="ITelemetryProvider.cs" />
+    <Compile Include="Nodes\AbstractFeedbackTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\AbstractTelemetryNodeItemBase.cs" />
+    <Compile Include="Nodes\AbstractUpdatableTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\CollectionTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\DynamicTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\ICollectionTelemetryItem.cs" />
+    <Compile Include="Nodes\IFeedbackTelemetryItem.cs" />
+    <Compile Include="Nodes\IManagementTelemetryItem.cs" />
+    <Compile Include="Nodes\ITelemetryItem.cs" />
+    <Compile Include="Nodes\ITelemetryNodeItem.cs" />
+    <Compile Include="Nodes\IUpdatableTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\MethodTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\StaticTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\UpdatableTelemetryNodeItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\ITelemetryService.cs" />
+    <Compile Include="Service\TelemetryService.cs" />
+    <Compile Include="AbstractTelemetryCollection.cs" />
+    <Compile Include="TelemetryCollection.cs" />
+    <Compile Include="TelemetryConsole.cs" />
+    <Compile Include="TelemetryMethodInfoEqualityComparer.cs" />
+    <Compile Include="TelemetryPropertyInfoEqualityComparer.cs" />
+    <Compile Include="TelemetryUtils.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
@@ -79,22 +121,6 @@
     <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_SimplSharp.csproj">
       <Project>{727F5820-5A61-440D-8899-E454FE8238D7}</Project>
       <Name>ICD.Connect.API_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_SimplSharp.csproj">
-      <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
-      <Name>ICD.Connect.Devices_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Misc\ICD.Connect.Misc\ICD.Connect.Misc_SimplSharp.csproj">
-      <Project>{3BAE6352-77B5-499A-9DA5-2AB198F53183}</Project>
-      <Name>ICD.Connect.Misc_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Panels\ICD.Connect.Panels\ICD.Connect.Panels_SimplSharp.csproj">
-      <Project>{A441FE98-6A8E-4EF3-98F0-D17041D2E118}</Project>
-      <Name>ICD.Connect.Panels_SimplSharp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_SimplSharp.csproj">
-      <Project>{5B84EB3C-1C3A-4C4D-98C2-69F67CF51D5A}</Project>
-      <Name>ICD.Connect.Settings_SimplSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />

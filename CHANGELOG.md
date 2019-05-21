@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.1.0] - 2019-05-21
+### Added
+ - FusionTelemetryMunger supports registering multiple mapping sets under existing mapping types
+ - Added util method for converting a log item into fusion log text format
+
+## [5.0.0] - 2019-05-16
+### Added
+ - Added attributes for decorating telemetry properties, methods and events
+ - Added telemetry nodes and collections for describing telemetry features as a hierarchy
+ - Added Fusion static asset support to interfaces and abstractions
+ - Added mappings and bindings for feeding telemetry data to/from Fusion
+ - Added Fusion Room sig support
+
 ## [4.0.0] - 2018-10-18
 ### Changed
  - Analytics renamed to Telemetry

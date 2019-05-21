@@ -1,5 +1,5 @@
-﻿using ICD.Connect.Telemetry.Assets;
-#if SIMPLSHARP
+﻿#if SIMPLSHARP
+using ICD.Connect.Telemetry.Crestron.Assets;
 using Crestron.SimplSharpPro.Fusion;
 
 namespace ICD.Connect.Telemetry.CrestronPro.Assets

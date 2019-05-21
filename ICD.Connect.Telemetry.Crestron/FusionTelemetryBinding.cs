@@ -1,0 +1,288 @@
+using System;
+using System.Linq;
+using ICD.Common.Utils.Attributes;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.Devices;
+using ICD.Connect.Misc.Occupancy;
+using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Telemetry.Crestron.Devices;
+using ICD.Connect.Telemetry.Crestron.SigMappings;
+using ICD.Connect.Telemetry.Nodes;
+using ICD.Connect.Telemetry.Service;
+
+namespace ICD.Connect.Telemetry.Crestron
+{
+	public sealed class FusionTelemetryBinding : IDisposable
+	{
+		private static ITelemetryService TelemetryService { get { return ServiceProvider.GetService<ITelemetryService>(); } }
+
+		public IFeedbackTelemetryItem GetTelemetry { get; private set; }
+		public IManagementTelemetryItem SetTelemetry { get; private set; }
+		public FusionSigMapping Mapping { get; private set; }
+		public IFusionRoom FusionRoom { get; private set; }
+		public IFusionAsset Asset { get; private set; }
+
+		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, IFusionAsset asset, FusionSigMapping mapping)
+		{
+			FusionRoom = fusionRoom;
+			GetTelemetry = getTelemetry as IFeedbackTelemetryItem;
+			SetTelemetry = setTelemetry as IManagementTelemetryItem;
+			Asset = asset;
+
+			IUpdatableTelemetryNodeItem updatable = GetTelemetry as IUpdatableTelemetryNodeItem;
+			if(updatable != null)
+				updatable.OnValueChanged += UpdatableOnValueChanged;
+
+			Mapping = mapping;
+
+			UpdateSig();
+		}
+
+		public void UpdateTelemetryNode()
+		{
+			switch (Mapping.SigType)
+			{
+				case eSigType.Digital:
+					UpdateDigitalTelemetry();
+					break;
+				case eSigType.Analog:
+					UpdateAnalogTelemetry();
+					break;
+				case eSigType.Serial:
+					UpdateSerialTelemetry();
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		private void UpdateDigitalTelemetry()
+		{
+			FusionSigMapping singleMapping = Mapping;
+			if(singleMapping == null)
+				return;
+
+			if (Mapping.Sig == 0)
+				return;
+
+			bool digital = ((IFusionStaticAsset)Asset).ReadDigitalSig(singleMapping.Sig);
+
+			//Handle case where two seperate digitals are used to set true and false
+			if (SetTelemetry.ParameterCount == 0 && digital)
+			{
+				SetTelemetry.Invoke();
+			}
+			else
+			{
+				SetTelemetry.Invoke(digital);
+			}
+		}
+
+		private void UpdateAnalogTelemetry()
+		{
+			FusionSigMapping singleMapping = Mapping;
+			if (singleMapping == null)
+				return;
+
+			if (Mapping.Sig == 0)
+				return;
+
+			ushort analog = ((IFusionStaticAsset)Asset).ReadAnalogSig(singleMapping.Sig);
+			object rescaledValue = GetRescaledAnalogValue(analog);
+			SetTelemetry.Invoke(rescaledValue);
+		}
+
+		private void UpdateSerialTelemetry()
+		{
+			FusionSigMapping singleMapping = Mapping;
+			if (singleMapping == null)
+				return;
+
+			if (Mapping.Sig == 0)
+				return;
+
+			string serial = ((IFusionStaticAsset)Asset).ReadSerialSig(singleMapping.Sig);
+			SetTelemetry.Invoke(serial);
+		}
+
+		private void UpdatableOnValueChanged(object sender, EventArgs eventArgs)
+		{
+			UpdateSig();
+		}
+
+		private void UpdateSig()
+		{
+			if (GetTelemetry == null)
+				return;
+
+			if (Mapping.Sig == 0)
+			{
+				UpdateReservedSig();
+				return;
+			}
+
+			switch (Mapping.SigType)
+			{
+				case eSigType.Digital:
+					UpdateDigitalSig();
+					break;
+				case eSigType.Analog:
+					UpdateAnalogSig();
+					break;
+				case eSigType.Serial:
+					UpdateSerialSig();
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		private void UpdateReservedSig()
+		{
+			if(Asset is IFusionStaticAsset)
+			{
+				if (Mapping.TelemetryGetName == DeviceTelemetryNames.ONLINE_STATE)
+				{
+					bool value = (bool)GetTelemetry.Value;
+					((IFusionStaticAsset)Asset).SetOnlineState(value);
+					return;
+				}
+				if (Mapping.TelemetryGetName == DeviceTelemetryNames.POWER_STATE)
+				{
+					bool value = (bool)GetTelemetry.Value;
+					((IFusionStaticAsset)Asset).SetPoweredState(value);
+					return;
+				}
+			}
+			if (Asset is IFusionOccupancySensorAsset)
+			{
+				if (Mapping.TelemetryGetName == OccupancyTelemetryNames.OCCUPANCY_STATE)
+				{
+					bool value = ((eOccupancyState)GetTelemetry.Value) == eOccupancyState.Occupied;
+					((IFusionOccupancySensorAsset)Asset).SetRoomOccupied(value);
+					return;
+				}
+			}
+		}
+
+		private void UpdateDigitalSig()
+		{
+			FusionSigMapping singleMapping = Mapping;
+			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
+				return;
+
+			bool digital = (bool)GetTelemetry.Value;
+			((IFusionStaticAsset)Asset).UpdateDigitalSig(singleMapping.Sig, digital);
+		}
+
+		private void UpdateAnalogSig()
+		{
+			FusionSigMapping singleMapping = Mapping;
+			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
+				return;
+
+			ushort analog = GetNewAnalogValue();
+			((IFusionStaticAsset)Asset).UpdateAnalogSig(singleMapping.Sig, analog);
+		}
+
+		private void UpdateSerialSig()
+		{
+			FusionSigMapping singleMapping = Mapping;
+			if (singleMapping == null || GetTelemetry == null ||GetTelemetry.Value == null)
+				return;
+
+			string serial = GetTelemetry.Value.ToString();
+			((IFusionStaticAsset)Asset).UpdateSerialSig(singleMapping.Sig, serial);
+		}
+
+		private object GetRescaledAnalogValue(ushort analog)
+		{
+			if(SetTelemetry == null || SetTelemetry.ParameterCount == 0)
+				throw new InvalidOperationException("Set telemetry is null or has no parameters");
+
+			Type targetType = SetTelemetry.ParameterTypes[0];
+
+			if (!targetType.IsDecimalNumeric())
+			{
+				return Convert.ChangeType(analog, targetType, null);
+			}
+
+			RangeAttribute rangeAttribute = EnumerableExtensions.FirstOrDefault(GetTelemetry.PropertyInfo
+			                                                                                .GetCustomAttributes<RangeAttribute>(),
+			                                                                    null);
+			return rangeAttribute == null 
+				? Convert.ChangeType(analog, targetType, null) 
+				: rangeAttribute.RemapUshortToRange(analog);
+		}
+
+		private ushort GetNewAnalogValue()
+		{
+			if (!GetTelemetry.ValueType.IsDecimalNumeric())
+			{
+				return (ushort)Convert.ChangeType(GetTelemetry.Value, typeof(ushort), null);
+			}
+
+			RangeAttribute rangeAttribute = EnumerableExtensions.FirstOrDefault(GetTelemetry.PropertyInfo
+			                                                                        .GetCustomAttributes<RangeAttribute>(), null);
+			if (rangeAttribute == null)
+			{
+				return (ushort)Convert.ChangeType(GetTelemetry.Value, typeof(ushort), null);
+			}
+
+			if (rangeAttribute.IsInRange(GetTelemetry.Value))
+			{
+				double value = (double)Convert.ChangeType(GetTelemetry.Value, typeof(double), null);
+
+				//Cast value to double, since we only care about decimal types here 
+				//and all decimal types can be converted to double
+				return rangeAttribute.RemapRangeToUshort(value);
+			}
+
+			ServiceProvider.GetService<ILoggerService>()
+			               .AddEntry(eSeverity.Warning,
+			                         "Warning when converting analog telemtry value. Value {0} is outside expected range {1}-{2}. Value will be set to 0.",
+			                         GetTelemetry.Value,
+			                         rangeAttribute.Min,
+			                         rangeAttribute.Max);
+			return 0;
+		}
+
+		public static FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryProvider provider, FusionSigMapping mapping, uint assetId)
+		{
+			if (fusionRoom == null)
+				throw new ArgumentNullException("fusionRoom");
+
+			if(provider == null)
+				throw new ArgumentException("provider");
+
+			if (mapping == null)
+				throw new ArgumentNullException("mapping");
+
+			IFusionAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset;
+			if (!asset.GetType().GetAllTypes().Any(t => mapping.TargetAssetTypes.Contains(t)))
+				return null;
+
+			ITelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName);
+			ITelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName);
+
+			if(getTelemetryItem == null && setTelemetryItem == null)
+				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
+
+			// If the sig number is 0, that indicates that the sig is special-handling
+			if (mapping.Sig != 0)
+				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
+
+			return new FusionTelemetryBinding(fusionRoom, getTelemetryItem, setTelemetryItem, asset, mapping);
+		}
+
+		public void Dispose()
+		{
+			IUpdatableTelemetryNodeItem updatable = GetTelemetry as IUpdatableTelemetryNodeItem;
+			if (updatable != null)
+				updatable.OnValueChanged -= UpdatableOnValueChanged;
+		}
+	}
+}
