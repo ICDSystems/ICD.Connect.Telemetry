@@ -34,7 +34,7 @@ namespace ICD.Connect.Telemetry.Crestron
 				{typeof(IDisplay), IcdDisplayFusionSigs.Sigs.ToIcdHashSet()},
 				{typeof(IRouteSwitcherControl), IcdSwitcherFusionSigs.Sigs.ToIcdHashSet()},
 				{typeof(InputOutputPortBase), IcdSwitcherFusionSigs.InputOutputSigs.ToIcdHashSet()},
-				{typeof(IDevice), IcdStandardFusionSigs.Sigs.ToIcdHashSet()},
+				{typeof(IDeviceBase), IcdStandardFusionSigs.Sigs.ToIcdHashSet()},
 				{typeof(IDialingDeviceExternalTelemetryProvider), IcdDialingDeviceFusionSigs.Sigs.ToIcdHashSet()},
 				{typeof(IOccupancySensorControl), IcdOccupancyFusionSigs.Sigs.ToIcdHashSet()},
 				{typeof(BiampTesiraDevice), IcdDspFusionSigs.Sigs.ToIcdHashSet()},
