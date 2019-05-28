@@ -1,6 +1,6 @@
-﻿using System;
+﻿#if SIMPLSHARP
+using System;
 using ICD.Connect.Telemetry.Crestron.Assets;
-#if SIMPLSHARP
 
 namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {
