@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
@@ -201,7 +202,12 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 #endregion
 
-#region Methods
+		public FusionRoomAdapter()
+		{
+			IcdEnvironment.OnProgramInitializationComplete += IcdEnvironmentOnProgramInitializationComplete;
+		}
+
+		#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -209,6 +215,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		protected override void DisposeFinal(bool disposing)
 		{
 			base.DisposeFinal(disposing);
+
+			IcdEnvironment.OnProgramInitializationComplete -= IcdEnvironmentOnProgramInitializationComplete;
 
 #if SIMPLSHARP
             SetFusionRoom(null);
@@ -289,16 +297,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		{
 			foreach (AssetInfo asset in assets)
 				AddAsset(asset);
-		}
-
-		public void RebuildRvi()
-		{
-#if SIMPLSHARP
-			m_FusionRoom.ReRegister();
-			FusionRVI.GenerateFileForAllFusionDevices();
-#else
-			throw new NotSupportedException();
-#endif
 		}
 
 		public void UpdateDigitalSig(uint sig, bool newValue)
@@ -730,7 +728,18 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		{
 			UpdateCachedOnlineStatus();
 		}
+
+
 #endif
+		private void IcdEnvironmentOnProgramInitializationComplete(object sender, EventArgs eventArgs)
+		{
+#if SIMPLSHARP
+			m_FusionRoom.ReRegister();
+			FusionRVI.GenerateFileForAllFusionDevices();
+#else
+			throw new NotSupportedException();
+#endif
+		}
 
 #endregion
 	}

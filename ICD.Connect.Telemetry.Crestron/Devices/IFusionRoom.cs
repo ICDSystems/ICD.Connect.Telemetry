@@ -37,8 +37,6 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// <param name="assets"></param>
 		void AddAssets(IEnumerable<AssetInfo> assets);
 
-		void RebuildRvi();
-
 		[PublicAPI]
 		void UpdateDigitalSig(uint sig, bool newValue);
 
