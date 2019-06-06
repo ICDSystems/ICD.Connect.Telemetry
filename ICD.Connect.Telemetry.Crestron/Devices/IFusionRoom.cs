@@ -104,6 +104,11 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// <param name="name"></param>
 		/// <param name="mask"></param>
 		void AddSig(uint assetId, eSigType sigType, uint number, string name, eSigIoMask mask);
+
+		/// <summary>
+		/// Generates an RVI file for the fusion assets.
+		/// </summary>
+		void RebuildRvi();
 	}
 
 	public sealed class FusionAssetSigUpdatedArgs : EventArgs

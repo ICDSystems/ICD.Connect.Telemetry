@@ -202,11 +202,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 #endregion
 
-		public FusionRoomAdapter()
-		{
-			IcdEnvironment.OnProgramInitializationComplete += IcdEnvironmentOnProgramInitializationComplete;
-		}
-
 		#region Methods
 
 		/// <summary>
@@ -215,8 +210,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		protected override void DisposeFinal(bool disposing)
 		{
 			base.DisposeFinal(disposing);
-
-			IcdEnvironment.OnProgramInitializationComplete -= IcdEnvironmentOnProgramInitializationComplete;
 
 #if SIMPLSHARP
             SetFusionRoom(null);
@@ -456,16 +449,17 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		}
 
 		/// <summary>
-		/// Loads sigs from the xml file at the given path.
+		/// 
 		/// </summary>
-		public void LoadSigs()
+		public void RebuildRvi()
 		{
 #if SIMPLSHARP
-            FusionRVI.GenerateFileForAllFusionDevices();
+			m_FusionRoom.ReRegister();
+			FusionRVI.GenerateFileForAllFusionDevices();
 #else
-            throw new NotSupportedException();
+			throw new NotSupportedException();
 #endif
-        }
+		}
 
 #endregion
 
@@ -520,8 +514,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 													 settings.RoomId);
 			
 			SetFusionRoom(fusionRoom);
-
-			LoadSigs();
 #else
             throw new NotSupportedException();
 #endif
@@ -731,15 +723,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 
 #endif
-		private void IcdEnvironmentOnProgramInitializationComplete(object sender, EventArgs eventArgs)
-		{
-#if SIMPLSHARP
-			m_FusionRoom.ReRegister();
-			FusionRVI.GenerateFileForAllFusionDevices();
-#else
-			throw new NotSupportedException();
-#endif
-		}
 
 #endregion
 	}
