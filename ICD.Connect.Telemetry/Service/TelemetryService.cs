@@ -22,7 +22,7 @@ namespace ICD.Connect.Telemetry.Service
 		/// Adds a telemetry provider to be tracked. When accessed, its nodes will be lazy-loaded.
 		/// </summary>
 		/// <param name="provider"></param>
-		public bool AddTelemetryProvider(ITelemetryProvider provider)
+		public void AddTelemetryProvider(ITelemetryProvider provider)
 		{
 			if (provider == null)
 				throw new ArgumentNullException("provider");
@@ -32,12 +32,9 @@ namespace ICD.Connect.Telemetry.Service
 			try
 			{
 				if (m_TelemetryProviders.ContainsKey(provider))
-					return false;
+					return;
 
 				m_TelemetryProviders.Add(provider, null);
-				provider.OnRequestTelemetryRebuild += ProviderOnRequestTelemetryRebuild;
-
-				return true;
 			}
 			finally
 			{
@@ -58,8 +55,7 @@ namespace ICD.Connect.Telemetry.Service
 
 			try
 			{
-				if (m_TelemetryProviders.Remove(provider))
-					provider.OnRequestTelemetryRebuild -= ProviderOnRequestTelemetryRebuild;
+				m_TelemetryProviders.Remove(provider);
 			}
 			finally
 			{

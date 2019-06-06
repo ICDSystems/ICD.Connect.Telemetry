@@ -6,7 +6,7 @@ namespace ICD.Connect.Telemetry.Service
 {
 	public interface ITelemetryService
 	{
-		bool AddTelemetryProvider(ITelemetryProvider provider);
+		void AddTelemetryProvider(ITelemetryProvider provider);
 		void RemoveTelemetryProvider(ITelemetryProvider provider);
 
 		IEnumerable<ITelemetryProvider> GetTelemetryProviders();
