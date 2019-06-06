@@ -201,7 +201,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 #endregion
 
-#region Methods
+		#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -289,16 +289,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		{
 			foreach (AssetInfo asset in assets)
 				AddAsset(asset);
-		}
-
-		public void RebuildRvi()
-		{
-#if SIMPLSHARP
-			m_FusionRoom.ReRegister();
-			FusionRVI.GenerateFileForAllFusionDevices();
-#else
-			throw new NotSupportedException();
-#endif
 		}
 
 		public void UpdateDigitalSig(uint sig, bool newValue)
@@ -458,16 +448,17 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		}
 
 		/// <summary>
-		/// Loads sigs from the xml file at the given path.
+		/// 
 		/// </summary>
-		public void LoadSigs()
+		public void RebuildRvi()
 		{
 #if SIMPLSHARP
-            FusionRVI.GenerateFileForAllFusionDevices();
+			m_FusionRoom.ReRegister();
+			FusionRVI.GenerateFileForAllFusionDevices();
 #else
-            throw new NotSupportedException();
+			throw new NotSupportedException();
 #endif
-        }
+		}
 
 #endregion
 
@@ -522,8 +513,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 													 settings.RoomId);
 			
 			SetFusionRoom(fusionRoom);
-
-			LoadSigs();
 #else
             throw new NotSupportedException();
 #endif
@@ -730,6 +719,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		{
 			UpdateCachedOnlineStatus();
 		}
+
+
 #endif
 
 #endregion

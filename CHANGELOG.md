@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.2.0] - 2019-06-06
+### Added
+ - Exposed features for generating Fusion RVI files
+
+### Changed
+ - Fixed bug where Fusion telemetry was not being generated for Panels
+ - FusionTelemetryMunger is no longer generating RVI on completion
+
 ## [5.1.0] - 2019-05-21
 ### Added
  - FusionTelemetryMunger supports registering multiple mapping sets under existing mapping types

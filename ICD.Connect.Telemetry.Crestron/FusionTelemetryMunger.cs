@@ -243,8 +243,6 @@ namespace ICD.Connect.Telemetry.Crestron
 		{
 			foreach (IDeviceBase device in devices)
 				BuildAssets(device);
-
-			m_FusionRoom.RebuildRvi();
 		}
 
 		public void Clear()
