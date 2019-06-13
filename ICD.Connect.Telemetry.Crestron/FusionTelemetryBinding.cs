@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using ICD.Common.Utils.Attributes;
 using ICD.Common.Utils.Extensions;
@@ -247,9 +248,10 @@ namespace ICD.Connect.Telemetry.Crestron
 				            .GetCustomAttributes<RangeAttribute>()
 				            .FirstOrDefault();
 
-			return rangeAttribute == null
-				? RangeAttribute.RemapFromUShort(analog, targetType)
-				: rangeAttribute.RemapAndClamp(analog);
+			if (rangeAttribute != null)
+				return Convert.ChangeType(rangeAttribute.RemapMinMax(analog), targetType, CultureInfo.InvariantCulture);
+
+			return RangeAttribute.Clamp(analog, targetType);
 		}
 
 		private ushort GetValueAsAnalog()
@@ -259,12 +261,20 @@ namespace ICD.Connect.Telemetry.Crestron
 				            .GetCustomAttributes<RangeAttribute>()
 				            .FirstOrDefault();
 
-			return rangeAttribute == null
-				? RangeAttribute.RemapToUShort(GetTelemetry.Value)
-				: rangeAttribute.RemapAndClampToUShort(GetTelemetry.Value);
+			if (rangeAttribute != null)
+				return Convert.ToUInt16(rangeAttribute.ClampMinMaxThenRemap(GetTelemetry.Value, typeof(ushort)));
+
+			// If decimal map dec min-max to ushort min-max
+			Type propertyType = GetTelemetry.PropertyInfo.PropertyType;
+			if (propertyType.IsDecimalNumeric())
+				return Convert.ToUInt16(RangeAttribute.Remap(GetTelemetry.Value, typeof(ushort)));
+
+			// Integral types are clamped
+			return Convert.ToUInt16(RangeAttribute.Clamp(GetTelemetry.Value, typeof(ushort)));
 		}
 
-		public static FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryProvider provider, FusionSigMapping mapping, uint assetId)
+		public static FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryProvider provider,
+		                                          FusionSigMapping mapping, uint assetId)
 		{
 			if (fusionRoom == null)
 				throw new ArgumentNullException("fusionRoom");
