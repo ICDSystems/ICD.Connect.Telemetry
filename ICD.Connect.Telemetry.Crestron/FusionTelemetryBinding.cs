@@ -25,7 +25,16 @@ namespace ICD.Connect.Telemetry.Crestron
 		public IFusionRoom FusionRoom { get; private set; }
 		public IFusionAsset Asset { get; private set; }
 
-		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, IFusionAsset asset, FusionSigMapping mapping)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="fusionRoom"></param>
+		/// <param name="getTelemetry"></param>
+		/// <param name="setTelemetry"></param>
+		/// <param name="asset"></param>
+		/// <param name="mapping"></param>
+		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry,
+		                               IFusionAsset asset, FusionSigMapping mapping)
 		{
 			FusionRoom = fusionRoom;
 			GetTelemetry = getTelemetry as IFeedbackTelemetryItem;
@@ -33,7 +42,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			Asset = asset;
 
 			IUpdatableTelemetryNodeItem updatable = GetTelemetry as IUpdatableTelemetryNodeItem;
-			if(updatable != null)
+			if (updatable != null)
 				updatable.OnValueChanged += UpdatableOnValueChanged;
 
 			Mapping = mapping;
@@ -62,7 +71,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		private void UpdateDigitalTelemetry()
 		{
 			FusionSigMapping singleMapping = Mapping;
-			if(singleMapping == null)
+			if (singleMapping == null)
 				return;
 
 			if (Mapping.Sig == 0)
@@ -72,13 +81,9 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			// Handle case where two separate digitals are used to set true and false
 			if (SetTelemetry.ParameterCount == 0 && digital)
-			{
 				SetTelemetry.Invoke();
-			}
 			else
-			{
 				SetTelemetry.Invoke(digital);
-			}
 		}
 
 		private void UpdateAnalogTelemetry()
@@ -162,7 +167,7 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void UpdateReservedSig()
 		{
-			if(Asset is IFusionStaticAsset)
+			if (Asset is IFusionStaticAsset)
 			{
 				if (Mapping.TelemetryGetName == DeviceTelemetryNames.ONLINE_STATE)
 				{
@@ -181,7 +186,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			{
 				if (Mapping.TelemetryGetName == OccupancyTelemetryNames.OCCUPANCY_STATE)
 				{
-					bool value = ((eOccupancyState)GetTelemetry.Value) == eOccupancyState.Occupied;
+					bool value = (eOccupancyState)GetTelemetry.Value == eOccupancyState.Occupied;
 					((IFusionOccupancySensorAsset)Asset).SetRoomOccupied(value);
 					return;
 				}
@@ -216,14 +221,14 @@ namespace ICD.Connect.Telemetry.Crestron
 				               .AddEntry(eSeverity.Error, "{0} - Failed to convert value to analog - {1}", this, e.Message);
 				return;
 			}
-			
+
 			((IFusionStaticAsset)Asset).UpdateAnalogSig(singleMapping.Sig, analog);
 		}
 
 		private void UpdateSerialSig()
 		{
 			FusionSigMapping singleMapping = Mapping;
-			if (singleMapping == null || GetTelemetry == null ||GetTelemetry.Value == null)
+			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
 				return;
 
 			string serial = GetTelemetry.Value.ToString();
@@ -264,7 +269,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (fusionRoom == null)
 				throw new ArgumentNullException("fusionRoom");
 
-			if(provider == null)
+			if (provider == null)
 				throw new ArgumentException("provider");
 
 			if (mapping == null)
@@ -277,7 +282,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			ITelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName);
 			ITelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName);
 
-			if(getTelemetryItem == null && setTelemetryItem == null)
+			if (getTelemetryItem == null && setTelemetryItem == null)
 				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
 
 			// If the sig number is 0, that indicates that the sig is special-handling
