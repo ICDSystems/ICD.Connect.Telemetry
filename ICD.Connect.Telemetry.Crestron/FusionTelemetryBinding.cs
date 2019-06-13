@@ -70,7 +70,7 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			bool digital = ((IFusionStaticAsset)Asset).ReadDigitalSig(singleMapping.Sig);
 
-			//Handle case where two seperate digitals are used to set true and false
+			// Handle case where two separate digitals are used to set true and false
 			if (SetTelemetry.ParameterCount == 0 && digital)
 			{
 				SetTelemetry.Invoke();
@@ -91,8 +91,28 @@ namespace ICD.Connect.Telemetry.Crestron
 				return;
 
 			ushort analog = ((IFusionStaticAsset)Asset).ReadAnalogSig(singleMapping.Sig);
-			object rescaledValue = GetRescaledAnalogValue(analog);
-			SetTelemetry.Invoke(rescaledValue);
+			object rescaledValue;
+
+			try
+			{
+				rescaledValue = GetRescaledAnalogValue(analog);
+			}
+			catch (Exception e)
+			{
+				ServiceProvider.GetService<ILoggerService>()
+				               .AddEntry(eSeverity.Error, "{0} - Failed to convert analog telemtry value - {1}", this, e.Message);
+				return;
+			}
+
+			try
+			{
+				SetTelemetry.Invoke(rescaledValue);
+			}
+			catch (Exception e)
+			{
+				ServiceProvider.GetService<ILoggerService>()
+				               .AddEntry(eSeverity.Error, "{0} - Failed to invoke SetTelemetry method - {1}", this, e.Message);
+			}
 		}
 
 		private void UpdateSerialTelemetry()
@@ -184,7 +204,19 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
 				return;
 
-			ushort analog = GetNewAnalogValue();
+			ushort analog;
+
+			try
+			{
+				analog = GetValueAsAnalog();
+			}
+			catch (Exception e)
+			{
+				ServiceProvider.GetService<ILoggerService>()
+				               .AddEntry(eSeverity.Error, "{0} - Failed to convert value to analog - {1}", this, e.Message);
+				return;
+			}
+			
 			((IFusionStaticAsset)Asset).UpdateAnalogSig(singleMapping.Sig, analog);
 		}
 
@@ -200,54 +232,31 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private object GetRescaledAnalogValue(ushort analog)
 		{
-			if(SetTelemetry == null || SetTelemetry.ParameterCount == 0)
+			if (SetTelemetry == null || SetTelemetry.ParameterCount == 0)
 				throw new InvalidOperationException("Set telemetry is null or has no parameters");
 
 			Type targetType = SetTelemetry.ParameterTypes[0];
 
-			if (!targetType.IsDecimalNumeric())
-			{
-				return Convert.ChangeType(analog, targetType, null);
-			}
+			RangeAttribute rangeAttribute =
+				GetTelemetry.PropertyInfo
+				            .GetCustomAttributes<RangeAttribute>()
+				            .FirstOrDefault();
 
-			RangeAttribute rangeAttribute = EnumerableExtensions.FirstOrDefault(GetTelemetry.PropertyInfo
-			                                                                                .GetCustomAttributes<RangeAttribute>(),
-			                                                                    null);
-			return rangeAttribute == null 
-				? Convert.ChangeType(analog, targetType, null) 
-				: rangeAttribute.RemapUshortToRange(analog);
+			return rangeAttribute == null
+				? RangeAttribute.RemapFromUShort(analog, targetType)
+				: rangeAttribute.RemapAndClamp(analog);
 		}
 
-		private ushort GetNewAnalogValue()
+		private ushort GetValueAsAnalog()
 		{
-			if (!GetTelemetry.ValueType.IsDecimalNumeric())
-			{
-				return (ushort)Convert.ChangeType(GetTelemetry.Value, typeof(ushort), null);
-			}
+			RangeAttribute rangeAttribute =
+				GetTelemetry.PropertyInfo
+				            .GetCustomAttributes<RangeAttribute>()
+				            .FirstOrDefault();
 
-			RangeAttribute rangeAttribute = EnumerableExtensions.FirstOrDefault(GetTelemetry.PropertyInfo
-			                                                                        .GetCustomAttributes<RangeAttribute>(), null);
-			if (rangeAttribute == null)
-			{
-				return (ushort)Convert.ChangeType(GetTelemetry.Value, typeof(ushort), null);
-			}
-
-			if (rangeAttribute.IsInRange(GetTelemetry.Value))
-			{
-				double value = (double)Convert.ChangeType(GetTelemetry.Value, typeof(double), null);
-
-				//Cast value to double, since we only care about decimal types here 
-				//and all decimal types can be converted to double
-				return rangeAttribute.RemapRangeToUshort(value);
-			}
-
-			ServiceProvider.GetService<ILoggerService>()
-			               .AddEntry(eSeverity.Warning,
-			                         "Warning when converting analog telemtry value. Value {0} is outside expected range {1}-{2}. Value will be set to 0.",
-			                         GetTelemetry.Value,
-			                         rangeAttribute.Min,
-			                         rangeAttribute.Max);
-			return 0;
+			return rangeAttribute == null
+				? RangeAttribute.RemapToUShort(GetTelemetry.Value)
+				: rangeAttribute.RemapAndClampToUShort(GetTelemetry.Value);
 		}
 
 		public static FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryProvider provider, FusionSigMapping mapping, uint assetId)
