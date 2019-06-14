@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.2.1] - 2019-06-14
+### Changed
+ - Using new RangeAttribute methods for safer remapping of ushort to/from numeric types
+ - Failing gracefully when a numeric value fails to remap
+
 ## [5.2.0] - 2019-06-06
 ### Added
  - Exposed features for generating Fusion RVI files
