@@ -124,7 +124,7 @@ namespace ICD.Connect.Telemetry
 				{
 					attributes = type.GetAllTypes()
 					                 .Except(type)
-					                 .SelectMany(GetExternalTelemetryAttributes)
+					                 .SelectMany(t => GetExternalTelemetryAttributes(t))
 									 .ToIcdHashSet();
 
 					IEnumerable<ExternalTelemetryAttribute> externalAttributes =
@@ -158,7 +158,7 @@ namespace ICD.Connect.Telemetry
 				{
 					propertyInfos = type.GetAllTypes()
 										.Except(type)
-										.SelectMany(GetPropertiesWithTelemetryAttributes)
+										.SelectMany(t => GetPropertiesWithTelemetryAttributes(t))
 										.ToIcdHashSet(TelemetryPropertyInfoEqualityComparer.Instance);
 
 					IEnumerable<PropertyInfo> typeProperties =
@@ -198,7 +198,7 @@ namespace ICD.Connect.Telemetry
 				{
 					methodInfos = type.GetAllTypes()
 					                  .Except(type)
-					                  .SelectMany(GetMethodsWithTelemetryAttributes)
+					                  .SelectMany(t => GetMethodsWithTelemetryAttributes(t))
 					                  .ToIcdHashSet(TelemetryMethodInfoEqualityComparer.Instance);
 
 					IEnumerable<MethodInfo> typeMethods =
