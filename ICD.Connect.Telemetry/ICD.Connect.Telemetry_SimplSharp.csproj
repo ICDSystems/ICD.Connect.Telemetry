@@ -84,6 +84,7 @@
     <Compile Include="Attributes\MethodTelemetryAttribute.cs" />
     <Compile Include="Attributes\DynamicPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\EventTelemetryAttribute.cs" />
+    <Compile Include="Comparers\TelemetryEventInfoEqualityComparer.cs" />
     <Compile Include="EventArguments\IndexedBooleanEventArgs.cs" />
     <Compile Include="IExternalTelemetryProvider.cs" />
     <Compile Include="ITelemetryCollection.cs" />
@@ -108,8 +109,8 @@
     <Compile Include="AbstractTelemetryCollection.cs" />
     <Compile Include="TelemetryCollection.cs" />
     <Compile Include="TelemetryConsole.cs" />
-    <Compile Include="TelemetryMethodInfoEqualityComparer.cs" />
-    <Compile Include="TelemetryPropertyInfoEqualityComparer.cs" />
+    <Compile Include="Comparers\TelemetryMethodInfoEqualityComparer.cs" />
+    <Compile Include="Comparers\TelemetryPropertyInfoEqualityComparer.cs" />
     <Compile Include="TelemetryUtils.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>

@@ -36,15 +36,15 @@ namespace ICD.Connect.Telemetry.Attributes
 					string.Format("Cannot generate collection telemetry for non-enumerable property {0}, {1}", propertyInfo.Name,
 					              propertyInfo.PropertyType));
 
-			IEnumerable childInstance = (IEnumerable)propertyInfo.GetValue(instance, null);
-			if (childInstance == null)
+			IEnumerable childInstances = (IEnumerable)propertyInfo.GetValue(instance, null);
+			if (childInstances == null)
 				throw new InvalidProgramException(string.Format("Property {0} value is null", propertyInfo.Name));
 
-			IEnumerable<ITelemetryProvider> childrenProviders = childInstance.OfType<ITelemetryProvider>();
+			IEnumerable<ITelemetryProvider> childrenProviders = childInstances.OfType<ITelemetryProvider>();
 
 			IcdHashSet<ITelemetryItem> listItemNodes = new IcdHashSet<ITelemetryItem>();
 			int index = 0;
-			foreach (var provider in childrenProviders)
+			foreach (ITelemetryProvider provider in childrenProviders)
 			{
 				ITelemetryCollection innerTelemetry = TelemetryUtils.InstantiateTelemetry(provider);
 				listItemNodes.Add(new CollectionTelemetryNodeItem(string.Format("{0}[{1}]", Name, index), instance, innerTelemetry));

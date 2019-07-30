@@ -6,6 +6,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Attributes;
+using ICD.Connect.Telemetry.Comparers;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -19,6 +20,7 @@ namespace ICD.Connect.Telemetry
 		private static readonly Dictionary<Type, IcdHashSet<ExternalTelemetryAttribute>> s_TypeToExternalTelemetryAttributes;
 		private static readonly Dictionary<Type, Dictionary<PropertyInfo, ITelemetryAttribute>> s_TypeToPropertyInfo;
 		private static readonly Dictionary<Type, Dictionary<MethodInfo, IMethodTelemetryAttribute>> s_TypeToMethodInfo;
+		private static readonly Dictionary<Type, Dictionary<EventInfo, IEventTelemetryAttribute>> s_TypeToEventInfo;
 		private static readonly SafeCriticalSection s_CacheSection;
 
 		/// <summary>
@@ -29,6 +31,7 @@ namespace ICD.Connect.Telemetry
 			s_TypeToExternalTelemetryAttributes = new Dictionary<Type, IcdHashSet<ExternalTelemetryAttribute>>();
 			s_TypeToPropertyInfo = new Dictionary<Type, Dictionary<PropertyInfo, ITelemetryAttribute>>();
 			s_TypeToMethodInfo = new Dictionary<Type, Dictionary<MethodInfo, IMethodTelemetryAttribute>>();
+			s_TypeToEventInfo = new Dictionary<Type, Dictionary<EventInfo, IEventTelemetryAttribute>>();
 			s_CacheSection = new SafeCriticalSection();
 		}
 
@@ -85,6 +88,25 @@ namespace ICD.Connect.Telemetry
 		#endregion
 
 		#region Reflection
+
+		[NotNull]
+		public static EventInfo GetEventInfo(ITelemetryProvider instance, string eventName)
+		{
+			if (instance == null)
+				throw new ArgumentNullException("instance");
+
+			Type type = instance.GetType();
+			return GetEventInfo(type, eventName);
+		}
+
+		[NotNull]
+		public static EventInfo GetEventInfo(Type type, string eventName)
+		{
+			if (type == null)
+				throw new ArgumentNullException("type");
+
+			return GetEventsWithTelemetryAttributes(type).First(kvp => kvp.Value.Name == eventName).Key;
+		}
 
 		private static IEnumerable<IExternalTelemetryProvider> GetExternalTelemetryProviders(ITelemetryProvider instance)
 		{
@@ -228,6 +250,52 @@ namespace ICD.Connect.Telemetry
 			}
 		}
 
+		private static IEnumerable<KeyValuePair<EventInfo, IEventTelemetryAttribute>> GetEventsWithTelemetryAttributes(Type type)
+		{
+			if (type == null)
+				throw new ArgumentNullException("type");
+
+			s_CacheSection.Enter();
+
+			try
+			{
+				Dictionary<EventInfo, IEventTelemetryAttribute> eventInfos;
+
+				if (!s_TypeToEventInfo.TryGetValue(type, out eventInfos))
+				{
+					eventInfos = new Dictionary<EventInfo, IEventTelemetryAttribute>(TelemetryEventInfoEqualityComparer.Instance);
+					s_TypeToEventInfo.Add(type, eventInfos);
+
+					// First get the inherited events
+					IEnumerable<KeyValuePair<EventInfo, IEventTelemetryAttribute>> inheritedEvents =
+						type.GetAllTypes()
+						    .Except(type)
+						    .SelectMany(t => GetEventsWithTelemetryAttributes(t));
+
+					// Then get the events for this type
+					IEnumerable<KeyValuePair<EventInfo, IEventTelemetryAttribute>> typeEvents =
+#if SIMPLSHARP
+						((CType)type)
+#else
+						type.GetTypeInfo()
+#endif
+						    .GetEvents()
+						    .Select(e => new KeyValuePair<EventInfo, IEventTelemetryAttribute>(e, GetTelemetryAttribute(e)))
+						    .Where(kvp => kvp.Value != null);
+
+					// Then insert everything - Type events win
+					foreach (KeyValuePair<EventInfo, IEventTelemetryAttribute> kvp in inheritedEvents.Concat(typeEvents))
+						eventInfos[kvp.Key] = kvp.Value;
+				}
+
+				return eventInfos;
+			}
+			finally
+			{
+				s_CacheSection.Leave();
+			}
+		}
+
 		[CanBeNull]
 		private static ITelemetryAttribute GetTelemetryAttribute(PropertyInfo property)
 		{
@@ -248,6 +316,17 @@ namespace ICD.Connect.Telemetry
 // ReSharper disable InvokeAsExtensionMethod
 			return ReflectionExtensions.GetCustomAttributes<IMethodTelemetryAttribute>(method, true).FirstOrDefault();
 // ReSharper restore InvokeAsExtensionMethod
+		}
+
+		[CanBeNull]
+		private static IEventTelemetryAttribute GetTelemetryAttribute(EventInfo eventInfo)
+		{
+			if (eventInfo == null)
+				throw new ArgumentException("eventInfo");
+
+			// ReSharper disable InvokeAsExtensionMethod
+			return ReflectionExtensions.GetCustomAttributes<IEventTelemetryAttribute>(eventInfo, true).FirstOrDefault();
+			// ReSharper restore InvokeAsExtensionMethod
 		}
 
 		#endregion

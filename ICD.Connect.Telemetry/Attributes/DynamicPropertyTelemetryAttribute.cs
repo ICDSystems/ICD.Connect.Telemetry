@@ -41,30 +41,7 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// <returns></returns>
 		public override IFeedbackTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
 		{
-			IcdHashSet<Type> types = instance.GetType().GetAllTypes().ToIcdHashSet();
-#if SIMPLSHARP
-			IEnumerable<CType> cTypes = types.Select(t => t.GetCType());
-			IcdHashSet<EventInfo> eventInfos =
-				cTypes.SelectMany(c => c.GetEvents()).ToIcdHashSet();
-#else
-			IEnumerable<EventInfo> eventInfos = types.SelectMany(t=> t.GetEvents());
-#endif
-			EventInfo eventInfo = eventInfos.FirstOrDefault(info => info.GetCustomAttributes<EventTelemetryAttribute>()
-			                                                            .Any(attr => attr.Name == EventName));
-
-			if (eventInfo == null)
-			{
-				foreach (var evInfo in eventInfos)
-				{
-					IEnumerable<EventTelemetryAttribute> attrs = evInfo.GetCustomAttributes<EventTelemetryAttribute>();
-					foreach (var attr in attrs)
-					{
-						IcdConsole.PrintLine(eConsoleColor.Magenta, attr.Name);
-					}
-				}
-				throw new InvalidOperationException(string.Format("Couldn't find event with name {0} on instance {1}", EventName, instance));
-			}
-
+			EventInfo eventInfo = TelemetryUtils.GetEventInfo(instance, EventName);
 			Type type = typeof(DynamicTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
 
 			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new object[] {Name, instance, eventInfo, propertyInfo});
