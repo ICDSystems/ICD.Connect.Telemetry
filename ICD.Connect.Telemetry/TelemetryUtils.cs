@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Attributes;
 #if SIMPLSHARP
@@ -14,6 +16,24 @@ namespace ICD.Connect.Telemetry
 {
 	public static class TelemetryUtils
 	{
+		private static readonly Dictionary<Type, IcdHashSet<ExternalTelemetryAttribute>> s_TypeToExternalTelemetryAttributes;
+		private static readonly Dictionary<Type, IcdHashSet<PropertyInfo>> s_TypeToPropertyInfo;
+		private static readonly Dictionary<Type, IcdHashSet<MethodInfo>> s_TypeToMethodInfo;
+		private static readonly SafeCriticalSection s_CacheSection;
+
+		/// <summary>
+		/// Static constructor.
+		/// </summary>
+		static TelemetryUtils()
+		{
+			s_TypeToExternalTelemetryAttributes = new Dictionary<Type, IcdHashSet<ExternalTelemetryAttribute>>();
+			s_TypeToPropertyInfo = new Dictionary<Type, IcdHashSet<PropertyInfo>>();
+			s_TypeToMethodInfo = new Dictionary<Type, IcdHashSet<MethodInfo>>();
+			s_CacheSection = new SafeCriticalSection();
+		}
+
+		#region Instantiate
+
 		[PublicAPI]
 		public static ITelemetryCollection InstantiateTelemetry(ITelemetryProvider instance)
 		{
@@ -70,6 +90,10 @@ namespace ICD.Connect.Telemetry
 			}
 		}
 
+		#endregion
+
+		#region Reflection
+
 		private static IEnumerable<IExternalTelemetryProvider> GetExternalTelemetryProviders(ITelemetryProvider instance)
 		{
 			IEnumerable<ExternalTelemetryAttribute> externalTelemetryAttributes = GetExternalTelemetryAttributes(instance);
@@ -77,12 +101,46 @@ namespace ICD.Connect.Telemetry
 			return externalTelemetryAttributes.Select(attr => attr.InstantiateTelemetryItem(instance));
 		}
 
-		private static IEnumerable<ExternalTelemetryAttribute> GetExternalTelemetryAttributes(ITelemetryProvider instance)
+		private static IEnumerable<ExternalTelemetryAttribute> GetExternalTelemetryAttributes([NotNull]ITelemetryProvider instance)
 		{
-			return instance.GetType()
-			               .GetAllTypes()
-			               .SelectMany(type => Attribute.GetCustomAttributes(type)
-			                                            .OfType<ExternalTelemetryAttribute>());
+			if (instance == null)
+				throw new ArgumentNullException("instance");
+
+			return GetExternalTelemetryAttributes(instance.GetType());
+		}
+
+		private static IEnumerable<ExternalTelemetryAttribute> GetExternalTelemetryAttributes([NotNull]Type type)
+		{
+			if (type == null)
+				throw new ArgumentNullException("type");
+
+			s_CacheSection.Enter();
+
+			try
+			{
+				IcdHashSet<ExternalTelemetryAttribute> attributes;
+
+				if (!s_TypeToExternalTelemetryAttributes.TryGetValue(type, out attributes))
+				{
+					attributes = type.GetAllTypes()
+					                 .Except(type)
+					                 .SelectMany(GetExternalTelemetryAttributes)
+									 .ToIcdHashSet();
+
+					IEnumerable<ExternalTelemetryAttribute> externalAttributes =
+						AttributeUtils.GetClassAttributes<ExternalTelemetryAttribute>(type);
+
+					attributes.AddRange(externalAttributes);
+
+					s_TypeToExternalTelemetryAttributes.Add(type, attributes);
+				}
+
+				return attributes;
+			}
+			finally
+			{
+				s_CacheSection.Leave();
+			}
 		}
 
 		private static IEnumerable<PropertyInfo> GetPropertiesWithTelemetryAttributes(Type type)
@@ -90,17 +148,39 @@ namespace ICD.Connect.Telemetry
 			if (type == null)
 				throw new ArgumentNullException("type");
 
-			return
-				type.GetAllTypes()
-				    .SelectMany(t =>
+			s_CacheSection.Enter();
+
+			try
+			{
+				IcdHashSet<PropertyInfo> propertyInfos;
+
+				if (!s_TypeToPropertyInfo.TryGetValue(type, out propertyInfos))
+				{
+					propertyInfos = type.GetAllTypes()
+										.Except(type)
+										.SelectMany(GetPropertiesWithTelemetryAttributes)
+										.ToIcdHashSet(TelemetryPropertyInfoEqualityComparer.Instance);
+
+					IEnumerable<PropertyInfo> typeProperties =
 #if SIMPLSHARP
-				                ((CType)t)
+						((CType)type)
 #else
-										t.GetTypeInfo()
+						type.GetTypeInfo()
 #endif
-					                .GetProperties())
-				    .Where(p => GetTelemetryAttribute(p) != null)
-				    .Distinct(TelemetryPropertyInfoEqualityComparer.Instance);
+						    .GetProperties()
+						    .Where(p => GetTelemetryAttribute(p) != null);
+
+					propertyInfos.AddRange(typeProperties);
+
+					s_TypeToPropertyInfo.Add(type, propertyInfos);
+				}
+
+				return propertyInfos;
+			}
+			finally
+			{
+				s_CacheSection.Leave();
+			}
 		}
 
 		private static IEnumerable<MethodInfo> GetMethodsWithTelemetryAttributes(Type type)
@@ -108,17 +188,39 @@ namespace ICD.Connect.Telemetry
 			if (type == null)
 				throw new ArgumentNullException("type");
 
-			return
-				type.GetAllTypes()
-				    .SelectMany(t =>
+			s_CacheSection.Enter();
+
+			try
+			{
+				IcdHashSet<MethodInfo> methodInfos;
+
+				if (!s_TypeToMethodInfo.TryGetValue(type, out methodInfos))
+				{
+					methodInfos = type.GetAllTypes()
+					                  .Except(type)
+					                  .SelectMany(GetMethodsWithTelemetryAttributes)
+					                  .ToIcdHashSet(TelemetryMethodInfoEqualityComparer.Instance);
+
+					IEnumerable<MethodInfo> typeMethods =
 #if SIMPLSHARP
-				                ((CType)t)
+						((CType)type)
 #else
-										t.GetTypeInfo()
+						type.GetTypeInfo()
 #endif
-					                .GetMethods())
-				    .Where(m => GetTelemetryAttribute(m) != null)
-				    .Distinct(TelemetryMethodInfoEqualityComparer.Instance);
+						    .GetMethods()
+						    .Where(m => GetTelemetryAttribute(m) != null);
+
+					methodInfos.AddRange(typeMethods);
+
+					s_TypeToMethodInfo.Add(type, methodInfos);
+				}
+
+				return methodInfos;
+			}
+			finally
+			{
+				s_CacheSection.Leave();
+			}
 		}
 
 		[CanBeNull]
@@ -142,5 +244,7 @@ namespace ICD.Connect.Telemetry
 			return ReflectionExtensions.GetCustomAttributes<IMethodTelemetryAttribute>(method, true).FirstOrDefault();
 // ReSharper restore InvokeAsExtensionMethod
 		}
+
+		#endregion
 	}
 }
