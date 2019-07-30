@@ -23,6 +23,12 @@ namespace ICD.Connect.Telemetry
 		private static readonly Dictionary<Type, Dictionary<EventInfo, IEventTelemetryAttribute>> s_TypeToEventInfo;
 		private static readonly SafeCriticalSection s_CacheSection;
 
+		private static BindingFlags s_BindingFlags =
+			BindingFlags.Instance | // Non-static classes
+			BindingFlags.Static | // Static classes
+			BindingFlags.Public | // Public members only
+			BindingFlags.DeclaredOnly; // No inherited members
+
 		/// <summary>
 		/// Static constructor.
 		/// </summary>
@@ -187,7 +193,7 @@ namespace ICD.Connect.Telemetry
 #else
 						type.GetTypeInfo()
 #endif
-						    .GetProperties()
+						    .GetProperties(s_BindingFlags)
 						    .Select(p => new KeyValuePair<PropertyInfo, ITelemetryAttribute>(p, GetTelemetryAttribute(p)))
 						    .Where(kvp => kvp.Value != null);
 
@@ -233,7 +239,7 @@ namespace ICD.Connect.Telemetry
 #else
 						type.GetTypeInfo()
 #endif
-						    .GetMethods()
+						    .GetMethods(s_BindingFlags)
 						    .Select(m => new KeyValuePair<MethodInfo, IMethodTelemetryAttribute>(m, GetTelemetryAttribute(m)))
 						    .Where(kvp => kvp.Value != null);
 
@@ -279,7 +285,7 @@ namespace ICD.Connect.Telemetry
 #else
 						type.GetTypeInfo()
 #endif
-						    .GetEvents()
+						    .GetEvents(s_BindingFlags)
 						    .Select(e => new KeyValuePair<EventInfo, IEventTelemetryAttribute>(e, GetTelemetryAttribute(e)))
 						    .Where(kvp => kvp.Value != null);
 
