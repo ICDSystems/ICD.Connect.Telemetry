@@ -17,8 +17,8 @@ namespace ICD.Connect.Telemetry
 	public static class TelemetryUtils
 	{
 		private static readonly Dictionary<Type, IcdHashSet<ExternalTelemetryAttribute>> s_TypeToExternalTelemetryAttributes;
-		private static readonly Dictionary<Type, IcdHashSet<PropertyInfo>> s_TypeToPropertyInfo;
-		private static readonly Dictionary<Type, IcdHashSet<MethodInfo>> s_TypeToMethodInfo;
+		private static readonly Dictionary<Type, Dictionary<PropertyInfo, ITelemetryAttribute>> s_TypeToPropertyInfo;
+		private static readonly Dictionary<Type, Dictionary<MethodInfo, IMethodTelemetryAttribute>> s_TypeToMethodInfo;
 		private static readonly SafeCriticalSection s_CacheSection;
 
 		/// <summary>
@@ -27,8 +27,8 @@ namespace ICD.Connect.Telemetry
 		static TelemetryUtils()
 		{
 			s_TypeToExternalTelemetryAttributes = new Dictionary<Type, IcdHashSet<ExternalTelemetryAttribute>>();
-			s_TypeToPropertyInfo = new Dictionary<Type, IcdHashSet<PropertyInfo>>();
-			s_TypeToMethodInfo = new Dictionary<Type, IcdHashSet<MethodInfo>>();
+			s_TypeToPropertyInfo = new Dictionary<Type, Dictionary<PropertyInfo, ITelemetryAttribute>>();
+			s_TypeToMethodInfo = new Dictionary<Type, Dictionary<MethodInfo, IMethodTelemetryAttribute>>();
 			s_CacheSection = new SafeCriticalSection();
 		}
 
@@ -46,36 +46,28 @@ namespace ICD.Connect.Telemetry
 
 		private static void InstantiatePropertyTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
 		{
-			IEnumerable<PropertyInfo> properties = GetPropertiesWithTelemetryAttributes(instance.GetType());
+			IEnumerable<KeyValuePair<PropertyInfo, ITelemetryAttribute>> properties =
+				GetPropertiesWithTelemetryAttributes(instance.GetType());
 
-			foreach (PropertyInfo property in properties)
+			foreach (KeyValuePair<PropertyInfo, ITelemetryAttribute> kvp in properties)
 			{
-				ITelemetryAttribute attribute = GetTelemetryAttribute(property);
-				if (attribute == null)
-					continue;
+				IPropertyTelemetryAttribute singleTelemetryAttribute = kvp.Value as IPropertyTelemetryAttribute;
+				if (singleTelemetryAttribute != null)
+					collection.Add(singleTelemetryAttribute.InstantiateTelemetryItem(instance, kvp.Key));
 
-				IPropertyTelemetryAttribute singleTelemetryAttribute = attribute as IPropertyTelemetryAttribute;
-				if(singleTelemetryAttribute != null)
-					collection.Add(singleTelemetryAttribute.InstantiateTelemetryItem(instance, property));
-
-				ICollectionTelemetryAttribute multiTelemetryAttribute = attribute as ICollectionTelemetryAttribute;
-				if(multiTelemetryAttribute != null)
-					collection.Add(multiTelemetryAttribute.InstantiateTelemetryItem(instance, property));
+				ICollectionTelemetryAttribute multiTelemetryAttribute = kvp.Value as ICollectionTelemetryAttribute;
+				if (multiTelemetryAttribute != null)
+					collection.Add(multiTelemetryAttribute.InstantiateTelemetryItem(instance, kvp.Key));
 			}
 		}
 
 		private static void InstantiateMethodTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
 		{
-			IEnumerable<MethodInfo> methods = GetMethodsWithTelemetryAttributes(instance.GetType());
+			IEnumerable<KeyValuePair<MethodInfo, IMethodTelemetryAttribute>> methods =
+				GetMethodsWithTelemetryAttributes(instance.GetType());
 
-			foreach (MethodInfo method in methods)
-			{
-				IMethodTelemetryAttribute attribute = GetTelemetryAttribute(method);
-				if (attribute == null)
-					continue;
-
-				collection.Add(attribute.InstantiateTelemetryItem(instance, method));
-			}
+			foreach (KeyValuePair<MethodInfo, IMethodTelemetryAttribute> kvp in methods)
+				collection.Add(kvp.Value.InstantiateTelemetryItem(instance, kvp.Key));
 		}
 
 		private static void InstantiateExternalTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
@@ -143,7 +135,8 @@ namespace ICD.Connect.Telemetry
 			}
 		}
 
-		private static IEnumerable<PropertyInfo> GetPropertiesWithTelemetryAttributes(Type type)
+		private static IEnumerable<KeyValuePair<PropertyInfo, ITelemetryAttribute>>
+			GetPropertiesWithTelemetryAttributes(Type type)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -152,27 +145,33 @@ namespace ICD.Connect.Telemetry
 
 			try
 			{
-				IcdHashSet<PropertyInfo> propertyInfos;
+				Dictionary<PropertyInfo, ITelemetryAttribute> propertyInfos;
 
 				if (!s_TypeToPropertyInfo.TryGetValue(type, out propertyInfos))
 				{
-					propertyInfos = type.GetAllTypes()
-										.Except(type)
-										.SelectMany(t => GetPropertiesWithTelemetryAttributes(t))
-										.ToIcdHashSet(TelemetryPropertyInfoEqualityComparer.Instance);
+					propertyInfos = new Dictionary<PropertyInfo, ITelemetryAttribute>(TelemetryPropertyInfoEqualityComparer.Instance);
+					s_TypeToPropertyInfo.Add(type, propertyInfos);
 
-					IEnumerable<PropertyInfo> typeProperties =
+					// First get the inherited properties
+					IEnumerable<KeyValuePair<PropertyInfo, ITelemetryAttribute>> inheritedProperties =
+						type.GetAllTypes()
+						    .Except(type)
+						    .SelectMany(t => GetPropertiesWithTelemetryAttributes(t));
+
+					// Then get the properties for this type
+					IEnumerable<KeyValuePair<PropertyInfo, ITelemetryAttribute>> typeProperties =
 #if SIMPLSHARP
 						((CType)type)
 #else
 						type.GetTypeInfo()
 #endif
 						    .GetProperties()
-						    .Where(p => GetTelemetryAttribute(p) != null);
+						    .Select(p => new KeyValuePair<PropertyInfo, ITelemetryAttribute>(p, GetTelemetryAttribute(p)))
+						    .Where(kvp => kvp.Value != null);
 
-					propertyInfos.AddRange(typeProperties);
-
-					s_TypeToPropertyInfo.Add(type, propertyInfos);
+					// Then insert everything - Type properties win
+					foreach (KeyValuePair<PropertyInfo, ITelemetryAttribute> kvp in inheritedProperties.Concat(typeProperties))
+						propertyInfos[kvp.Key] = kvp.Value;
 				}
 
 				return propertyInfos;
@@ -183,7 +182,7 @@ namespace ICD.Connect.Telemetry
 			}
 		}
 
-		private static IEnumerable<MethodInfo> GetMethodsWithTelemetryAttributes(Type type)
+		private static IEnumerable<KeyValuePair<MethodInfo, IMethodTelemetryAttribute>> GetMethodsWithTelemetryAttributes(Type type)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -192,27 +191,33 @@ namespace ICD.Connect.Telemetry
 
 			try
 			{
-				IcdHashSet<MethodInfo> methodInfos;
+				Dictionary<MethodInfo, IMethodTelemetryAttribute> methodInfos;
 
 				if (!s_TypeToMethodInfo.TryGetValue(type, out methodInfos))
 				{
-					methodInfos = type.GetAllTypes()
-					                  .Except(type)
-					                  .SelectMany(t => GetMethodsWithTelemetryAttributes(t))
-					                  .ToIcdHashSet(TelemetryMethodInfoEqualityComparer.Instance);
+					methodInfos = new Dictionary<MethodInfo, IMethodTelemetryAttribute>(TelemetryMethodInfoEqualityComparer.Instance);
+					s_TypeToMethodInfo.Add(type, methodInfos);
 
-					IEnumerable<MethodInfo> typeMethods =
+					// First get the inherited methods
+					IEnumerable<KeyValuePair<MethodInfo, IMethodTelemetryAttribute>> inheritedMethods =
+						type.GetAllTypes()
+						    .Except(type)
+						    .SelectMany(t => GetMethodsWithTelemetryAttributes(t));
+
+					// Then get the methods for this type
+					IEnumerable<KeyValuePair<MethodInfo, IMethodTelemetryAttribute>> typeMethods =
 #if SIMPLSHARP
 						((CType)type)
 #else
 						type.GetTypeInfo()
 #endif
 						    .GetMethods()
-						    .Where(m => GetTelemetryAttribute(m) != null);
+						    .Select(m => new KeyValuePair<MethodInfo, IMethodTelemetryAttribute>(m, GetTelemetryAttribute(m)))
+						    .Where(kvp => kvp.Value != null);
 
-					methodInfos.AddRange(typeMethods);
-
-					s_TypeToMethodInfo.Add(type, methodInfos);
+					// Then insert everything - Type methods win
+					foreach (KeyValuePair<MethodInfo, IMethodTelemetryAttribute> kvp in inheritedMethods.Concat(typeMethods))
+						methodInfos[kvp.Key] = kvp.Value;
 				}
 
 				return methodInfos;
