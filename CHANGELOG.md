@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.2.2] - 2019-08-01
+### Changed
+ - Substantial performance improvements in telemetry instantiation
+
 ## [5.2.1] - 2019-06-14
 ### Changed
  - Using new RangeAttribute methods for safer remapping of ushort to/from numeric types

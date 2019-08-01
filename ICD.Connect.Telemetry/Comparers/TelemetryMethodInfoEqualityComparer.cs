@@ -5,7 +5,7 @@ using Crestron.SimplSharp.Reflection;
 using System.Reflection;
 #endif
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.Comparers
 {
 	public sealed class TelemetryMethodInfoEqualityComparer : IEqualityComparer<MethodInfo>
 	{
