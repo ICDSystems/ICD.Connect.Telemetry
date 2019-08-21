@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
@@ -225,19 +226,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		{
 			Unsubscribe(m_FusionRoom);
 
-			if (m_FusionRoom != null)
-			{
-				if (m_FusionRoom.Registered)
-					m_FusionRoom.UnRegister();
-
-				try
-				{
-					m_FusionRoom.Dispose();
-				}
-				catch (Exception)
-				{
-				}
-			}
+	        if (m_FusionRoom != null)
+		        GenericBaseUtils.TearDown(m_FusionRoom);
 
 	        m_BooleanInput = null;
 	        m_BooleanOutput = null;
@@ -248,15 +238,10 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 	        m_FusionAssets = null;
 
 			m_FusionRoom = fusionRoom;
-			if (m_FusionRoom != null && !m_FusionRoom.Registered)
-			{
-				if (Name != null)
-					m_FusionRoom.Description = Name;
 
-				eDeviceRegistrationUnRegistrationResponse result = m_FusionRoom.Register();
-				if (result != eDeviceRegistrationUnRegistrationResponse.Success)
-					Log(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
-			}
+			eDeviceRegistrationUnRegistrationResponse result;
+			if (m_FusionRoom != null && !GenericBaseUtils.SetUp(m_FusionRoom, this, out result))
+				Log(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
 
 			Subscribe(m_FusionRoom);
 
