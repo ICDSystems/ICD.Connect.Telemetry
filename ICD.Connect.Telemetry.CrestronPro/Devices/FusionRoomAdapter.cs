@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
+using ICD.Connect.Misc.CrestronPro.Utils;
+using ICD.Connect.Settings;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
@@ -15,7 +17,6 @@ using ICD.Connect.Protocol.Sigs;
 #endif
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
-using ICD.Connect.Settings.Core;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
@@ -225,19 +226,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		{
 			Unsubscribe(m_FusionRoom);
 
-			if (m_FusionRoom != null)
-			{
-				if (m_FusionRoom.Registered)
-					m_FusionRoom.UnRegister();
-
-				try
-				{
-					m_FusionRoom.Dispose();
-				}
-				catch (Exception)
-				{
-				}
-			}
+	        if (m_FusionRoom != null)
+		        GenericBaseUtils.TearDown(m_FusionRoom);
 
 	        m_BooleanInput = null;
 	        m_BooleanOutput = null;
@@ -248,15 +238,10 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 	        m_FusionAssets = null;
 
 			m_FusionRoom = fusionRoom;
-			if (m_FusionRoom != null && !m_FusionRoom.Registered)
-			{
-				if (Name != null)
-					m_FusionRoom.Description = Name;
 
-				eDeviceRegistrationUnRegistrationResponse result = m_FusionRoom.Register();
-				if (result != eDeviceRegistrationUnRegistrationResponse.Success)
-					Log(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
-			}
+			eDeviceRegistrationUnRegistrationResponse result;
+			if (m_FusionRoom != null && !GenericBaseUtils.SetUp(m_FusionRoom, this, out result))
+				Log(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
 
 			Subscribe(m_FusionRoom);
 
@@ -283,8 +268,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			catch (Exception ex)
 			{
 				Log(eSeverity.Error, ex,
-					string.Format("Error adding Asset, Type:{0}, Number:{1}, Name:{2}, Id:{3}, DeviceType:{4}",
-					asset.AssetType, asset.Number, asset.Name, asset.InstanceId, asset.Type));
+					string.Format("Error adding Asset, Type:{0}, Number:{1}, Name:{2}, Id:{3}, DeviceType:{4}, {5}",
+					asset.AssetType, asset.Number, asset.Name, asset.InstanceId, asset.Type, ex.Message));
 			}
 #else
 			throw new NotSupportedException();
@@ -441,8 +426,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			catch (Exception ex)
 			{
 				Log(eSeverity.Error, ex, 
-					string.Format("Error adding Sig, Type:{0}, Number:{1}, Name:{2}, Mask:{3}",
-					sigType, number, name, mask));
+					string.Format("Error adding Sig, Type:{0}, Number:{1}, Name:{2}, Mask:{3}, {4}",
+					sigType, number, name, mask, ex.Message));
 			}
 #else
 			throw new NotSupportedException();
@@ -469,8 +454,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			catch (Exception ex)
 			{
 				Log(eSeverity.Error, ex, 
-					string.Format("Error adding Sig, AssetId:{0}, Type:{1}, Number:{2}, Name:{3}, Mask:{4}",
-					assetId, sigType, number, name, mask));
+					string.Format("Error adding Sig, AssetId:{0}, Type:{1}, Number:{2}, Name:{3}, Mask:{4}, {5}",
+					assetId, sigType, number, name, mask, ex.Message));
 			}
 #else
 			throw new NotSupportedException();
