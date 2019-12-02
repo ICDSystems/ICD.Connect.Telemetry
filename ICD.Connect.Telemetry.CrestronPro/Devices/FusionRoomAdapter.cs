@@ -267,9 +267,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
-				Log(eSeverity.Error,
-					string.Format("Error adding Asset, Type:{0}, Number:{1}, Name:{2}, Id:{3}, DeviceType:{4}, {5}",
-					asset.AssetType, asset.Number, asset.Name, asset.InstanceId, asset.Type, ex.Message));
+				Log(eSeverity.Error, ex,
+					string.Format("Error adding Asset, Type:{0}, Number:{1}, Name:{2}, Id:{3}, DeviceType:{4}",
+					asset.AssetType, asset.Number, asset.Name, asset.InstanceId, asset.Type));
 			}
 #else
 			throw new NotSupportedException();
@@ -453,9 +453,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
-				Log(eSeverity.Error,
-					string.Format("Error adding Sig, AssetId:{0}, Type:{1}, Number:{2}, Name:{3}, Mask:{4}, {5}", 
-					assetId, sigType, number, name, mask, ex.Message));
+				Log(eSeverity.Error, ex, 
+					string.Format("Error adding Sig, AssetId:{0}, Type:{1}, Number:{2}, Name:{3}, Mask:{4}",
+					assetId, sigType, number, name, mask));
 			}
 #else
 			throw new NotSupportedException();
