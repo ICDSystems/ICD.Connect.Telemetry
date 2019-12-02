@@ -425,9 +425,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
-				Log(eSeverity.Error,
-					string.Format("Error adding Sig, Type:{0}, Number:{1}, Name:{2}, Mask:{3}, {4}",
-					sigType, number, name, mask, ex.Message));
+				Log(eSeverity.Error, ex, 
+					string.Format("Error adding Sig, Type:{0}, Number:{1}, Name:{2}, Mask:{3}",
+					sigType, number, name, mask));
 			}
 #else
 			throw new NotSupportedException();
