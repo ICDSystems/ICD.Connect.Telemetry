@@ -201,7 +201,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 #endregion
 
-		#region Methods
+#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -271,11 +271,21 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		public void AddAsset(AssetInfo asset)
 		{
 #if SIMPLSHARP
-			m_FusionRoom.AddAsset(asset.AssetType.FromIcd(),
-			                      asset.Number,
-			                      string.Format("{0} {1}", asset.Name, s_AssetNameSuffixByType[asset.AssetType]),
-			                      asset.Type,
-			                      asset.InstanceId);
+			try
+			{
+				m_FusionRoom.AddAsset(asset.AssetType.FromIcd(),
+				                      asset.Number,
+				                      string.Format("{0} {1}", asset.Name, s_AssetNameSuffixByType[asset.AssetType]),
+				                      asset.Type,
+				                      asset.InstanceId);
+			}
+			//Throws an argument exception when a duplicate is added
+			catch (Exception ex)
+			{
+				Log(eSeverity.Error,
+					string.Format("Error adding Asset, Type:{0}, Number:{1}, Name:{2}, Id:{3}, DeviceType:{4}, {5}",
+					asset.AssetType, asset.Number, asset.Name, asset.InstanceId, asset.Type, ex.Message));
+			}
 #else
 			throw new NotSupportedException();
 #endif
@@ -423,7 +433,17 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		public void AddSig(eSigType sigType, uint number, string name, eSigIoMask mask)
 		{
 #if SIMPLSHARP
-			m_FusionRoom.AddSig(sigType.FromIcd(), number, name, mask.FromIcd());
+			try
+			{
+				m_FusionRoom.AddSig(sigType.FromIcd(), number, name, mask.FromIcd());
+			}
+			//Throws an argument exception when a duplicate is added
+			catch (Exception ex)
+			{
+				Log(eSeverity.Error,
+					string.Format("Error adding Sig, Type:{0}, Number:{1}, Name:{2}, Mask:{3}, {4}",
+					sigType, number, name, mask, ex.Message));
+			}
 #else
 			throw new NotSupportedException();
 #endif
@@ -441,7 +461,17 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		public void AddSig(uint assetId, eSigType sigType, uint number, string name, eSigIoMask mask)
 		{
 #if SIMPLSHARP
-			m_FusionRoom.AddSig(assetId, sigType.FromIcd(), number, name, mask.FromIcd());
+			try
+			{
+				m_FusionRoom.AddSig(assetId, sigType.FromIcd(), number, name, mask.FromIcd());
+			}
+			//Throws an argument exception when a duplicate is added
+			catch (Exception ex)
+			{
+				Log(eSeverity.Error,
+					string.Format("Error adding Sig, AssetId:{0}, Type:{1}, Number:{2}, Name:{3}, Mask:{4}, {5}", 
+					assetId, sigType, number, name, mask, ex.Message));
+			}
 #else
 			throw new NotSupportedException();
 #endif
