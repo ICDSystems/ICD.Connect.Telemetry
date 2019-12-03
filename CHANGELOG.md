@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Using new GenericBaseUtils to standardize crestron device setup and teardown
 
+## [5.2.3] - 2019-12-03
+### Added
+ - Added error catching around adding sigs and assets to fusion to better log what sigs are causing errors.
+
 ## [5.2.2] - 2019-08-01
 ### Changed
  - Substantial performance improvements in telemetry instantiation
