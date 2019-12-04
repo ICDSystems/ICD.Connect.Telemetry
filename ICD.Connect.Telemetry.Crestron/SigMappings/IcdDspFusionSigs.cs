@@ -47,8 +47,8 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			},
 			new FusionSigMultiMapping
 			{
-				TelemetryGetName = VolumeTelemetryNames.VOLUME_CONTROL_LEVEL,
-				TelemetrySetName = VolumeTelemetryNames.VOLUME_CONTROL_LEVEL_COMMAND,
+				TelemetryGetName = VolumeTelemetryNames.VOLUME_CONTROL_PERCENT,
+				TelemetrySetName = VolumeTelemetryNames.VOLUME_CONTROL_PERCENT_COMMAND,
 				FusionSigName = "Volume Control {0} Level",
 				FirstSig = 10000,
 				LastSig = 10999,
