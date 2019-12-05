@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Audio;
+using ICD.Connect.Audio.Telemetry;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Protocol.Sigs;
 
@@ -56,7 +57,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			},
 			new FusionSigMultiMapping
 			{
-				TelemetryGetName = VolumeTelemetryNames.VOLUME_CONTROL_MUTE,
+				TelemetryGetName = VolumeTelemetryNames.VOLUME_CONTROL_IS_MUTED,
 				TelemetrySetName = VolumeTelemetryNames.VOLUME_CONTROL_MUTE_COMMAND,
 				FusionSigName = "Volume Control {0} Mute",
 				FirstSig = 10000,

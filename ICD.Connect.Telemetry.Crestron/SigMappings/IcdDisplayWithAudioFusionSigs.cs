@@ -29,7 +29,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = DisplayTelemetryNames.VOLUME,
+				TelemetryGetName = DisplayTelemetryNames.VOLUME_PERCENT,
 				TelemetrySetName = DisplayTelemetryNames.SET_VOLUME,
 				FusionSigName = "Audio Output 1 Volume",
 				SigType = eSigType.Analog,
