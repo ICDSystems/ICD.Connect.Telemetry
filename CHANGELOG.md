@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Renamed volume telemetry to match volume interfaces
+
 ## [5.3.0] - 2019-11-20
 ### Changed
  - Using new GenericBaseUtils to standardize crestron device setup and teardown
