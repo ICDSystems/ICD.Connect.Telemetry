@@ -10,10 +10,13 @@ namespace ICD.Connect.Telemetry
 	{
 		public static IEnumerable<IConsoleNodeBase> GetConsoleNodes(ITelemetryProvider instance)
 		{
+			ITelemetryService service = ServiceProvider.TryGetService<ITelemetryService>();
+			if (service == null)
+				yield break;
+
 			yield return ConsoleNodeGroup.IndexNodeMap("Telemetry",
-			                                           ServiceProvider.GetService<ITelemetryService>()
-			                                                          .GetTelemetryForProvider(instance)
-			                                                          .OfType<IConsoleNodeBase>());
+			                                           service.GetTelemetryForProvider(instance)
+			                                                  .OfType<IConsoleNodeBase>());
 		} 
 	}
 }

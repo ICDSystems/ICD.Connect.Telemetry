@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
  - Renamed volume telemetry to match volume interfaces
+ - Fixed a bug where the console would break if no Telemetry service exists
 
 ## [5.3.0] - 2019-11-20
 ### Changed
