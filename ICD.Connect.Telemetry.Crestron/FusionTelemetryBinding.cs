@@ -6,6 +6,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Misc.Occupancy;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
@@ -168,28 +169,31 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void UpdateReservedSig()
 		{
-			if (Asset is IFusionStaticAsset)
+			IFusionStaticAsset asset = Asset as IFusionStaticAsset;
+			if (asset != null)
 			{
 				if (Mapping.TelemetryGetName == DeviceTelemetryNames.ONLINE_STATE)
 				{
 					bool value = (bool)GetTelemetry.Value;
-					((IFusionStaticAsset)Asset).SetOnlineState(value);
+					asset.SetOnlineState(value);
 					return;
 				}
 				if (Mapping.TelemetryGetName == DeviceTelemetryNames.POWER_STATE)
 				{
-					bool value = (bool)GetTelemetry.Value;
-					((IFusionStaticAsset)Asset).SetPoweredState(value);
+					ePowerState value = (ePowerState)GetTelemetry.Value;
+					bool powered = value == ePowerState.PowerOn || value == ePowerState.Warming;
+					asset.SetPoweredState(powered);
 					return;
 				}
 			}
-			if (Asset is IFusionOccupancySensorAsset)
+
+			IFusionOccupancySensorAsset sensorAsset = Asset as IFusionOccupancySensorAsset;
+			if (sensorAsset != null)
 			{
 				if (Mapping.TelemetryGetName == OccupancyTelemetryNames.OCCUPANCY_STATE)
 				{
 					bool value = (eOccupancyState)GetTelemetry.Value == eOccupancyState.Occupied;
-					((IFusionOccupancySensorAsset)Asset).SetRoomOccupied(value);
-					return;
+					sensorAsset.SetRoomOccupied(value);
 				}
 			}
 		}
