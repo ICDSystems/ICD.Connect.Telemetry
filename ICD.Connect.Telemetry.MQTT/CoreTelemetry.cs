@@ -58,8 +58,7 @@ namespace ICD.Connect.Telemetry.MQTT
 
 			CreateBindingsForSystem(systemTelemetry);
 		}
-
-
+			
 		private void CreateBindingsForSystem(ITelemetryCollection systemTelemetry)
 		{
 			Stack<string> workingPath = new Stack<string>();
@@ -112,7 +111,6 @@ namespace ICD.Connect.Telemetry.MQTT
 					MQTTTelemetryBinding binding = MQTTTelemetryBinding.Bind(item, null, path, this);
 					AddProgramToServiceBinding(binding);
 				}
-
 				workingPath.Pop();
 			}
 		}

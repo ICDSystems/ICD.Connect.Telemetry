@@ -1,16 +1,10 @@
 ﻿using System;
+
+using System.Globalization;
 using System.Linq;
-using System.Text;
-using Crestron.SimplSharp.CrestronIO;
 using ICD.Common.Properties;
-using ICD.Common.Utils;
-using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.IO;
-using ICD.Common.Utils.Json;
 using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Nodes;
-
-using Newtonsoft.Json;
 
 namespace ICD.Connect.Telemetry.MQTT.Binding
 {
@@ -35,78 +29,20 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 
 		public override void UpdateLocalNodeValueFromService()
 		{
-			if (SetTelemetry.ParameterCount == 0)
-				SetTelemetry.Invoke();
+			if (SetTelemetry.ParameterCount != 0)
+				throw new NotSupportedException();
+
+			SetTelemetry.Invoke();
 		}
 
 		public void UpdateLocalNodeValueFromService(string message)
 		{
 			if(SetTelemetry == null)
 				return;
-
-			Type paramType = SetTelemetry.ParameterTypes.First();
-			if (paramType == typeof(string))
-				SetTelemetry.Invoke(message);
-			else if (paramType == typeof(bool))
-			{
-				bool parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
-			else if (paramType == typeof(ushort))
-			{
-				ushort parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
-			else if (paramType == typeof(short))
-			{
-				short parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
-			else if (paramType == typeof(uint))
-			{
-				uint parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
-			else if (paramType == typeof(long))
-			{
-				long parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
-			else if (paramType == typeof(ulong))
-			{
-				ulong parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
-			else if (paramType == typeof(float))
-			{
-				float parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
-			else if (paramType == typeof(double))
-			{
-				double parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
-			else if (paramType == typeof(byte))
-			{
-				byte parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
-			else if (paramType == typeof(char))
-			{
-				char parsed;
-				StringUtils.TryParse(message, out parsed);
-				SetTelemetry.Invoke(parsed);
-			}
+			
+			Type paramType = SetTelemetry.ParameterTypes.Single();
+			object value = Convert.ChangeType(message, paramType, CultureInfo.InvariantCulture);
+			SetTelemetry.Invoke(value);
 		}
 
 		protected override void UpdateAndSendValueToService()
