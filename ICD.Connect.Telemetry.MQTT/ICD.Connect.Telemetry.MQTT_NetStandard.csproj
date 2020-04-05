@@ -4,8 +4,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>ICD.Connect.Telemetry</RootNamespace>
-    <AssemblyName>ICD.Connect.Telemetry</AssemblyName>
+    <RootNamespace>ICD.Connect.Telemetry.MQTT</RootNamespace>
+    <AssemblyName>ICD.Connect.Telemetry.MQTT</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>true</Deterministic>
     <EazfuscatorIntegration>MSBuild</EazfuscatorIntegration>
@@ -28,12 +28,16 @@
     <Compile Remove="ObfuscationSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="ICD.Connect.projectinfo" />
+    <None Remove="ICD.Connect.Telemetry.projectinfo" />
     <None Remove="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_NetStandard.csproj" />
-    <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol.IoT\ICD.Connect.Protocol.IoT_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_NetStandard.csproj" />
+    <ProjectReference Include="..\ICD.Connect.Telemetry\ICD.Connect.Telemetry_NetStandard.csproj" />
   </ItemGroup>
 
 </Project>
