@@ -9,20 +9,16 @@ using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
 using ICD.Connect.Misc.Occupancy;
 using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Nodes;
-using ICD.Connect.Telemetry.Service;
 
 namespace ICD.Connect.Telemetry.Crestron
 {
-	public sealed class FusionTelemetryBinding : IDisposable
+	public sealed class FusionTelemetryBinding : AbstractTelemetryBinding
 	{
-		private static ITelemetryService TelemetryService { get { return ServiceProvider.GetService<ITelemetryService>(); } }
-
-		public IFeedbackTelemetryItem GetTelemetry { get; private set; }
-		public IManagementTelemetryItem SetTelemetry { get; private set; }
 		public FusionSigMapping Mapping { get; private set; }
 		public IFusionRoom FusionRoom { get; private set; }
 		public IFusionAsset Asset { get; private set; }
@@ -36,41 +32,35 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <param name="asset"></param>
 		/// <param name="mapping"></param>
 		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry,
-		                               IFusionAsset asset, FusionSigMapping mapping)
+		                               IFusionAsset asset, FusionSigMapping mapping) 
+			: base(getTelemetry, setTelemetry)
 		{
 			FusionRoom = fusionRoom;
-			GetTelemetry = getTelemetry as IFeedbackTelemetryItem;
-			SetTelemetry = setTelemetry as IManagementTelemetryItem;
 			Asset = asset;
-
-			IUpdatableTelemetryNodeItem updatable = GetTelemetry as IUpdatableTelemetryNodeItem;
-			if (updatable != null)
-				updatable.OnValueChanged += UpdatableOnValueChanged;
-
 			Mapping = mapping;
 
-			UpdateSig();
+			UpdateAndSendValueToService();
 		}
 
-		public void UpdateTelemetryNode()
+		public override void UpdateLocalNodeValueFromService()
 		{
 			switch (Mapping.SigType)
 			{
 				case eSigType.Digital:
-					UpdateDigitalTelemetry();
+					UpdateDigitalTelemetryFromService();
 					break;
 				case eSigType.Analog:
-					UpdateAnalogTelemetry();
+					UpdateAnalogTelemetryFromService();
 					break;
 				case eSigType.Serial:
-					UpdateSerialTelemetry();
+					UpdateSerialTelemetryFromService();
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		private void UpdateDigitalTelemetry()
+		private void UpdateDigitalTelemetryFromService()
 		{
 			FusionSigMapping singleMapping = Mapping;
 			if (singleMapping == null)
@@ -88,7 +78,7 @@ namespace ICD.Connect.Telemetry.Crestron
 				SetTelemetry.Invoke(digital);
 		}
 
-		private void UpdateAnalogTelemetry()
+		private void UpdateAnalogTelemetryFromService()
 		{
 			FusionSigMapping singleMapping = Mapping;
 			if (singleMapping == null)
@@ -122,7 +112,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
-		private void UpdateSerialTelemetry()
+		private void UpdateSerialTelemetryFromService()
 		{
 			FusionSigMapping singleMapping = Mapping;
 			if (singleMapping == null)
@@ -135,39 +125,34 @@ namespace ICD.Connect.Telemetry.Crestron
 			SetTelemetry.Invoke(serial);
 		}
 
-		private void UpdatableOnValueChanged(object sender, EventArgs eventArgs)
-		{
-			UpdateSig();
-		}
-
-		private void UpdateSig()
+		protected override void UpdateAndSendValueToService()
 		{
 			if (GetTelemetry == null)
 				return;
 
 			if (Mapping.Sig == 0)
 			{
-				UpdateReservedSig();
+				UpdateReservedSigToService();
 				return;
 			}
 
 			switch (Mapping.SigType)
 			{
 				case eSigType.Digital:
-					UpdateDigitalSig();
+					UpdateDigitalSigToService();
 					break;
 				case eSigType.Analog:
-					UpdateAnalogSig();
+					UpdateAnalogSigToService();
 					break;
 				case eSigType.Serial:
-					UpdateSerialSig();
+					UpdateSerialSigToService();
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		private void UpdateReservedSig()
+		private void UpdateReservedSigToService()
 		{
 			IFusionStaticAsset asset = Asset as IFusionStaticAsset;
 			if (asset != null)
@@ -198,7 +183,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
-		private void UpdateDigitalSig()
+		private void UpdateDigitalSigToService()
 		{
 			FusionSigMapping singleMapping = Mapping;
 			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
@@ -208,7 +193,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			((IFusionStaticAsset)Asset).UpdateDigitalSig(singleMapping.Sig, digital);
 		}
 
-		private void UpdateAnalogSig()
+		private void UpdateAnalogSigToService()
 		{
 			FusionSigMapping singleMapping = Mapping;
 			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
@@ -230,7 +215,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			((IFusionStaticAsset)Asset).UpdateAnalogSig(singleMapping.Sig, analog);
 		}
 
-		private void UpdateSerialSig()
+		private void UpdateSerialSigToService()
 		{
 			FusionSigMapping singleMapping = Mapping;
 			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
@@ -304,13 +289,6 @@ namespace ICD.Connect.Telemetry.Crestron
 				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
 
 			return new FusionTelemetryBinding(fusionRoom, getTelemetryItem, setTelemetryItem, asset, mapping);
-		}
-
-		public void Dispose()
-		{
-			IUpdatableTelemetryNodeItem updatable = GetTelemetry as IUpdatableTelemetryNodeItem;
-			if (updatable != null)
-				updatable.OnValueChanged -= UpdatableOnValueChanged;
 		}
 	}
 }

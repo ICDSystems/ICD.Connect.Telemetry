@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
-	public sealed class DynamicPropertyTelemetryAttribute : AbstractPropertyTelemetryAttribute
+	public sealed class DynamicPropertyTelemetryAttribute : AbstractUpdatablePropertyTelemetryAttribute
 	{
 		private readonly string m_EventName;
 
@@ -22,9 +22,10 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// Constructor.
 		/// </summary>
 		/// <param name="name"></param>
+		/// <param name="setTelemetryName"></param>
 		/// <param name="updateEventName"></param>
-		public DynamicPropertyTelemetryAttribute(string name, string updateEventName) 
-			: base(name)
+		public DynamicPropertyTelemetryAttribute(string name, string setTelemetryName, string updateEventName) 
+			: base(name, setTelemetryName)
 		{
 			m_EventName = updateEventName;
 		}
@@ -40,7 +41,7 @@ namespace ICD.Connect.Telemetry.Attributes
 			EventInfo eventInfo = TelemetryUtils.GetEventInfo(instance, EventName);
 			Type type = typeof(DynamicTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
 
-			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new object[] {Name, instance, eventInfo, propertyInfo});
+			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new object[] {Name, instance, eventInfo, propertyInfo, SetTelemetryName});
 		}
 	}
 }

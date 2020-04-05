@@ -281,7 +281,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			foreach (
 				FusionTelemetryBinding bindingMatch in
 					bindingsForAsset.Where(b => b.Mapping.Sig == (args.Sig + SIG_OFFSET) && b.Mapping.SigType == args.SigType))
-				bindingMatch.UpdateTelemetryNode();
+				bindingMatch.UpdateLocalNodeValueFromService();
 		}
 
 		private void FusionRoomOnFusionAssetPowerStateUpdated(object sender, FusionAssetPowerStateUpdatedArgs args)

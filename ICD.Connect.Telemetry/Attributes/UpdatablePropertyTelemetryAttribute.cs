@@ -15,8 +15,9 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// Constructor.
 		/// </summary>
 		/// <param name="name"></param>
-		public UpdatablePropertyTelemetryAttribute(string name)
-			: base(name)
+		/// <param name="setTelemetryName"></param>
+		public UpdatablePropertyTelemetryAttribute(string name, string setTelemetryName)
+			: base(name, setTelemetryName)
 		{
 		}
 
@@ -30,7 +31,7 @@ namespace ICD.Connect.Telemetry.Attributes
 		{
 			Type type = typeof(UpdatableTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
 
-			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new object[] { Name, instance, propertyInfo });
+			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new object[] { Name, instance, propertyInfo, SetTelemetryName });
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 #if SIMPLSHARP
@@ -12,10 +13,13 @@ namespace ICD.Connect.Telemetry.Nodes
 {
 	public abstract class AbstractUpdatableTelemetryNodeItem<T> : AbstractFeedbackTelemetryNodeItem<T>, IUpdatableTelemetryNodeItem
 	{
-		protected AbstractUpdatableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo)
+		[CanBeNull]
+		public string SetTelemetryName { get; private set; }
+
+		protected AbstractUpdatableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo, string setTelemetry)
 			: base(name, parent, propertyInfo)
 		{
-
+			SetTelemetryName = setTelemetry;
 		}
 
 		public override void Dispose()

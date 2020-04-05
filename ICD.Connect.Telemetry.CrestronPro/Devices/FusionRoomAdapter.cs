@@ -4,6 +4,7 @@ using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
+using ICD.Connect.Telemetry.Crestron;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
@@ -21,7 +22,6 @@ using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
-using eSigIoMask = ICD.Connect.Telemetry.Crestron.eSigIoMask;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 
 namespace ICD.Connect.Telemetry.CrestronPro.Devices
@@ -416,7 +416,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		/// <param name="number"></param>
 		/// <param name="name"></param>
 		/// <param name="mask"></param>
-		public void AddSig(eSigType sigType, uint number, string name, eSigIoMask mask)
+		public void AddSig(eSigType sigType, uint number, string name, eTelemetryIoMask mask)
 		{
 #if SIMPLSHARP
 			try
@@ -444,7 +444,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		/// <param name="number"></param>
 		/// <param name="name"></param>
 		/// <param name="mask"></param>
-		public void AddSig(uint assetId, eSigType sigType, uint number, string name, eSigIoMask mask)
+		public void AddSig(uint assetId, eSigType sigType, uint number, string name, eTelemetryIoMask mask)
 		{
 #if SIMPLSHARP
 			try

@@ -80,7 +80,6 @@
     <Compile Include="Assets\IFusionOccupancySensorAsset.cs" />
     <Compile Include="Assets\IFusionRemoteOccupancySensorAsset.cs" />
     <Compile Include="Assets\IFusionStaticAsset.cs" />
-    <Compile Include="eSigIoMask.cs" />
     <Compile Include="SigMappings\FusionSigMapping.cs" />
     <Compile Include="SigMappings\AbstractFusionSigMapping.cs" />
     <Compile Include="FusionTelemetryBinding.cs" />

@@ -7,21 +7,18 @@ using ICD.Connect.API.Nodes;
 namespace ICD.Connect.Telemetry.Nodes
 {
 
-	public sealed class CollectionTelemetryNodeItem : AbstractTelemetryCollection, ICollectionTelemetryItem
+	public sealed class CollectionTelemetryNodeItem : AbstractCollectionTelemetryWithParent, ICollectionTelemetryItem
 	{
-		public string Name { get; private set; }
-		public ITelemetryProvider Parent { get; private set; }
-
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="parent"></param>
 		/// <param name="childNodes"></param>
-		public CollectionTelemetryNodeItem(string name, ITelemetryProvider parent, IEnumerable<ITelemetryItem> childNodes)
+		public CollectionTelemetryNodeItem(string name, ITelemetryProvider parent, IEnumerable<ITelemetryItem> childNodes) 
+			: base(parent)
 		{
 			Name = name;
-			Parent = parent;
 
 			foreach (ITelemetryItem item in childNodes)
 				Add(item);

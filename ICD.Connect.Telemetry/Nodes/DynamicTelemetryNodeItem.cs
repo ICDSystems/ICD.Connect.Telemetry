@@ -41,8 +41,9 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <param name="parent"></param>
 		/// <param name="eventInfo"></param>
 		/// <param name="propertyInfo"></param>
-		public DynamicTelemetryNodeItem(string name, ITelemetryProvider parent, EventInfo eventInfo, PropertyInfo propertyInfo)
-			: base(name, parent, propertyInfo)
+		/// <param name="setTelemetryName"></param>
+		public DynamicTelemetryNodeItem(string name, ITelemetryProvider parent, EventInfo eventInfo, PropertyInfo propertyInfo, string setTelemetryName)
+			: base(name, parent, propertyInfo, setTelemetryName)
 		{
 			if (propertyInfo.PropertyType != typeof(T))
 				throw new InvalidOperationException(

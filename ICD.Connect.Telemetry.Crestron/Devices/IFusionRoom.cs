@@ -93,7 +93,7 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// <param name="number"></param>
 		/// <param name="name"></param>
 		/// <param name="mask"></param>
-		void AddSig(eSigType sigType, uint number, string name, eSigIoMask mask);
+		void AddSig(eSigType sigType, uint number, string name, eTelemetryIoMask mask);
 
 		/// <summary>
 		/// Adds the sig for the given asset id.
@@ -103,7 +103,7 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// <param name="number"></param>
 		/// <param name="name"></param>
 		/// <param name="mask"></param>
-		void AddSig(uint assetId, eSigType sigType, uint number, string name, eSigIoMask mask);
+		void AddSig(uint assetId, eSigType sigType, uint number, string name, eTelemetryIoMask mask);
 
 		/// <summary>
 		/// Generates an RVI file for the fusion assets.

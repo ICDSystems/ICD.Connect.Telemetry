@@ -14,8 +14,9 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <param name="name"></param>
 		/// <param name="parent"></param>
 		/// <param name="propertyInfo"></param>
-		public UpdatableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo)
-			: base(name, parent, propertyInfo)
+		/// <param name="setTelemetry"></param>
+		public UpdatableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo, string setTelemetry)
+			: base(name, parent, propertyInfo, setTelemetry)
 		{
 		}
 	}

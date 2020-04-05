@@ -1,13 +1,11 @@
 using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Telemetry.Mappings;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
-	public interface IFusionSigMapping
+	public interface IFusionSigMapping : ITelemetryMapping
 	{
-		string TelemetrySetName { get; set; }
-		string TelemetryGetName { get; set; }
 		string FusionSigName { get; set; }
-		eSigIoMask IoMask { get; }
 		eSigType SigType { get; set; }
 		int GetHashCode();
 	}
