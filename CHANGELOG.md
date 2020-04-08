@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - Using new logging context
+
 ## [5.4.0] - 2020-03-20
 ### Added
  - Added error catching around adding sigs and assets to fusion to better log what sigs are causing errors.

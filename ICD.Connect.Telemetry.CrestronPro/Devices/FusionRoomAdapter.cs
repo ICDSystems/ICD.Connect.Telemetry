@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
@@ -241,7 +242,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 			eDeviceRegistrationUnRegistrationResponse result;
 			if (m_FusionRoom != null && !GenericBaseUtils.SetUp(m_FusionRoom, this, out result))
-				Log(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
+				Logger.Log(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
 
 			Subscribe(m_FusionRoom);
 
@@ -267,9 +268,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
-				Log(eSeverity.Error, ex,
-					string.Format("Error adding Asset, Type:{0}, Number:{1}, Name:{2}, Id:{3}, DeviceType:{4}",
-					asset.AssetType, asset.Number, asset.Name, asset.InstanceId, asset.Type));
+				Logger.Log(eSeverity.Error, ex,
+				           string.Format("Error adding Asset, Type:{0}, Number:{1}, Name:{2}, Id:{3}, DeviceType:{4}",
+				                         asset.AssetType, asset.Number, asset.Name, asset.InstanceId, asset.Type));
 			}
 #else
 			throw new NotSupportedException();
@@ -425,9 +426,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
-				Log(eSeverity.Error, ex, 
-					string.Format("Error adding Sig, Type:{0}, Number:{1}, Name:{2}, Mask:{3}",
-					sigType, number, name, mask));
+				Logger.Log(eSeverity.Error, ex,
+				           string.Format("Error adding Sig, Type:{0}, Number:{1}, Name:{2}, Mask:{3}",
+				                         sigType, number, name, mask));
 			}
 #else
 			throw new NotSupportedException();
@@ -453,9 +454,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
-				Log(eSeverity.Error, ex, 
-					string.Format("Error adding Sig, AssetId:{0}, Type:{1}, Number:{2}, Name:{3}, Mask:{4}",
-					assetId, sigType, number, name, mask));
+				Logger.Log(eSeverity.Error, ex,
+				           string.Format("Error adding Sig, AssetId:{0}, Type:{1}, Number:{2}, Name:{3}, Mask:{4}",
+				                         assetId, sigType, number, name, mask));
 			}
 #else
 			throw new NotSupportedException();
