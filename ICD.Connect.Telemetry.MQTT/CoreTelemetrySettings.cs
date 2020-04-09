@@ -13,19 +13,24 @@ namespace ICD.Connect.Telemetry.MQTT
 
 		public IcdMqttClientSettings PortSettings { get; private set; }
 
+		public CoreTelemetrySettings()
+		{
+			PortSettings = new IcdMqttClientSettings();
+		}
+
 		public void Update(CoreTelemetrySettings settings)
 		{
 			if (settings == null)
 				throw new ArgumentNullException("settings");
 
 			PathPrefix = settings.PathPrefix;
-			PortSettings = settings.PortSettings;
+			PortSettings = settings.PortSettings ?? new IcdMqttClientSettings();
 		}
 
 		public void Clear()
 		{
 			PathPrefix = string.Empty;
-			PortSettings = null;
+			PortSettings = new IcdMqttClientSettings();
 		}
 
 		public void ToXml(IcdXmlTextWriter writer, string element)
