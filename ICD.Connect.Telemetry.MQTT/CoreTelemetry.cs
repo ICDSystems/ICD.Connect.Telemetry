@@ -44,7 +44,6 @@ namespace ICD.Connect.Telemetry.MQTT
 			m_SystemId = core.Id;
 
 			m_Client = new IcdMqttClient();
-			m_Client.Connect();
 			m_Client.OnMessageReceived += ClientOnMessageReceived;
 		}
 
@@ -57,28 +56,9 @@ namespace ICD.Connect.Telemetry.MQTT
 			foreach (ITelemetryItem systemLevelTelemetry in TelemetryService.GetTelemetryForProvider(m_Core))
 				systemTelemetry.Add(systemLevelTelemetry);
 
-			foreach (IOriginator originator in m_Core.Originators)
-			{
-				ITelemetryCollection originatorsNodesUncast = TelemetryService.GetTelemetryForProvider(originator);
-				OriginatorsTelemetryCollection originatorsNodes = originatorsNodesUncast.ToCollection<ITelemetryItem, OriginatorsTelemetryCollection>();
-				
-				IDeviceBase device = originator as IDeviceBase;
-				if (device != null)
-				{
-					ControlsTelemetryCollection controlsNodes = new ControlsTelemetryCollection(originator);
-					foreach (IDeviceControl control in device.Controls)
-					{
-						ITelemetryCollection controlNodesUncast = TelemetryService.GetTelemetryForProvider(control);
-						ControlTelemetryCollection controlNodes = controlNodesUncast.ToCollection<ITelemetryItem, ControlTelemetryCollection>();
-						controlNodes.SetParent(control);
-						controlsNodes.Add(controlNodes);
-					}
-					originatorsNodes.Prepend(controlsNodes);
-				}
-				systemTelemetry.Add(originatorsNodes);
-			}
 			CreateBindingsForSystem(systemTelemetry);
 		}
+
 
 		private void CreateBindingsForSystem(ITelemetryCollection systemTelemetry)
 		{
@@ -89,49 +69,41 @@ namespace ICD.Connect.Telemetry.MQTT
 				foreach (string prefixItem in prefixItems)
 					workingPath.Push(prefixItem);
 
-			CreateBindingsForSystemToProgram(systemTelemetry, workingPath);
-			CreateBindingsForProgramToSystem(systemTelemetry, workingPath);
+			CreateBindingsForServiceToProgram(systemTelemetry, workingPath);
+			CreateBindingsForProgramToService(systemTelemetry, workingPath);
 		}
 
-		private void CreateBindingsForProgramToSystem(IEnumerable<ITelemetryItem> systemTelemetry, Stack<string> workingPath)
+		private void CreateBindingsForProgramToService(IEnumerable<ITelemetryItem> systemTelemetry, Stack<string> workingPath)
 		{
 			workingPath.Push(PROGRAM_TO_SERVICE_PREFIX);
 			workingPath.Push(SYSTEMS_PREFIX);
 			workingPath.Push(m_SystemId.ToString());
-			BindProgramToSystemTelemetryRecursive(systemTelemetry, workingPath);
+			BindProgramToServiceTelemetryRecursive(systemTelemetry, workingPath);
 			workingPath.Pop();
 			workingPath.Pop();
 			workingPath.Pop();
 		}
 
-		private void CreateBindingsForSystemToProgram(IEnumerable<ITelemetryItem> systemTelemetry, Stack<string> workingPath)
+		private void CreateBindingsForServiceToProgram(IEnumerable<ITelemetryItem> systemTelemetry, Stack<string> workingPath)
 		{
 			workingPath.Push(SERVICE_TO_PROGRAM_PREFIX);
 			workingPath.Push(SYSTEMS_PREFIX);
 			workingPath.Push(m_SystemId.ToString());
-			BindSystemToProgramTelemetryRecursive(systemTelemetry, workingPath);
+			BindServiceToProgramTelemetryRecursive(systemTelemetry, workingPath);
 			workingPath.Pop();
 			workingPath.Pop();
 			workingPath.Pop();
 		}
 
-		private void BindProgramToSystemTelemetryRecursive(IEnumerable<ITelemetryItem> systemTelemetry, Stack<string> workingPath)
+		private void BindProgramToServiceTelemetryRecursive(IEnumerable<ITelemetryItem> telemetryItems, Stack<string> workingPath)
 		{
-			foreach (ITelemetryItem item in systemTelemetry)
+			foreach (ITelemetryItem item in telemetryItems)
 			{
 				ITelemetryCollection collection = item as ITelemetryCollection;
 				if (collection != null)
 				{
-					if(collection is OriginatorsTelemetryCollection)
-						workingPath.Push(OriginatorsTelemetryCollection.PATH_STRING);
-					else if (collection is ControlsTelemetryCollection)
-						workingPath.Push(ControlsTelemetryCollection.PATH_STRING);
-					else
-						workingPath.Push(item.Name);
-
-					BindProgramToSystemTelemetryRecursive(collection.GetChildren(), workingPath);
-
-					workingPath.Pop();
+					workingPath.Push(item.Name);
+					BindProgramToServiceTelemetryRecursive(collection.GetChildren(), workingPath);
 				}
 				else
 				{
@@ -140,26 +112,20 @@ namespace ICD.Connect.Telemetry.MQTT
 					MQTTTelemetryBinding binding = MQTTTelemetryBinding.Bind(item, null, path, this);
 					AddProgramToServiceBinding(binding);
 				}
+
+				workingPath.Pop();
 			}
 		}
 
-		private void BindSystemToProgramTelemetryRecursive(IEnumerable<ITelemetryItem> systemTelemetry, Stack<string> workingPath)
+		private void BindServiceToProgramTelemetryRecursive(IEnumerable<ITelemetryItem> telemetryItems, Stack<string> workingPath)
 		{
-			foreach (ITelemetryItem item in systemTelemetry)
+			foreach (ITelemetryItem item in telemetryItems)
 			{
 				ITelemetryCollection collection = item as ITelemetryCollection;
 				if (collection != null)
 				{
-					if (collection is OriginatorsTelemetryCollection)
-						workingPath.Push(OriginatorsTelemetryCollection.PATH_STRING);
-					else if (collection is ControlsTelemetryCollection)
-						workingPath.Push(ControlsTelemetryCollection.PATH_STRING);
-					else
-						workingPath.Push(item.Name);
-
-					BindProgramToSystemTelemetryRecursive(collection.GetChildren(), workingPath);
-
-					workingPath.Pop();
+					workingPath.Push(item.Name);
+					BindServiceToProgramTelemetryRecursive(collection.GetChildren(), workingPath);
 				}
 				else
 				{
@@ -168,6 +134,7 @@ namespace ICD.Connect.Telemetry.MQTT
 					MQTTTelemetryBinding binding = MQTTTelemetryBinding.Bind(null, item, path, this);
 					AddServiceToProgramBinding(binding);
 				}
+				workingPath.Pop();
 			}
 		}
 
