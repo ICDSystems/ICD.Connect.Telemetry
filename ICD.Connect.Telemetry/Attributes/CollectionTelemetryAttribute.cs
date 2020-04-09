@@ -46,8 +46,17 @@ namespace ICD.Connect.Telemetry.Attributes
 			int index = 0;
 			foreach (ITelemetryProvider provider in childrenProviders)
 			{
+				PropertyInfo nameProperty = TelemetryCollectionIdentityAttribute.GetProperty(provider);
+
+				string name;
+
+				if (nameProperty == null)
+					name = string.Format("{0}{1}", Name, index);
+				else
+					name = nameProperty.GetValue(provider, null).ToString();
+
 				ITelemetryCollection innerTelemetry = TelemetryUtils.InstantiateTelemetry(provider);
-				listItemNodes.Add(new CollectionTelemetryNodeItem(string.Format("{0}[{1}]", Name, index), instance, innerTelemetry));
+				listItemNodes.Add(new CollectionTelemetryNodeItem(name, instance, innerTelemetry));
 				index++;
 			}
 
