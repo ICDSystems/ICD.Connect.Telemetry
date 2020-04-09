@@ -20,7 +20,7 @@ namespace ICD.Connect.Telemetry.MQTT
 			if (items.Length == 0)
 				return string.Empty;
 
-			return string.Join(SEPERATOR.ToString(), items);
+			return string.Join(SEPERATOR.ToString(), items).Replace(" ", ""); //remove spaces for more consistent paths
 		}
 
 		public static string[] Split(string path)
