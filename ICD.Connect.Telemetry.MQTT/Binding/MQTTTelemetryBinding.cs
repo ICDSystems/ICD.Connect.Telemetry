@@ -1,9 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
+using Crestron.SimplSharp.CrestronIO;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.IO;
+using ICD.Common.Utils.Json;
 using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Nodes;
+
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Telemetry.MQTT.Binding
 {
@@ -107,12 +114,9 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 			if (GetTelemetry == null)
 				return;
 
-			if (!GetTelemetry.ValueType.IsPrimitive)
-				throw new InvalidOperationException("Cannot send values to Core Telemetry Service which are not primitive types.");
-
-			object value = GetTelemetry.Value;
-
-			m_Telemetry.UpdateValueForPath(Path, value.ToString());
+			JsonItemWrapper wrapper = new JsonItemWrapper(GetTelemetry.Value);
+			string json = JsonConvert.SerializeObject(wrapper);
+			m_Telemetry.UpdateValueForPath(Path, json);
 		}
 
 		public static MQTTTelemetryBinding Bind(ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, string path,
