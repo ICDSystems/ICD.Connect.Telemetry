@@ -80,6 +80,7 @@
     <Compile Include="Attributes\ITelemetryAttribute.cs" />
     <Compile Include="Attributes\IPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\StaticPropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\TelemetryCollectionIdentityAttribute.cs" />
     <Compile Include="Attributes\UpdatablePropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\MethodTelemetryAttribute.cs" />
     <Compile Include="Attributes\DynamicPropertyTelemetryAttribute.cs" />
@@ -98,8 +99,6 @@
     <Compile Include="Nodes\AbstractTelemetryNodeItemBase.cs" />
     <Compile Include="Nodes\AbstractUpdatableTelemetryNodeItem.cs" />
     <Compile Include="Nodes\CollectionTelemetryNodeItem.cs" />
-    <Compile Include="Nodes\ControlsTelemetryCollection.cs" />
-    <Compile Include="Nodes\ControlTelemetryCollection.cs" />
     <Compile Include="Nodes\DynamicTelemetryNodeItem.cs" />
     <Compile Include="Nodes\ICollectionTelemetryItem.cs" />
     <Compile Include="Nodes\IFeedbackTelemetryItem.cs" />
@@ -108,7 +107,6 @@
     <Compile Include="Nodes\ITelemetryNodeItem.cs" />
     <Compile Include="Nodes\IUpdatableTelemetryNodeItem.cs" />
     <Compile Include="Nodes\MethodTelemetryNodeItem.cs" />
-    <Compile Include="Nodes\OriginatorsTelemetryCollection.cs" />
     <Compile Include="Nodes\StaticTelemetryNodeItem.cs" />
     <Compile Include="Nodes\UpdatableTelemetryNodeItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
