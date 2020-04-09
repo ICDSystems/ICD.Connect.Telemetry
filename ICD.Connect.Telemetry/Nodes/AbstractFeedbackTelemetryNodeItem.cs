@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ICD.Common.Properties;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -18,6 +19,7 @@ namespace ICD.Connect.Telemetry.Nodes
 
 		object IFeedbackTelemetryItem.Value { get { return Value; } }
 		public T Value { get; protected set; }
+		[NotNull]
 		public Type ValueType { get { return typeof(T); } }
 		public PropertyInfo PropertyInfo { get { return m_PropertyInfo; } }
 

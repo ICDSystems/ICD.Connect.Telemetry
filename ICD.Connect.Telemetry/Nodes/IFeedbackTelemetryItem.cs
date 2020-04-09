@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Properties;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -9,6 +10,7 @@ namespace ICD.Connect.Telemetry.Nodes
 {
 	public interface IFeedbackTelemetryItem : ITelemetryItem
 	{
+		[NotNull]
 		Type ValueType { get; }
 		object Value { get; }
 		PropertyInfo PropertyInfo { get; }
