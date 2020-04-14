@@ -5,6 +5,7 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Nodes;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Telemetry.MQTT.Binding
 {
@@ -50,8 +51,7 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 			if (GetTelemetry == null)
 				return;
 
-			JsonItemWrapper wrapper = new JsonItemWrapper(GetTelemetry.Value);
-			string json = JsonConvert.SerializeObject(wrapper);
+			string json = JsonConvert.SerializeObject(GetTelemetry.Value);
 			m_Telemetry.UpdateValueForPath(Path, json);
 		}
 
