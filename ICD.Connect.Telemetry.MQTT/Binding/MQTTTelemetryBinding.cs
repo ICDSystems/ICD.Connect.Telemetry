@@ -1,5 +1,4 @@
 ﻿using System;
-
 using System.Globalization;
 using System.Linq;
 using ICD.Common.Properties;
@@ -55,14 +54,14 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 			m_Telemetry.UpdateValueForPath(Path, json);
 		}
 
-		public static MQTTTelemetryBinding Bind(ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, string path,
-		                                        CoreTelemetry telemetry)
+		public static MQTTTelemetryBinding Bind(ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, [NotNull] string path,
+		                                        [NotNull] CoreTelemetry telemetry)
 		{
 			if(telemetry == null)
-				throw new InvalidOperationException("Cannot create telemetry binding with a null CoreTelemetry");
+				throw new ArgumentNullException("telemetry");
 
 			if(string.IsNullOrEmpty(path))
-				throw new InvalidOperationException("Cannot create telemetry binding with a null or empty path. ");
+				throw new ArgumentException("Cannot create telemetry binding with a null or empty path.");
 
 			if(!MQTTUtils.ValidatePath(path))
 				throw new InvalidOperationException(string.Format("Cannot create telemetry binding with the invalid path {0}", path));
