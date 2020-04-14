@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Attributes;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
-using ICD.Connect.Devices;
-using ICD.Connect.Devices.Controls;
 using ICD.Connect.Protocol.IoT.EventArguments;
 using ICD.Connect.Protocol.IoT.Ports;
 using ICD.Connect.Settings.Cores;
-using ICD.Connect.Settings.Originators;
 using ICD.Connect.Telemetry.MQTT.Binding;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Service;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Telemetry.MQTT
 {
@@ -107,12 +107,54 @@ namespace ICD.Connect.Telemetry.MQTT
 				else
 				{
 					workingPath.Push(item.Name);
+					GenerateMetadataForItem(item, workingPath);
+
 					string path = MQTTUtils.Join(workingPath.Reverse().ToArray());
 					MQTTTelemetryBinding binding = MQTTTelemetryBinding.Bind(item, null, path, this);
 					AddProgramToServiceBinding(binding);
+					
 				}
 				workingPath.Pop();
 			}
+		}
+
+		private void GenerateMetadataForItem(ITelemetryItem item, Stack<string> workingPath)
+		{
+			IFeedbackTelemetryItem feedbackTelemetryItem = item as IFeedbackTelemetryItem;
+			if (feedbackTelemetryItem == null)
+				return;
+
+			workingPath.Push("Metadata");
+
+			TelemetryMetadata metadata = new TelemetryMetadata
+			{
+				DataType = feedbackTelemetryItem.ValueType
+			};
+
+			eMetadataSupport supports = eMetadataSupport.None;
+
+			if (feedbackTelemetryItem.ValueType.IsEnum)
+				supports = supports | eMetadataSupport.EnumerationValues;
+
+			RangeAttribute rangeAttr = feedbackTelemetryItem.PropertyInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
+			if (rangeAttr != null)
+			{
+				supports = supports | eMetadataSupport.Range;
+
+				if (feedbackTelemetryItem.ValueType.IsNumeric())
+				{
+					metadata.RangeMin = (double)Convert.ChangeType(rangeAttr.Min, TypeCode.Double, CultureInfo.InvariantCulture);
+					metadata.RangeMax = (double)Convert.ChangeType(rangeAttr.Min, TypeCode.Double, CultureInfo.InvariantCulture);
+				}
+			}
+
+			metadata.Supports = supports;
+
+			string json = JsonConvert.SerializeObject(metadata);
+			string path = MQTTUtils.Join(workingPath.Reverse().ToArray());
+			UpdateValueForPath(path, json);
+			
+			workingPath.Pop();
 		}
 
 		private void BindServiceToProgramTelemetryRecursive(IEnumerable<ITelemetryItem> telemetryItems, Stack<string> workingPath)
