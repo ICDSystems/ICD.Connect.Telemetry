@@ -28,7 +28,6 @@ namespace ICD.Connect.Telemetry.MQTT
 		private readonly Dictionary<string, MQTTTelemetryBinding> m_ProgramToServiceBindingsByPath;
 		private readonly Dictionary<string, MQTTTelemetryBinding> m_ServiceToProgramBindingsByPath;
 		private readonly SafeCriticalSection m_BindingsSection;
-		private readonly int m_SystemId;
 		private readonly IcdMqttClient m_Client;
 
 		public string PathPrefix { get; set; }
@@ -41,7 +40,6 @@ namespace ICD.Connect.Telemetry.MQTT
 			m_ProgramToServiceBindingsByPath = new Dictionary<string, MQTTTelemetryBinding>();
 			m_ServiceToProgramBindingsByPath = new Dictionary<string, MQTTTelemetryBinding>();
 			m_BindingsSection = new SafeCriticalSection();
-			m_SystemId = core.Id;
 
 			m_Client = new IcdMqttClient();
 			m_Client.OnMessageReceived += ClientOnMessageReceived;
@@ -76,7 +74,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		{
 			workingPath.Push(PROGRAM_TO_SERVICE_PREFIX);
 			workingPath.Push(SYSTEMS_PREFIX);
-			workingPath.Push(m_SystemId.ToString());
+			workingPath.Push(m_Core.Id.ToString());
 			BindProgramToServiceTelemetryRecursive(systemTelemetry, workingPath);
 			workingPath.Pop();
 			workingPath.Pop();
@@ -87,7 +85,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		{
 			workingPath.Push(SERVICE_TO_PROGRAM_PREFIX);
 			workingPath.Push(SYSTEMS_PREFIX);
-			workingPath.Push(m_SystemId.ToString());
+			workingPath.Push(m_Core.Id.ToString());
 			BindServiceToProgramTelemetryRecursive(systemTelemetry, workingPath);
 			workingPath.Pop();
 			workingPath.Pop();
