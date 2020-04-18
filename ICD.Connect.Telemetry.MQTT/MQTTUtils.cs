@@ -11,10 +11,6 @@ namespace ICD.Connect.Telemetry.MQTT
 
 		private const char SEPERATOR = '/';
 
-		private const string VALIDATION_REGEX = @"^([\w\d])+(\/([\w\d]+))*$";
-
-		private static readonly Regex s_ValidPathRegex = new Regex(VALIDATION_REGEX);
-
 		public static string Join(string[] items)
 		{
 			if (items.Length == 0)
@@ -28,11 +24,6 @@ namespace ICD.Connect.Telemetry.MQTT
 				return new string[0];
 
 			return path.Split(SEPERATOR);
-		}
-
-		public static bool ValidatePath(string path)
-		{
-			return s_ValidPathRegex.IsMatch(path);
 		}
 	}
 }
