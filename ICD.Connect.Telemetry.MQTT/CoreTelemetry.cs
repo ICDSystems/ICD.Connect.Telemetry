@@ -74,7 +74,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		{
 			workingPath.Push(PROGRAM_TO_SERVICE_PREFIX);
 			workingPath.Push(SYSTEMS_PREFIX);
-			workingPath.Push(m_Core.Id.ToString());
+			workingPath.Push(m_Core.NewId.ToString());
 			BindProgramToServiceTelemetryRecursive(systemTelemetry, workingPath);
 			workingPath.Pop();
 			workingPath.Pop();
@@ -85,7 +85,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		{
 			workingPath.Push(SERVICE_TO_PROGRAM_PREFIX);
 			workingPath.Push(SYSTEMS_PREFIX);
-			workingPath.Push(m_Core.Id.ToString());
+			workingPath.Push(m_Core.NewId.ToString());
 			BindServiceToProgramTelemetryRecursive(systemTelemetry, workingPath);
 			workingPath.Pop();
 			workingPath.Pop();
