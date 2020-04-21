@@ -10,12 +10,11 @@ namespace ICD.Connect.Telemetry.Nodes
 
 		public ITelemetryProvider Parent { get; private set; }
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="parent"></param>
 		protected AbstractCollectionTelemetryWithParent(ITelemetryProvider parent)
-		{
-			Parent = parent;
-		}
-
-		public void SetParent(ITelemetryProvider parent)
 		{
 			Parent = parent;
 		}

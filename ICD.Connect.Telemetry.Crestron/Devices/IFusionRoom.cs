@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils.EventArguments;
-using ICD.Connect.Devices;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
 
 namespace ICD.Connect.Telemetry.Crestron.Devices
 {
-	public interface IFusionRoom : ISigDevice, IDevice
+	public interface IFusionRoom : ISigDevice
 	{
 		event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
 		event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated;

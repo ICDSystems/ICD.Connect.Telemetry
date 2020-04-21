@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Text.RegularExpressions;
-
-namespace ICD.Connect.Telemetry.MQTT
+﻿namespace ICD.Connect.Telemetry.MQTT
 {
 	public static class MQTTUtils
 	{
