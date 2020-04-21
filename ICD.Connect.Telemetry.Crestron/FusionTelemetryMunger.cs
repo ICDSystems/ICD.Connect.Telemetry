@@ -67,7 +67,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// </summary>
 		/// <param name="device"></param>
 		/// <returns></returns>
-		public void BuildAssets(IDeviceBase device)
+		public void BuildAssets(IDevice device)
 		{
 			// Create the sig bindings
 			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
@@ -98,7 +98,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			AddBindingsToCollection(staticAssetId, bindings);
 		}
 
-		private void GenerateOccupancySensorAsset(IDeviceBase device)
+		private void GenerateOccupancySensorAsset(IDevice device)
 		{
 			AssetInfo occAssetInfo = new AssetInfo(eAssetType.OccupancySensor,
 			                                       GetNextAssetId(),
@@ -239,9 +239,9 @@ namespace ICD.Connect.Telemetry.Crestron
 			return null;
 		}
 
-		public void AddAssets(IEnumerable<IDeviceBase> devices)
+		public void AddAssets(IEnumerable<IDevice> devices)
 		{
-			foreach (IDeviceBase device in devices)
+			foreach (IDevice device in devices)
 				BuildAssets(device);
 		}
 
