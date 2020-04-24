@@ -1,4 +1,9 @@
-﻿namespace ICD.Connect.Telemetry.MQTT
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using ICD.Common.Properties;
+
+namespace ICD.Connect.Telemetry.MQTT
 {
 	public static class MQTTUtils
 	{
@@ -8,18 +13,32 @@
 
 		private const char SEPERATOR = '/';
 
-		public static string Join(string[] items)
+		public const ushort DEFAULT_PORT = 1883;
+
+		/// <summary>
+		/// Creates an MQTT topic path from the given items.
+		/// </summary>
+		/// <param name="items"></param>
+		/// <returns></returns>
+		[NotNull]
+		public static string Join([NotNull] IEnumerable<string> items)
 		{
-			if (items.Length == 0)
-				return string.Empty;
-			return string.Join(SEPERATOR.ToString(), items).Replace(" ", ""); //remove spaces for more consistent paths
+			if (items == null)
+				throw new ArgumentNullException("items");
+
+			return string.Join(SEPERATOR.ToString(), items.ToArray())
+			             .Replace(" ", ""); // Remove spaces for more consistent paths
 		}
 
-		public static string[] Split(string path)
+		/// <summary>
+		/// Splits an MQTT topic path into its individual items.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		[NotNull]
+		public static IEnumerable<string> Split([CanBeNull] string path)
 		{
-			if (string.IsNullOrEmpty(path))
-				return new string[0];
-
+			path = path ?? string.Empty;
 			return path.Split(SEPERATOR);
 		}
 	}
