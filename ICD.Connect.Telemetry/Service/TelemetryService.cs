@@ -1,75 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Service
 {
-	public sealed class TelemetryService: ITelemetryService
+	public sealed class TelemetryService : ITelemetryService
 	{
-		private readonly Dictionary<ITelemetryProvider, ITelemetryCollection> m_TelemetryProviders;
+		private readonly WeakKeyDictionary<ITelemetryProvider, ITelemetryCollection> m_TelemetryProviders;
 		private readonly SafeCriticalSection m_TelemetryProvidersSection;
 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
 		public TelemetryService()
 		{
-			m_TelemetryProviders = new Dictionary<ITelemetryProvider, ITelemetryCollection>();
+			m_TelemetryProviders = new WeakKeyDictionary<ITelemetryProvider, ITelemetryCollection>();
 			m_TelemetryProvidersSection = new SafeCriticalSection();
-		}
-
-		/// <summary>
-		/// Adds a telemetry provider to be tracked. When accessed, its nodes will be lazy-loaded.
-		/// </summary>
-		/// <param name="provider"></param>
-		public void AddTelemetryProvider(ITelemetryProvider provider)
-		{
-			if (provider == null)
-				throw new ArgumentNullException("provider");
-
-			m_TelemetryProvidersSection.Enter();
-
-			try
-			{
-				if (m_TelemetryProviders.ContainsKey(provider))
-					return;
-
-				m_TelemetryProviders.Add(provider, null);
-			}
-			finally
-			{
-				m_TelemetryProvidersSection.Leave();
-			}
-		}
-
-		/// <summary>
-		/// Removes a telemetry provider and its associated nodes.
-		/// </summary>
-		/// <param name="provider"></param>
-		public void RemoveTelemetryProvider(ITelemetryProvider provider)
-		{
-			if (provider == null)
-				throw new ArgumentNullException("provider");
-
-			m_TelemetryProvidersSection.Enter();
-
-			try
-			{
-				m_TelemetryProviders.Remove(provider);
-			}
-			finally
-			{
-				m_TelemetryProvidersSection.Leave();
-			}
-		}
-
-		/// <summary>
-		/// Returns all active telemetry providers.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerable<ITelemetryProvider> GetTelemetryProviders()
-		{
-			return m_TelemetryProvidersSection.Execute(() => m_TelemetryProviders.Keys.ToArray(m_TelemetryProviders.Count));
 		}
 
 		/// <summary>
@@ -77,7 +26,7 @@ namespace ICD.Connect.Telemetry.Service
 		/// </summary>
 		/// <param name="provider"></param>
 		/// <returns></returns>
-		[CanBeNull]
+		[NotNull]
 		public ITelemetryCollection GetTelemetryForProvider(ITelemetryProvider provider)
 		{
 			if (provider == null)
@@ -87,16 +36,7 @@ namespace ICD.Connect.Telemetry.Service
 
 			try
 			{
-				ITelemetryCollection collection;
-				if (!m_TelemetryProviders.TryGetValue(provider, out collection) || collection == null)
-				{
-					AddTelemetryProvider(provider);
-
-					collection = TelemetryUtils.InstantiateTelemetry(provider);
-					m_TelemetryProviders[provider] = collection;
-				}
-
-				return collection;
+				return m_TelemetryProviders.GetOrAddNew(provider, () => TelemetryUtils.InstantiateTelemetry(provider));
 			}
 			finally
 			{
@@ -116,28 +56,7 @@ namespace ICD.Connect.Telemetry.Service
 			if (provider == null)
 				throw new ArgumentNullException("provider");
 
-			ITelemetryCollection collection = GetTelemetryForProvider(provider);
-			return collection == null ? null : collection.GetChildByName(name);
-		}
-
-		private void ProviderOnRequestTelemetryRebuild(object sender, EventArgs eventArgs)
-		{
-			ITelemetryProvider provider = sender as ITelemetryProvider;
-			if (provider == null)
-				return;
-
-			m_TelemetryProvidersSection.Enter();
-
-			try
-			{
-				// If the telemetry needs a rebuild, invalidate the cached nodes.
-				if (m_TelemetryProviders.ContainsKey(provider))
-					m_TelemetryProviders[provider] = null;
-			}
-			finally
-			{
-				m_TelemetryProvidersSection.Leave();
-			}
+			return GetTelemetryForProvider(provider).GetChildByName(name);
 		}
 	}
 }
