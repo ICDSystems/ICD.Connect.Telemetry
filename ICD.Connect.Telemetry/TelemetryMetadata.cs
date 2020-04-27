@@ -26,7 +26,7 @@ namespace ICD.Connect.Telemetry
 		#region Properties
 
 		/// <summary>
-		/// Gets the datatype of the property this metadata is for 
+		/// Gets the data type of the property this metadata is for 
 		/// </summary>
 		public Type DataType { get; private set; }
 

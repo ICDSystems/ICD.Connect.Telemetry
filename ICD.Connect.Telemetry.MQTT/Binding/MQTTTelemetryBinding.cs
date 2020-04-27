@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Connect.Telemetry.Bindings;
@@ -18,8 +17,16 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 
 		public string Path { get { return m_Path; } }
 
-		private MQTTTelemetryBinding(ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, string path, CoreTelemetry telemetry)
-			:base(getTelemetry, setTelemetry)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="getTelemetry"></param>
+		/// <param name="setTelemetry"></param>
+		/// <param name="path"></param>
+		/// <param name="telemetry"></param>
+		private MQTTTelemetryBinding(IFeedbackTelemetryItem getTelemetry, IManagementTelemetryItem setTelemetry,
+		                             string path, CoreTelemetry telemetry)
+			: base(getTelemetry, setTelemetry)
 		{
 			m_Path = path;
 			m_Telemetry = telemetry;
@@ -29,7 +36,7 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 
 		public override void UpdateLocalNodeValueFromService()
 		{
-			if (SetTelemetry.ParameterCount != 0)
+			if (SetTelemetry == null || SetTelemetry.ParameterCount != 0)
 				throw new NotSupportedException();
 
 			SetTelemetry.Invoke();
@@ -37,11 +44,12 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 
 		public void UpdateLocalNodeValueFromService(string message)
 		{
-			if(SetTelemetry == null)
-				return;
-			
+			if (SetTelemetry == null || SetTelemetry.ParameterCount != 1)
+				throw new NotSupportedException();
+
 			Type paramType = SetTelemetry.ParameterTypes.Single();
-			object value = Convert.ChangeType(message, paramType, CultureInfo.InvariantCulture);
+			object value = JsonConvert.DeserializeObject(message, paramType);
+
 			SetTelemetry.Invoke(value);
 		}
 
@@ -50,21 +58,23 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 			if (GetTelemetry == null)
 				return;
 
-			string json = JsonConvert.SerializeObject(GetTelemetry.Value);
-			m_Telemetry.UpdateValueForPath(Path, json);
+			m_Telemetry.Publish(Path, GetTelemetry.Value);
 		}
 
-		public static MQTTTelemetryBinding Bind(ITelemetryItem getTelemetry, ITelemetryItem setTelemetry, [NotNull] string path,
+		public static MQTTTelemetryBinding Bind([CanBeNull] IFeedbackTelemetryItem getTelemetry,
+		                                        [CanBeNull] IManagementTelemetryItem setTelemetry,
+		                                        [NotNull] string path,
 		                                        [NotNull] CoreTelemetry telemetry)
 		{
-			if(telemetry == null)
+			if (telemetry == null)
 				throw new ArgumentNullException("telemetry");
 
-			if(string.IsNullOrEmpty(path))
+			if (string.IsNullOrEmpty(path))
 				throw new ArgumentException("Cannot create telemetry binding with a null or empty path.");
 
 			if (getTelemetry == null && setTelemetry == null)
-				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
+				throw new
+					InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
 
 			return new MQTTTelemetryBinding(getTelemetry, setTelemetry, path, telemetry);
 		}

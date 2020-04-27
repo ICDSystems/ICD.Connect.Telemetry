@@ -31,7 +31,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <param name="setTelemetry"></param>
 		/// <param name="asset"></param>
 		/// <param name="mapping"></param>
-		private FusionTelemetryBinding(IFusionRoom fusionRoom, ITelemetryItem getTelemetry, ITelemetryItem setTelemetry,
+		private FusionTelemetryBinding(IFusionRoom fusionRoom, IFeedbackTelemetryItem getTelemetry, IManagementTelemetryItem setTelemetry,
 		                               IFusionAsset asset, FusionSigMapping mapping) 
 			: base(getTelemetry, setTelemetry)
 		{
@@ -278,8 +278,8 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (!asset.GetType().GetAllTypes().Any(t => mapping.TargetAssetTypes.Contains(t)))
 				return null;
 
-			ITelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName);
-			ITelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName);
+			IFeedbackTelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName) as IFeedbackTelemetryItem;
+			IManagementTelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName) as IManagementTelemetryItem;
 
 			if (getTelemetryItem == null && setTelemetryItem == null)
 				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
