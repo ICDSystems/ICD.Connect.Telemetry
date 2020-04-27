@@ -27,46 +27,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				FusionSigName = "USB Breakaway Enabled",
 				Sig = 222,
 				SigType = eSigType.Digital
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.IP_ADDRESS,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "IP Address",
-				Sig = 119,
-				SigType = eSigType.Serial
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.HOSTNAME,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Hostname",
-				Sig = 120,
-				SigType = eSigType.Serial
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.SUBNET_MASK,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Subnet Mask",
-				Sig = 121,
-				SigType = eSigType.Serial
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.MAC_ADDRESS,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "MAC Address",
-				Sig = 122,
-				SigType = eSigType.Serial
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.DEFAULT_ROUTER,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Default Router",
-				Sig = 123,
-				SigType = eSigType.Serial
 			}
 		};
 
