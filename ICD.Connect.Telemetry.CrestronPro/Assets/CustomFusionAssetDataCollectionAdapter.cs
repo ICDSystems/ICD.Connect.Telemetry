@@ -1,7 +1,6 @@
 ﻿#if SIMPLSHARP
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Common.Utils;
@@ -23,29 +22,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		/// <param name="id"></param>
 		/// <returns></returns>
 		public FusionAssetData this[uint id] { get { return LazyLoadAdapter(id); } }
-
-		/// <summary>
-		/// Gets the first asset data with the given asset type.
-		/// </summary>
-		/// <param name="type"></param>
-		/// <returns></returns>
-		public FusionAssetData GetAssetData(eAssetType type)
-		{
-			m_Section.Enter();
-
-			try
-			{
-				if (!m_TypeToAdapters.ContainsKey(type))
-					return null;
-
-				return m_TypeToAdapters[type].Select(id => LazyLoadAdapter(id))
-				                             .FirstOrDefault();
-			}
-			finally
-			{
-				m_Section.Leave();
-			}
-		}
 
 		/// <summary>
 		/// Constructor.
