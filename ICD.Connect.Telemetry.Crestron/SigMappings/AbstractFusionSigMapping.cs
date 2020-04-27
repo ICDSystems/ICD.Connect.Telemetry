@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Telemetry.Crestron.Devices;
+using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
@@ -11,7 +13,16 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		public string TelemetrySetName { get; set; }
 		public string TelemetryGetName { get; set; }
 		public string FusionSigName { get; set; }
-		public IEnumerable<Type> TargetAssetTypes { get; set; }
+
+		/// <summary>
+		/// Whitelist for the fusion asset types this mapping is valid for.
+		/// </summary>
+		public IEnumerable<Type> FusionAssetTypes { get; set; }
+
+		/// <summary>
+		/// Whitelist for the telemetry provider types this mapping is valid for.
+		/// </summary>
+		public IEnumerable<Type> TelemetryProviderTypes { get; set; }
 
 		public eSigIoMask IoMask
 		{
@@ -36,9 +47,9 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		/// </summary>
 		protected AbstractFusionSigMapping()
 		{
-			TargetAssetTypes = new IcdHashSet<Type> {typeof(IFusionStaticAsset)};
+			FusionAssetTypes = new IcdHashSet<Type> {typeof(IFusionStaticAsset)};
 		}
 
-		public override abstract int GetHashCode();
+		public abstract FusionTelemetryBinding Bind(IFusionRoom room, ITelemetryItem node, uint assetId, RangeMappingUsageTracker mappingUsage);
 	}
 }
