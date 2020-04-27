@@ -285,8 +285,9 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (mapping == null)
 				throw new ArgumentNullException("mapping");
 
+			// Check against the fusion asset whitelist for the mapping
 			IFusionAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset;
-			if (!asset.GetType().GetAllTypes().Any(t => mapping.TargetAssetTypes.Contains(t)))
+			if (mapping.FusionAssetTypes != null && !asset.GetType().GetAllTypes().Any(t => mapping.FusionAssetTypes.Contains(t)))
 				return null;
 
 			ITelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName);
