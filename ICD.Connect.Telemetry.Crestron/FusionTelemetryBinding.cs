@@ -229,10 +229,15 @@ namespace ICD.Connect.Telemetry.Crestron
 		private void UpdateSerialSig()
 		{
 			FusionSigMapping singleMapping = Mapping;
-			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
+			if (singleMapping == null || GetTelemetry == null)
 				return;
 
-			string serial = GetTelemetry.Value.ToString();
+			string serial;
+			if (GetTelemetry.Value == null)
+				serial = String.Empty;
+			else
+				serial = GetTelemetry.Value.ToString();
+
 			((IFusionStaticAsset)Asset).UpdateSerialSig(singleMapping.Sig, serial);
 		}
 
