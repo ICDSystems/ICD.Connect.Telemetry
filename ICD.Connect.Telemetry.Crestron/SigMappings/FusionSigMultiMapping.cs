@@ -1,11 +1,12 @@
 ﻿using System;
+using ICD.Connect.Telemetry.Crestron.Devices;
+using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
-	public sealed class FusionSigMultiMapping : AbstractFusionSigMapping, IEquatable<FusionSigMultiMapping>
+	public sealed class FusionSigMultiMapping : AbstractFusionSigMapping
 	{
 		private ushort m_FirstSig;
-		private ushort m_CurrentSig;
 		private ushort m_LastSig;
 
 		public ushort FirstSig
@@ -13,7 +14,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			get { return m_FirstSig; }
 			set
 			{
-				m_CurrentSig = value;
 				m_FirstSig = value;
 			}
 		}
@@ -50,27 +50,20 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			return string.Format(FusionSigName, positionInRange.ToString("D5"));
 		}
 
-		public bool Equals(FusionSigMultiMapping other)
+		public override FusionTelemetryBinding Bind(IFusionRoom room, ITelemetryItem node, uint assetId,
+		                                            RangeMappingUsageTracker mappingUsage)
 		{
-			return other != null &&
-			       TelemetrySetName == other.TelemetrySetName &&
-			       TelemetryGetName == other.TelemetryGetName &&
-			       FusionSigName == other.FusionSigName &&
-			       FirstSig == other.FirstSig &&
-			       LastSig == other.LastSig &&
-			       SigType == other.SigType;
-		}
+			FusionSigMapping tempMapping = new FusionSigMapping
+			{
+				FusionSigName = string.Format(FusionSigName, mappingUsage.GetCurrentOffset(this) + 1),
+				Sig = mappingUsage.GetNextSig(this),
+				SigType = SigType,
+				TelemetryGetName = TelemetryGetName,
+				TelemetrySetName = TelemetrySetName,
+				TelemetryProviderTypes = TelemetryProviderTypes
+			};
 
-		public override int GetHashCode()
-		{
-			int hash = 17;
-			hash = hash * 23 + (TelemetrySetName == null ? 0 : TelemetrySetName.GetHashCode());
-			hash = hash * 23 + (TelemetryGetName == null ? 0 : TelemetryGetName.GetHashCode());
-			hash = hash * 23 + (FusionSigName == null ? 0 : FusionSigName.GetHashCode());
-			hash = hash * 23 + FirstSig;
-			hash = hash * 23 + LastSig;
-			hash = hash * 23 + (int)SigType;
-			return hash;
+			return FusionTelemetryBinding.Bind(room, node.Parent, tempMapping, assetId);
 		}
 	}
 }

@@ -229,10 +229,15 @@ namespace ICD.Connect.Telemetry.Crestron
 		private void UpdateSerialSig()
 		{
 			FusionSigMapping singleMapping = Mapping;
-			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
+			if (singleMapping == null || GetTelemetry == null)
 				return;
 
-			string serial = GetTelemetry.Value.ToString();
+			string serial;
+			if (GetTelemetry.Value == null)
+				serial = String.Empty;
+			else
+				serial = GetTelemetry.Value.ToString();
+
 			((IFusionStaticAsset)Asset).UpdateSerialSig(singleMapping.Sig, serial);
 		}
 
@@ -285,8 +290,9 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (mapping == null)
 				throw new ArgumentNullException("mapping");
 
+			// Check against the fusion asset whitelist for the mapping
 			IFusionAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset;
-			if (!asset.GetType().GetAllTypes().Any(t => mapping.TargetAssetTypes.Contains(t)))
+			if (mapping.FusionAssetTypes != null && !asset.GetType().GetAllTypes().Any(t => mapping.FusionAssetTypes.Contains(t)))
 				return null;
 
 			ITelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName);

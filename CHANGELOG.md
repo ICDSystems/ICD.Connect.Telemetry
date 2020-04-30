@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [5.2.4] - 2020-04-30
+### Added
+ - Fusion: Telemetry provider whitelist to Fusion Sig Mappings
+ - MockFusionRoom with assets, for testing
+
+### Changed
+ - Fusion: A null value sends an empty string
+ - Fusion: Removed Audio and USB Breakaway mapping sigs
+ - Fusion: Refactored Sig Binding
+ - Fusion: Munger - Removed unused Type for mappings
+ - Fusion: Updated Mappings to move comonly used attributes to Standard Sig Mappings
+
 ## [5.2.3] - 2019-12-03
 ### Added
  - Added error catching around adding sigs and assets to fusion to better log what sigs are causing errors.

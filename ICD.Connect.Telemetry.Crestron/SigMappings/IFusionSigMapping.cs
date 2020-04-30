@@ -1,4 +1,9 @@
+using System;
+using System.Collections.Generic;
+using ICD.Common.Properties;
 using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Telemetry.Crestron.Devices;
+using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
@@ -10,5 +15,14 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		eSigIoMask IoMask { get; }
 		eSigType SigType { get; set; }
 		int GetHashCode();
+		
+		/// <summary>
+		/// What provider types this binding can use
+		/// If null, all types are allowed
+		/// </summary>
+		IEnumerable<Type> TelemetryProviderTypes { get; }
+
+		[CanBeNull]
+		FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryItem node, uint assetId, RangeMappingUsageTracker mappingUsage);
 	}
 }
