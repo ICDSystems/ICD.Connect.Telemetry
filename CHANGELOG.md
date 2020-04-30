@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Fusion: A null value sends an empty string
  - Fusion: Removed Audio and USB Breakaway mapping sigs
+ - Fusion: Refactored Sig Binding
+ - Fusion: Munger - Removed unused Type for mappings
+ - Fusion: Updated Mappings to move comonly used attributes to Standard Sig Mappings
+ 
+### Added
+ - Fusion: Telemetry provider whitelist to Fusion Sig Mappings
+ - MockFusionRoom with assets, for testing
 
 ## [5.2.3] - 2019-12-03
 ### Added
