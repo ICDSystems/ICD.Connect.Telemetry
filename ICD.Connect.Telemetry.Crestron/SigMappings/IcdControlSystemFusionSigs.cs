@@ -1,4 +1,4 @@
-﻿#if SIMPLSHARP
+﻿using ICD.Connect.Devices;
 using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Protocol.Sigs;
@@ -12,78 +12,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 
 		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>
 		{
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.DHCP_STATUS,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "DHCP On",
-				SigType = eSigType.Digital,
-				Sig = 54
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_MODEL,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor Model",
-				SigType = eSigType.Serial,
-				Sig = 50
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_FIRMWARE_VER,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor Firmware",
-				SigType = eSigType.Serial,
-				Sig = 51
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_FIRMWARE_DATE,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor FW Date",
-				SigType = eSigType.Serial,
-				Sig = 52
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_MAC_ADDRESS,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor MAC",
-				SigType = eSigType.Serial,
-				Sig = 53
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_IP_ADDRESS,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor IP",
-				SigType = eSigType.Serial,
-				Sig = 54
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_HOSTNAME,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor Hostname",
-				SigType = eSigType.Serial,
-				Sig = 55
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_SERIAL_NUMBER,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor Serial No",
-				SigType = eSigType.Serial,
-				Sig = 56
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_UPTIME,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor Uptime",
-				SigType = eSigType.Serial,
-				Sig = 57
-			},
 			new FusionSigMapping
 			{
 				TelemetryGetName = ControlSystemExternalTelemetryNames.PROGRAM_UPTIME,
@@ -123,24 +51,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				FusionSigName = "Program Compile Date",
 				SigType = eSigType.Serial,
 				Sig = 62
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_IP_ADDRESS_SECONDARY,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor IP 2",
-				SigType = eSigType.Serial,
-				Sig = 63
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROCESSOR_HOSTNAME_SECONDARY,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Processor Hostname Custom",
-				SigType = eSigType.Serial,
-				Sig = 64
-			},
+			}
 		};
 	}
 }
-#endif
