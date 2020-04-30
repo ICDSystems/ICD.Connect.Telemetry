@@ -10,25 +10,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		public static IEnumerable<IFusionSigMapping> Sigs { get { return s_Sigs; } }
 		public static IEnumerable<IFusionSigMapping> InputOutputSigs { get { return s_InputOutputSigs; } } 
 
-		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>
-		{
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.AUDIO_BREAKAWAY_ENABLED,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Audio Breakaway Enabled",
-				Sig = 221,
-				SigType = eSigType.Digital
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.USB_BREAKAWAY_ENABLED,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "USB Breakaway Enabled",
-				Sig = 222,
-				SigType = eSigType.Digital
-			}
-		};
+		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>();
 
 		private static readonly IcdHashSet<IFusionSigMapping> s_InputOutputSigs = new IcdHashSet<IFusionSigMapping>
 		{
