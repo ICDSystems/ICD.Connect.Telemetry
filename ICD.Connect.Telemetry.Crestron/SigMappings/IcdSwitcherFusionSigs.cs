@@ -10,65 +10,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		public static IEnumerable<IFusionSigMapping> Sigs { get { return s_Sigs; } }
 		public static IEnumerable<IFusionSigMapping> InputOutputSigs { get { return s_InputOutputSigs; } } 
 
-		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>
-		{
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.AUDIO_BREAKAWAY_ENABLED,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Audio Breakaway Enabled",
-				Sig = 221,
-				SigType = eSigType.Digital
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.USB_BREAKAWAY_ENABLED,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "USB Breakaway Enabled",
-				Sig = 222,
-				SigType = eSigType.Digital
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.IP_ADDRESS,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "IP Address",
-				Sig = 119,
-				SigType = eSigType.Serial
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.HOSTNAME,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Hostname",
-				Sig = 120,
-				SigType = eSigType.Serial
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.SUBNET_MASK,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Subnet Mask",
-				Sig = 121,
-				SigType = eSigType.Serial
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.MAC_ADDRESS,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "MAC Address",
-				Sig = 122,
-				SigType = eSigType.Serial
-			},
-			new FusionSigMapping
-			{
-				TelemetryGetName = SwitcherTelemetryNames.DEFAULT_ROUTER,
-				TelemetrySetName = string.Empty,
-				FusionSigName = "Default Router",
-				Sig = 123,
-				SigType = eSigType.Serial
-			}
-		};
+		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>();
 
 		private static readonly IcdHashSet<IFusionSigMapping> s_InputOutputSigs = new IcdHashSet<IFusionSigMapping>
 		{

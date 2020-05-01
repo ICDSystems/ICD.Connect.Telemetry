@@ -20,7 +20,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				FusionSigName = "Occupied",
 				Sig = 0,
 				SigType = eSigType.Digital,
-				TargetAssetTypes = new IcdHashSet<Type>{typeof(IFusionOccupancySensorAsset)}
+				FusionAssetTypes = new IcdHashSet<Type>{typeof(IFusionOccupancySensorAsset)}
 			}
 		};
 	}
