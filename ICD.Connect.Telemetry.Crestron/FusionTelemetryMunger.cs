@@ -55,10 +55,34 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		#region Methods
 
-		public void AddAssets(IEnumerable<IDevice> devices)
+		/// <summary>
+		/// Adds the devices as assets to fusion and builds the sigs from the telemetry.
+		/// </summary>
+		/// <param name="devices"></param>
+		/// <returns></returns>
+		public void BuildAssets(IEnumerable<IDevice> devices)
 		{
+			Clear();
+
 			foreach (IDevice device in devices)
 				BuildAssets(device);
+		}
+
+		/// <summary>
+		/// Adds the device as assets to fusion and builds the sigs from the telemetry.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <returns></returns>
+		public void BuildAssets(IDevice device)
+		{
+			// Create the sig bindings
+			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
+
+			// Add the assets to fusion
+			if (device.Controls.GetControls<IOccupancySensorControl>().Any())
+				GenerateOccupancySensorAsset(device);
+
+			GenerateStaticAsset(device, nodes);
 		}
 
 		public static void RegisterMappingSet(Type type, IEnumerable<IFusionSigMapping> mappings)
@@ -88,23 +112,6 @@ namespace ICD.Connect.Telemetry.Crestron
 		}
 
 		#endregion
-
-		/// <summary>
-		/// Adds the device as an asset to fusion and builds the sigs from the telemetry.
-		/// </summary>
-		/// <param name="device"></param>
-		/// <returns></returns>
-		public void BuildAssets(IDevice device)
-		{
-			// Create the sig bindings
-			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
-
-			// Add the assets to fusion
-			if (device.Controls.GetControls<IOccupancySensorControl>().Any())
-				GenerateOccupancySensorAsset(device);
-
-			GenerateStaticAsset(device, nodes);
-		}
 
 		private void GenerateStaticAsset(IDeviceBase device, ITelemetryCollection nodes)
 		{
