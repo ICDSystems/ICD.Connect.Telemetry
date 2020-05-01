@@ -20,7 +20,5 @@
 				return output;
 			}
 		}
-
-		public override abstract int GetHashCode();
 	}
 }

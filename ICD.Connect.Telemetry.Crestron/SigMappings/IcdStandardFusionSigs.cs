@@ -52,6 +52,142 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				SigType = eSigType.Digital,
 				Sig = 0
 			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_MODEL,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "Model",
+				SigType = eSigType.Serial,
+				Sig = 50
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_FIRMWARE_VERSION,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "Firmware",
+				SigType = eSigType.Serial,
+				Sig = 51
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_FIRMWARE_DATE,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "Firmware Date",
+				SigType = eSigType.Serial,
+				Sig = 52
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_SERIAL_NUMBER,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "Serial No",
+				SigType = eSigType.Serial,
+				Sig = 56
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_UPTIME,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "Uptime",
+				SigType = eSigType.Serial,
+				Sig = 57
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_MAC_ADDRESS,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "MAC Address",
+				SigType = eSigType.Serial,
+				Sig = 100
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_HOSTNAME,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "Hostname",
+				SigType = eSigType.Serial,
+				Sig = 101
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_IP_ADDRESS,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "IP Address",
+				SigType = eSigType.Serial,
+				Sig = 102
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_IP_SUBNET,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "IP Subnet",
+				SigType = eSigType.Serial,
+				Sig = 103
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_IP_GATEWAY,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "IP Gateway",
+				SigType = eSigType.Serial,
+				Sig = 104
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_DHCP_STATUS,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "IP DHCP Enabled",
+				SigType = eSigType.Digital,
+				Sig = 100
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_MAC_ADDRESS_SECONDARY,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "MAC Address 2",
+				SigType = eSigType.Serial,
+				Sig = 110
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_HOSTNAME_SECONDARY,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "Hostname 2",
+				SigType = eSigType.Serial,
+				Sig = 111
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_IP_ADDRESS_SECONDARY,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "IP Address 2",
+				SigType = eSigType.Serial,
+				Sig = 112
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_IP_SUBNET_SECONDARY,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "IP Subnet 2",
+				SigType = eSigType.Serial,
+				Sig = 113
+			},
+			new FusionSigMapping
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_IP_GATEWAY_SECONDARY,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "IP Gateway 2",
+				SigType = eSigType.Serial,
+				Sig = 114
+			},
+			new FusionSigMapping()
+			{
+				TelemetryGetName = DeviceTelemetryNames.DEVICE_DHCP_STATUS_SECONDARY,
+				TelemetrySetName = string.Empty,
+				FusionSigName = "IP DHCP Enabled 2",
+				SigType = eSigType.Digital,
+				Sig = 110
+			}
 		}; 
 	}
 }

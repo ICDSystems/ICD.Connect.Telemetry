@@ -18,17 +18,5 @@ namespace ICD.Connect.Telemetry.MQTT.Mappings
 			Item = item;
 			Path = path;
 		}
-
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = 17;
-				hash = hash * 23 + (TelemetrySetName == null ? 0 : TelemetrySetName.GetHashCode());
-				hash = hash * 23 + (TelemetryGetName == null ? 0 : TelemetryGetName.GetHashCode());
-				hash = hash * 23 + (Path == null ? 0 : Path.GetHashCode());
-				return hash;
-			}
-		}
 	}
 }

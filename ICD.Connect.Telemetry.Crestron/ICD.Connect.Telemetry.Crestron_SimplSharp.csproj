@@ -80,6 +80,14 @@
     <Compile Include="Assets\IFusionOccupancySensorAsset.cs" />
     <Compile Include="Assets\IFusionRemoteOccupancySensorAsset.cs" />
     <Compile Include="Assets\IFusionStaticAsset.cs" />
+    <Compile Include="Assets\Mock\AbstractMockFusionAsset.cs" />
+    <Compile Include="Assets\Mock\IMockFusionAsset.cs" />
+    <Compile Include="Assets\Mock\MockFusionAssetDataCollection.cs" />
+    <Compile Include="Assets\Mock\MockFusionOccupancySensorAsset.cs" />
+    <Compile Include="Assets\Mock\MockFusionStaticAsset.cs" />
+    <Compile Include="Devices\MockFusionRoom\MockFusionRoom.cs" />
+    <Compile Include="Devices\MockFusionRoom\MockFusionRoomSettings.cs" />
+    <Compile Include="KrangPlugin.cs" />
     <Compile Include="SigMappings\FusionSigMapping.cs" />
     <Compile Include="SigMappings\AbstractFusionSigMapping.cs" />
     <Compile Include="FusionTelemetryBinding.cs" />
@@ -90,7 +98,6 @@
     <Compile Include="SigMappings\IcdControlSystemFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDialingDeviceFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDisplayFusionSigs.cs" />
-    <Compile Include="SigMappings\IcdDisplayWithAudioFusionSigs.cs" />
     <Compile Include="SigMappings\IcdDspFusionSigs.cs" />
     <Compile Include="SigMappings\IcdOccupancyFusionSigs.cs" />
     <Compile Include="SigMappings\IcdStandardFusionSigs.cs" />
