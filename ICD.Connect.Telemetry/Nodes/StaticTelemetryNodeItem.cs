@@ -3,6 +3,7 @@ using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
 #endif
+using ICD.Common.Properties;
 
 namespace ICD.Connect.Telemetry.Nodes
  {
@@ -12,13 +13,11 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// Constructor.
 		/// </summary>
 		/// <param name="name"></param>
-		/// <param name="value"></param>
 		/// <param name="parent"></param>
 		/// <param name="propertyInfo"></param>
-		public StaticTelemetryNodeItem(string name, T value, ITelemetryProvider parent, PropertyInfo propertyInfo)
+		public StaticTelemetryNodeItem(string name, [NotNull] ITelemetryProvider parent, [NotNull] PropertyInfo propertyInfo)
 			: base(name, parent, propertyInfo)
 		{
-			Value = value;
 		}
 	}
 }

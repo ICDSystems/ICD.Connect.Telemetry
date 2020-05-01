@@ -1,5 +1,4 @@
-﻿using System;
-using ICD.Common.Properties;
+﻿using ICD.Common.Properties;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -10,14 +9,16 @@ namespace ICD.Connect.Telemetry.Nodes
 {
 	public interface IFeedbackTelemetryItem : ITelemetryItem
 	{
-		[NotNull]
-		Type ValueType { get; }
+		/// <summary>
+		/// Gets the value from the property.
+		/// </summary>
+		[CanBeNull]
 		object Value { get; }
-		PropertyInfo PropertyInfo { get; }
-	}
 
-	public interface IFeedbackTelemetryItem<T> : IFeedbackTelemetryItem
-	{
-		new T Value { get; }
+		/// <summary>
+		/// Gets the property info for the property.
+		/// </summary>
+		[NotNull]
+		PropertyInfo PropertyInfo { get; }
 	}
 }

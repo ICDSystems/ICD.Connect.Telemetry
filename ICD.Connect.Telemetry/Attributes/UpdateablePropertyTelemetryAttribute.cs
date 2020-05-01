@@ -9,14 +9,14 @@ using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
-	public sealed class UpdatablePropertyTelemetryAttribute : AbstractUpdatablePropertyTelemetryAttribute
+	public sealed class UpdateablePropertyTelemetryAttribute : AbstractUpdateablePropertyTelemetryAttribute
 	{
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="setTelemetryName"></param>
-		public UpdatablePropertyTelemetryAttribute(string name, string setTelemetryName)
+		public UpdateablePropertyTelemetryAttribute(string name, string setTelemetryName)
 			: base(name, setTelemetryName)
 		{
 		}
@@ -29,7 +29,7 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// <returns></returns>
 		public override IFeedbackTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
 		{
-			Type type = typeof(UpdatableTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
+			Type type = typeof(UpdateableTelemetryNodeItem<>).MakeGenericType(propertyInfo.PropertyType);
 
 			return (IFeedbackTelemetryItem)ReflectionUtils.CreateInstance(type, new object[] { Name, instance, propertyInfo, SetTelemetryName });
 		}

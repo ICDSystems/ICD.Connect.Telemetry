@@ -11,9 +11,20 @@ namespace ICD.Connect.Telemetry.MQTT
 		public const byte QOS_LEVEL_AT_LEAST_ONCE = 0x01;
 		public const byte QOS_LEVEL_EXACTLY_ONCE = 0x02;
 
-		private const char SEPERATOR = '/';
+		private const char SEPARATOR = '/';
 
 		public const ushort DEFAULT_PORT = 1883;
+
+		/// <summary>
+		/// Creates an MQTT topic path from the given items.
+		/// </summary>
+		/// <param name="items"></param>
+		/// <returns></returns>
+		[NotNull]
+		public static string Join([NotNull] params string[] items)
+		{
+			return Join((IEnumerable<string>)items);
+		}
 
 		/// <summary>
 		/// Creates an MQTT topic path from the given items.
@@ -26,7 +37,7 @@ namespace ICD.Connect.Telemetry.MQTT
 			if (items == null)
 				throw new ArgumentNullException("items");
 
-			return string.Join(SEPERATOR.ToString(), items.ToArray())
+			return string.Join(SEPARATOR.ToString(), items.ToArray())
 			             .Replace(" ", ""); // Remove spaces for more consistent paths
 		}
 
@@ -39,7 +50,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		public static IEnumerable<string> Split([CanBeNull] string path)
 		{
 			path = path ?? string.Empty;
-			return path.Split(SEPERATOR);
+			return path.Split(SEPARATOR);
 		}
 	}
 }

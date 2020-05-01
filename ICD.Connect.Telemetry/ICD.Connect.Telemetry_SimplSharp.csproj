@@ -76,7 +76,7 @@
     <Compile Include="Attributes\AbstractMethodTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractTelemetryAttribute.cs" />
-    <Compile Include="Attributes\AbstractUpdatablePropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\AbstractUpdateablePropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\CollectionTelemetryAttribute.cs" />
     <Compile Include="Attributes\ExternalTelemetryAttribute.cs" />
     <Compile Include="Attributes\ICollectionTelemetryAttribute.cs" />
@@ -87,7 +87,7 @@
     <Compile Include="Attributes\IPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\StaticPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\TelemetryCollectionIdentityAttribute.cs" />
-    <Compile Include="Attributes\UpdatablePropertyTelemetryAttribute.cs" />
+    <Compile Include="Attributes\UpdateablePropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\MethodTelemetryAttribute.cs" />
     <Compile Include="Attributes\DynamicPropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\EventTelemetryAttribute.cs" />
@@ -103,7 +103,7 @@
     <Compile Include="Nodes\AbstractCollectionTelemetryWithParent.cs" />
     <Compile Include="Nodes\AbstractFeedbackTelemetryNodeItem.cs" />
     <Compile Include="Nodes\AbstractTelemetryNodeItemBase.cs" />
-    <Compile Include="Nodes\AbstractUpdatableTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\AbstractUpdateableTelemetryNodeItem.cs" />
     <Compile Include="Nodes\CollectionTelemetryNodeItem.cs" />
     <Compile Include="Nodes\ControlsTelemetryCollection.cs" />
     <Compile Include="Nodes\ControlTelemetryCollection.cs" />
@@ -117,7 +117,7 @@
     <Compile Include="Nodes\MethodTelemetryNodeItem.cs" />
     <Compile Include="Nodes\OriginatorsTelemetryCollection.cs" />
     <Compile Include="Nodes\StaticTelemetryNodeItem.cs" />
-    <Compile Include="Nodes\UpdatableTelemetryNodeItem.cs" />
+    <Compile Include="Nodes\UpdateableTelemetryNodeItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ITelemetryService.cs" />
     <Compile Include="Service\TelemetryService.cs" />

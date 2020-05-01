@@ -11,17 +11,33 @@ using System.Reflection;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public abstract class AbstractUpdatableTelemetryNodeItem<T> : AbstractFeedbackTelemetryNodeItem<T>, IUpdatableTelemetryNodeItem
+	public abstract class AbstractUpdateableTelemetryNodeItem<T> : AbstractFeedbackTelemetryNodeItem<T>, IUpdatableTelemetryNodeItem
 	{
+		public event EventHandler OnValueChanged;
+
+		private T m_CachedValue;
+
 		[CanBeNull]
 		public string SetTelemetryName { get; private set; }
 
-		protected AbstractUpdatableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo, string setTelemetry)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="parent"></param>
+		/// <param name="propertyInfo"></param>
+		/// <param name="setTelemetry"></param>
+		protected AbstractUpdateableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo, string setTelemetry)
 			: base(name, parent, propertyInfo)
 		{
 			SetTelemetryName = setTelemetry;
+
+			Update();
 		}
 
+		/// <summary>
+		/// Release resources.
+		/// </summary>
 		public override void Dispose()
 		{
 			OnValueChanged = null;
@@ -29,24 +45,21 @@ namespace ICD.Connect.Telemetry.Nodes
 			base.Dispose();
 		}
 
-		public event EventHandler OnValueChanged;
+		#region Methods
 
 		public void Update()
 		{
-			T newValue = (T)PropertyInfo.GetValue(Parent, null);
+			T newValue = Value;
 
-			// ReSharper disable CompareNonConstrainedGenericWithNull
-			if (Value == null && newValue == null)
+			if (EqualityComparer<T>.Default.Equals(m_CachedValue, newValue))
 				return;
 
-			if (newValue != null && newValue.Equals(Value))
-				return;
-			// ReSharper restore CompareNonConstrainedGenericWithNull
-
-			Value = newValue;
+			m_CachedValue = newValue;
 
 			OnValueChanged.Raise(this);
 		}
+
+		#endregion
 
 		#region Console
 
@@ -56,7 +69,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <returns></returns>
 		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
-			foreach (var command in GetBaseConsoleCommands())
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
 			yield return new ConsoleCommand("Update", "Invokes the update method manually", () => Update());

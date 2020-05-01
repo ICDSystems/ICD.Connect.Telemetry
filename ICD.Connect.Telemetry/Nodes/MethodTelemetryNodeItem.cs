@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Common.Properties;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -14,9 +15,21 @@ namespace ICD.Connect.Telemetry.Nodes
 	public sealed class MethodTelemetryNodeItem : AbstractTelemetryNodeItemBase, IManagementTelemetryItem
 	{
 		private readonly MethodInfo m_MethodInfo;
+		private readonly ParameterInfo m_ParameterInfo;
 
-		public int ParameterCount { get { return ParameterTypes.Length; } }
-		public Type[] ParameterTypes { get; private set; }
+		#region Properties
+
+		/// <summary>
+		/// Gets the info for the method.
+		/// </summary>
+		public MethodInfo MethodInfo { get { return m_MethodInfo; } }
+
+		/// <summary>
+		/// Gets the info for the first method parameter.
+		/// </summary>
+		public ParameterInfo ParameterInfo { get { return m_ParameterInfo; } }
+
+		#endregion
 
 		/// <summary>
 		/// Constructor.
@@ -24,12 +37,17 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <param name="name"></param>
 		/// <param name="parent"></param>
 		/// <param name="info"></param>
-		public MethodTelemetryNodeItem(string name, ITelemetryProvider parent, MethodInfo info)
+		public MethodTelemetryNodeItem(string name, [NotNull] ITelemetryProvider parent, [NotNull] MethodInfo info)
 			: base(name, parent)
 		{
-			m_MethodInfo = info;
+			if (parent == null)
+				throw new ArgumentNullException("parent");
 
-			ParameterTypes = m_MethodInfo.GetParameters().Select(p => (Type)p.ParameterType).ToArray();
+			if (info == null)
+				throw new ArgumentNullException("info");
+
+			m_MethodInfo = info;
+			m_ParameterInfo = info.GetParameters().SingleOrDefault();
 		}
 
 		public void Invoke(params object[] parameters)
@@ -40,10 +58,12 @@ namespace ICD.Connect.Telemetry.Nodes
 			}
 			catch (ArgumentException ex)
 			{
-				throw new ArgumentException(String.Format("Exception invoking telemetry method Name:{0} Parent:{1}", Name, Parent),
+				throw new ArgumentException(string.Format("Exception invoking telemetry method Name:{0} Parent:{1}", Name, Parent),
 				                            ex);
 			}
 		}
+
+		#region Console
 
 		/// <summary>
 		/// Calls the delegate for each console status item.
@@ -53,18 +73,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		{
 			base.BuildConsoleStatus(addRow);
 
-			addRow("Parameter Count", ParameterCount);
-
-			if (ParameterCount == 0)
-				return;
-
-			addRow("Parameter Types", "");
-			var index = 1;
-			foreach (var type in ParameterTypes)
-			{
-				addRow(string.Format("Parameter {0}", index), type.ToString());
-				index ++;
-			}
+			addRow("Parameter Type", m_ParameterInfo == null ? null : m_ParameterInfo.ParameterType);
 		}
 
 		/// <summary>
@@ -73,33 +82,30 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <returns></returns>
 		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
 		{
-			foreach (var command in GetBaseConsoleCommands())
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
 				yield return command;
 
-			if (ParameterCount == 0)
-				yield return new ConsoleCommand("Invoke", "Invokes this parameterless command", () => Invoke(new object[0]));
+			if (ParameterInfo == null)
+				yield return new ConsoleCommand("Invoke", "Invokes this parameterless command", () => Invoke());
 			else
 				yield return
-					new ParamsConsoleCommand("Invoke", "Invokes this command with the given parameters", a => ConsoleParseCommand(a));
+					new GenericConsoleCommand<string>("Invoke", "Invokes this command with the given parameter", a => ConsoleParseCommand(a));
 		}
 
-		private void ConsoleParseCommand(IEnumerable<string> args)
+		private void ConsoleParseCommand(string arg)
 		{
-			List<object> parameters = new List<object>();
+			if (ParameterInfo == null)
+				throw new InvalidOperationException();
 
-			var index = 0;
-			foreach (var arg in args)
-			{
-				parameters.Add(AbstractConsoleCommand.Convert(arg, ParameterTypes[index]));
-				index++;
-			}
-
-			Invoke(parameters.ToArray());
+			object parameter = AbstractConsoleCommand.Convert(arg, ParameterInfo.ParameterType);
+			Invoke(parameter);
 		}
 
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{
 			return base.GetConsoleCommands();
 		}
+
+		#endregion
 	}
 }

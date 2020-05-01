@@ -1,6 +1,6 @@
 ﻿namespace ICD.Connect.Telemetry.Attributes
 {
-	public abstract class AbstractUpdatablePropertyTelemetryAttribute : AbstractPropertyTelemetryAttribute
+	public abstract class AbstractUpdateablePropertyTelemetryAttribute : AbstractPropertyTelemetryAttribute
 	{
 		private readonly string m_SetTelemetryName;
 
@@ -11,7 +11,7 @@
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="setTelemetryName"></param>
-		protected AbstractUpdatablePropertyTelemetryAttribute(string name, string setTelemetryName)
+		protected AbstractUpdateablePropertyTelemetryAttribute(string name, string setTelemetryName)
 			: base(name)
 		{
 			m_SetTelemetryName = setTelemetryName;

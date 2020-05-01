@@ -34,7 +34,10 @@ namespace ICD.Connect.Telemetry.Bindings
 				updateable.OnValueChanged += UpdateableOnValueChanged;
 		}
 
-		public void Dispose()
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		public virtual void Dispose()
 		{
 			IUpdatableTelemetryNodeItem updateable = GetTelemetry as IUpdatableTelemetryNodeItem;
 			if (updateable != null)

@@ -9,7 +9,7 @@ using ICD.Common.Utils;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public sealed class DynamicTelemetryNodeItem<T> : AbstractUpdatableTelemetryNodeItem<T>
+	public sealed class DynamicTelemetryNodeItem<T> : AbstractUpdateableTelemetryNodeItem<T>
 	{
 		private readonly Delegate m_Delegate;
 		private readonly EventInfo m_EventInfo;

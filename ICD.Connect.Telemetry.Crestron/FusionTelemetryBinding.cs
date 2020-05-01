@@ -72,7 +72,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			bool digital = ((IFusionStaticAsset)Asset).ReadDigitalSig(singleMapping.Sig);
 
 			// Handle case where two separate digitals are used to set true and false
-			if (SetTelemetry.ParameterCount == 0 && digital)
+			if (SetTelemetry.ParameterInfo == null && digital)
 				SetTelemetry.Invoke();
 			else
 				SetTelemetry.Invoke(digital);
@@ -232,10 +232,10 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private object GetRescaledAnalogValue(ushort analog)
 		{
-			if (SetTelemetry == null || SetTelemetry.ParameterCount == 0)
+			if (SetTelemetry == null || SetTelemetry.ParameterInfo == null)
 				throw new InvalidOperationException("Set telemetry is null or has no parameters");
 
-			Type targetType = SetTelemetry.ParameterTypes[0];
+			Type targetType = SetTelemetry.ParameterInfo.ParameterType;
 
 			RangeAttribute rangeAttribute =
 				GetTelemetry.PropertyInfo

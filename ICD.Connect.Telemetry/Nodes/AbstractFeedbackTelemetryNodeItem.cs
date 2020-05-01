@@ -1,35 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
 using ICD.Common.Properties;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
 #endif
-using ICD.Common.Utils.Services;
-using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public abstract class AbstractFeedbackTelemetryNodeItem<T> : AbstractTelemetryNodeItemBase, IFeedbackTelemetryItem<T>
+	public abstract class AbstractFeedbackTelemetryNodeItem<T> : AbstractTelemetryNodeItemBase, IFeedbackTelemetryItem
 	{
 		private readonly PropertyInfo m_PropertyInfo;
 
+		/// <summary>
+		/// Gets the value from the property.
+		/// </summary>
 		object IFeedbackTelemetryItem.Value { get { return Value; } }
-		public T Value { get; protected set; }
-		[NotNull]
-		public Type ValueType { get { return typeof(T); } }
+
+		/// <summary>
+		/// Gets the value from the property.
+		/// </summary>
+		public T Value { get { return (T)m_PropertyInfo.GetValue(Parent, null); } }
+
+		/// <summary>
+		/// Gets the property info for the property.
+		/// </summary>
 		public PropertyInfo PropertyInfo { get { return m_PropertyInfo; } }
 
-		protected AbstractFeedbackTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo) 
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="parent"></param>
+		/// <param name="propertyInfo"></param>
+		protected AbstractFeedbackTelemetryNodeItem(string name, [NotNull] ITelemetryProvider parent, [NotNull] PropertyInfo propertyInfo) 
 			: base(name, parent)
 		{
+			if (propertyInfo == null)
+				throw new ArgumentNullException("propertyInfo");
+
 			m_PropertyInfo = propertyInfo;
 		}
-
-#region Console
 
 		/// <summary>
 		/// Calls the delegate for each console status item.
@@ -38,27 +50,9 @@ namespace ICD.Connect.Telemetry.Nodes
 		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			base.BuildConsoleStatus(addRow);
-			addRow("Value Type", ValueType.ToString());
-			addRow("Value", Value.ToString());
+
+			addRow("Property Type", PropertyInfo.PropertyType);
+			addRow("Property Value", Value.ToString());
 		}
-
-		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
-		{
-			foreach (var command in GetBaseConsoleCommands())
-				yield return command;
-
-			yield return new ConsoleCommand("Get Value",
-			                                "Prints the value for the telemetry item",
-			                                () =>
-			                                ServiceProvider.GetService<ILoggerService>()
-			                                               .AddEntry(eSeverity.Informational, Value.ToString()));
-		}
-
-		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
-		{
-			return base.GetConsoleCommands();
-		}
-
-#endregion
 	}
 }

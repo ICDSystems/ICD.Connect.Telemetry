@@ -54,23 +54,58 @@ namespace ICD.Connect.Telemetry
 		/// <summary>
 		/// Creates metadata for the given feedback telemetry.
 		/// </summary>
-		/// <param name="feedbackTelemetryItem"></param>
-		public static TelemetryMetadata FromFeedbackTelemetry([NotNull] IFeedbackTelemetryItem feedbackTelemetryItem)
+		/// <param name="feedbackTelemetry"></param>
+		public static TelemetryMetadata FromFeedbackTelemetry([NotNull] IFeedbackTelemetryItem feedbackTelemetry)
 		{
 			TelemetryMetadata output = new TelemetryMetadata
 			{
-				DataType = feedbackTelemetryItem.ValueType
+				DataType = feedbackTelemetry.PropertyInfo.PropertyType
 			};
 
 			eMetadataSupport supports = eMetadataSupport.None;
 
-			if (feedbackTelemetryItem.ValueType.IsEnum)
-				supports = supports | eMetadataSupport.EnumerationValues;
+			if (output.DataType != null && output.DataType.IsEnum)
+				supports |= eMetadataSupport.EnumerationValues;
 
-			RangeAttribute rangeAttr = feedbackTelemetryItem.PropertyInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
+			RangeAttribute rangeAttr = feedbackTelemetry.PropertyInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
 			if (rangeAttr != null)
 			{
-				supports = supports | eMetadataSupport.Range;
+				supports |= eMetadataSupport.Range;
+				output.RangeMin = (double)Convert.ChangeType(rangeAttr.Min, TypeCode.Double, CultureInfo.InvariantCulture);
+				output.RangeMax = (double)Convert.ChangeType(rangeAttr.Max, TypeCode.Double, CultureInfo.InvariantCulture);
+			}
+
+			output.Supports = supports;
+
+			return output;
+		}
+
+		/// <summary>
+		/// Creates metadata for the given management telemetry.
+		/// </summary>
+		/// <param name="managementTelemetry"></param>
+		public static TelemetryMetadata FromManagementTelemetry(IManagementTelemetryItem managementTelemetry)
+		{
+			TelemetryMetadata output = new TelemetryMetadata
+			{
+				DataType = managementTelemetry.ParameterInfo == null
+					? null
+					: managementTelemetry.ParameterInfo.ParameterType
+			};
+
+			eMetadataSupport supports = eMetadataSupport.None;
+
+			if (output.DataType != null && output.DataType.IsEnum)
+				supports |= eMetadataSupport.EnumerationValues;
+
+			RangeAttribute rangeAttr =
+				managementTelemetry.ParameterInfo == null
+					? null
+					: managementTelemetry.ParameterInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
+
+			if (rangeAttr != null)
+			{
+				supports |= eMetadataSupport.Range;
 				output.RangeMin = (double)Convert.ChangeType(rangeAttr.Min, TypeCode.Double, CultureInfo.InvariantCulture);
 				output.RangeMax = (double)Convert.ChangeType(rangeAttr.Max, TypeCode.Double, CultureInfo.InvariantCulture);
 			}

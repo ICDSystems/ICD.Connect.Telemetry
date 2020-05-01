@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
-	public sealed class DynamicPropertyTelemetryAttribute : AbstractUpdatablePropertyTelemetryAttribute
+	public sealed class DynamicPropertyTelemetryAttribute : AbstractUpdateablePropertyTelemetryAttribute
 	{
 		private readonly string m_EventName;
 

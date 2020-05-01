@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public sealed class UpdatableTelemetryNodeItem<T> : AbstractUpdatableTelemetryNodeItem<T>
+	public sealed class UpdateableTelemetryNodeItem<T> : AbstractUpdateableTelemetryNodeItem<T>
 	{
 		/// <summary>
 		/// Constructor.
@@ -15,7 +15,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <param name="parent"></param>
 		/// <param name="propertyInfo"></param>
 		/// <param name="setTelemetry"></param>
-		public UpdatableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo, string setTelemetry)
+		public UpdateableTelemetryNodeItem(string name, ITelemetryProvider parent, PropertyInfo propertyInfo, string setTelemetry)
 			: base(name, parent, propertyInfo, setTelemetry)
 		{
 		}
