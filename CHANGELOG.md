@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+ - MockFusionRoom supports Fusion To Program telemetry from the console
 
 ## [5.2.4] - 2020-04-30
 ### Added
