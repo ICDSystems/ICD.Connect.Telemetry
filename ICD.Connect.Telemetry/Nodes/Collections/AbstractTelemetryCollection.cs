@@ -1,9 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Connect.Telemetry.Nodes;
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.Nodes.Collections
 {
 	public abstract class AbstractTelemetryCollection : ITelemetryCollection
 	{

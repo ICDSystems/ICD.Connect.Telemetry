@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
-namespace ICD.Connect.Telemetry.Nodes
+namespace ICD.Connect.Telemetry.Nodes.Collections
 {
 	public class AbstractCollectionTelemetryWithParent : AbstractTelemetryCollection, ITelemetryItem
 	{

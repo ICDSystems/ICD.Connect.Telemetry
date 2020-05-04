@@ -4,6 +4,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Nodes;
+using ICD.Connect.Telemetry.Nodes.Collections;
 
 namespace ICD.Connect.Telemetry.Service
 {

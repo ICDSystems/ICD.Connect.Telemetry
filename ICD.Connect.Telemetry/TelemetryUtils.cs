@@ -7,6 +7,7 @@ using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Attributes;
 using ICD.Connect.Telemetry.Comparers;
+using ICD.Connect.Telemetry.Nodes.Collections;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -23,7 +24,7 @@ namespace ICD.Connect.Telemetry
 		private static readonly Dictionary<Type, Dictionary<EventInfo, IEventTelemetryAttribute>> s_TypeToEventInfo;
 		private static readonly SafeCriticalSection s_CacheSection;
 
-		private static BindingFlags s_BindingFlags =
+		private const BindingFlags BINDING_FLAGS =
 			BindingFlags.Instance | // Non-static classes
 			BindingFlags.Static | // Static classes
 			BindingFlags.Public | // Public members only
@@ -193,7 +194,7 @@ namespace ICD.Connect.Telemetry
 #else
 						type.GetTypeInfo()
 #endif
-						    .GetProperties(s_BindingFlags)
+						    .GetProperties(BINDING_FLAGS)
 						    .Select(p => new KeyValuePair<PropertyInfo, ITelemetryAttribute>(p, GetTelemetryAttribute(p)))
 						    .Where(kvp => kvp.Value != null);
 
@@ -239,7 +240,7 @@ namespace ICD.Connect.Telemetry
 #else
 						type.GetTypeInfo()
 #endif
-						    .GetMethods(s_BindingFlags)
+						    .GetMethods(BINDING_FLAGS)
 						    .Select(m => new KeyValuePair<MethodInfo, IMethodTelemetryAttribute>(m, GetTelemetryAttribute(m)))
 						    .Where(kvp => kvp.Value != null);
 
@@ -285,7 +286,7 @@ namespace ICD.Connect.Telemetry
 #else
 						type.GetTypeInfo()
 #endif
-						    .GetEvents(s_BindingFlags)
+						    .GetEvents(BINDING_FLAGS)
 						    .Select(e => new KeyValuePair<EventInfo, IEventTelemetryAttribute>(e, GetTelemetryAttribute(e)))
 						    .Where(kvp => kvp.Value != null);
 

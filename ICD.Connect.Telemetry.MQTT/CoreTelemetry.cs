@@ -15,6 +15,7 @@ using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings.Cores;
 using ICD.Connect.Telemetry.MQTT.Binding;
 using ICD.Connect.Telemetry.Nodes;
+using ICD.Connect.Telemetry.Nodes.Collections;
 using ICD.Connect.Telemetry.Service;
 
 namespace ICD.Connect.Telemetry.MQTT

@@ -1,5 +1,6 @@
 ﻿using ICD.Common.Properties;
 using ICD.Connect.Telemetry.Nodes;
+using ICD.Connect.Telemetry.Nodes.Collections;
 
 namespace ICD.Connect.Telemetry.Service
 {

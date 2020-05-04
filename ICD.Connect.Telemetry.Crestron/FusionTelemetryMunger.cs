@@ -12,6 +12,7 @@ using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Nodes;
+using ICD.Connect.Telemetry.Nodes.Collections;
 using ICD.Connect.Telemetry.Service;
 
 namespace ICD.Connect.Telemetry.Crestron

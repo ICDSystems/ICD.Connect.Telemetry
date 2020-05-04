@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Connect.Telemetry.Nodes.Collections;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
