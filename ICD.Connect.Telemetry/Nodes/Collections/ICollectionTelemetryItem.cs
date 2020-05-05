@@ -1,6 +1,4 @@
-﻿using ICD.Connect.Telemetry.Nodes.Collections;
-
-namespace ICD.Connect.Telemetry.Nodes
+﻿namespace ICD.Connect.Telemetry.Nodes.Collections
 {
 	public interface ICollectionTelemetryItem : ITelemetryItem, ITelemetryCollection
 	{

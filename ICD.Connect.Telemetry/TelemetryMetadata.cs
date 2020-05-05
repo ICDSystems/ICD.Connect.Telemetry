@@ -54,12 +54,12 @@ namespace ICD.Connect.Telemetry
 		/// <summary>
 		/// Creates metadata for the given feedback telemetry.
 		/// </summary>
-		/// <param name="feedbackTelemetry"></param>
-		public static TelemetryMetadata FromFeedbackTelemetry([NotNull] IFeedbackTelemetryItem feedbackTelemetry)
+		/// <param name="propertyTelemetry"></param>
+		public static TelemetryMetadata FromPropertyTelemetry([NotNull] PropertyTelemetryItem propertyTelemetry)
 		{
 			TelemetryMetadata output = new TelemetryMetadata
 			{
-				DataType = feedbackTelemetry.PropertyInfo.PropertyType
+				DataType = propertyTelemetry.PropertyInfo.PropertyType
 			};
 
 			eMetadataSupport supports = eMetadataSupport.None;
@@ -67,7 +67,7 @@ namespace ICD.Connect.Telemetry
 			if (output.DataType != null && output.DataType.IsEnum)
 				supports |= eMetadataSupport.EnumerationValues;
 
-			RangeAttribute rangeAttr = feedbackTelemetry.PropertyInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
+			RangeAttribute rangeAttr = propertyTelemetry.PropertyInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
 			if (rangeAttr != null)
 			{
 				supports |= eMetadataSupport.Range;
@@ -81,16 +81,16 @@ namespace ICD.Connect.Telemetry
 		}
 
 		/// <summary>
-		/// Creates metadata for the given management telemetry.
+		/// Creates metadata for the given method telemetry.
 		/// </summary>
-		/// <param name="managementTelemetry"></param>
-		public static TelemetryMetadata FromManagementTelemetry(IManagementTelemetryItem managementTelemetry)
+		/// <param name="methodTelemetry"></param>
+		public static TelemetryMetadata FromMethodTelemetry(MethodTelemetryItem methodTelemetry)
 		{
 			TelemetryMetadata output = new TelemetryMetadata
 			{
-				DataType = managementTelemetry.ParameterInfo == null
+				DataType = methodTelemetry.ParameterInfo == null
 					? null
-					: managementTelemetry.ParameterInfo.ParameterType
+					: methodTelemetry.ParameterInfo.ParameterType
 			};
 
 			eMetadataSupport supports = eMetadataSupport.None;
@@ -99,9 +99,9 @@ namespace ICD.Connect.Telemetry
 				supports |= eMetadataSupport.EnumerationValues;
 
 			RangeAttribute rangeAttr =
-				managementTelemetry.ParameterInfo == null
+				methodTelemetry.ParameterInfo == null
 					? null
-					: managementTelemetry.ParameterInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
+					: methodTelemetry.ParameterInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
 
 			if (rangeAttr != null)
 			{

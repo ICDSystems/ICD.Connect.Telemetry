@@ -32,8 +32,8 @@ namespace ICD.Connect.Telemetry.MQTT
 		private readonly ICore m_Core;
 		private readonly ILoggingContext m_Logger;
 
-		private readonly Dictionary<string, MQTTTelemetryBinding> m_ProgramToServiceBindings;
-		private readonly Dictionary<string, MQTTTelemetryBinding> m_ServiceToProgramBindings;
+		private readonly Dictionary<string, MqttTelemetryBinding> m_ProgramToServiceBindings;
+		private readonly Dictionary<string, MqttTelemetryBinding> m_ServiceToProgramBindings;
 		private readonly Dictionary<string, IcdHashSet<SubscriptionCallback>> m_SubscriptionCallbacks;
 		private readonly SafeCriticalSection m_BindingsSection;
 
@@ -81,8 +81,8 @@ namespace ICD.Connect.Telemetry.MQTT
 			m_Core = core;
 			m_Logger = new ServiceLoggingContext(this);
 
-			m_ProgramToServiceBindings = new Dictionary<string, MQTTTelemetryBinding>();
-			m_ServiceToProgramBindings = new Dictionary<string, MQTTTelemetryBinding>();
+			m_ProgramToServiceBindings = new Dictionary<string, MqttTelemetryBinding>();
+			m_ServiceToProgramBindings = new Dictionary<string, MqttTelemetryBinding>();
 			m_SubscriptionCallbacks = new Dictionary<string, IcdHashSet<SubscriptionCallback>>();
 			m_BindingsSection = new SafeCriticalSection();
 
@@ -161,7 +161,7 @@ namespace ICD.Connect.Telemetry.MQTT
 				m_BindingsSection.Leave();
 			}
 
-			m_Client.Subscribe(new[] { topic }, new[] { MQTTUtils.QOS_LEVEL_EXACTLY_ONCE });
+			m_Client.Subscribe(new[] { topic }, new[] { MqttUtils.QOS_LEVEL_EXACTLY_ONCE });
 		}
 
 		/// <summary>
@@ -254,11 +254,11 @@ namespace ICD.Connect.Telemetry.MQTT
 
 			try
 			{
-				foreach (MQTTTelemetryBinding binding in m_ProgramToServiceBindings.Values)
+				foreach (MqttTelemetryBinding binding in m_ProgramToServiceBindings.Values)
 					binding.Dispose();
 				m_ProgramToServiceBindings.Clear();
 
-				foreach (MQTTTelemetryBinding binding in m_ServiceToProgramBindings.Values)
+				foreach (MqttTelemetryBinding binding in m_ServiceToProgramBindings.Values)
 					binding.Dispose();
 				m_ServiceToProgramBindings.Clear();
 			}
@@ -284,7 +284,7 @@ namespace ICD.Connect.Telemetry.MQTT
 			if (!string.IsNullOrEmpty(PathPrefix))
 				pathEnumerable = pathEnumerable.Prepend(PathPrefix);
 
-			return MQTTUtils.Join(pathEnumerable);
+			return MqttUtils.Join(pathEnumerable);
 		}
 
 		/// <summary>
@@ -303,7 +303,7 @@ namespace ICD.Connect.Telemetry.MQTT
 			if (!string.IsNullOrEmpty(PathPrefix))
 				pathEnumerable = pathEnumerable.Prepend(PathPrefix);
 
-			return MQTTUtils.Join(pathEnumerable);
+			return MqttUtils.Join(pathEnumerable);
 		}
 
 		#endregion
@@ -358,13 +358,13 @@ namespace ICD.Connect.Telemetry.MQTT
 				if (collection != null)
 					GenerateTelemetryRecursive(collection, path);
 
-				IFeedbackTelemetryItem feedback = telemetryItem as IFeedbackTelemetryItem;
+				PropertyTelemetryItem feedback = telemetryItem as PropertyTelemetryItem;
 				if (feedback != null)
 					CreateSystemToServiceBinding(feedback, path);
 
-				IManagementTelemetryItem management = telemetryItem as IManagementTelemetryItem;
-				if (management != null)
-					CreateServiceToSystemBinding(management, path);
+				MethodTelemetryItem method = telemetryItem as MethodTelemetryItem;
+				if (method != null)
+					CreateServiceToSystemBinding(method, path);
 			}
 			finally
 			{
@@ -377,7 +377,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		/// </summary>
 		/// <param name="telemetry"></param>
 		/// <param name="path"></param>
-		private void CreateSystemToServiceBinding([NotNull] IFeedbackTelemetryItem telemetry, [NotNull] Stack<string> path)
+		private void CreateSystemToServiceBinding([NotNull] PropertyTelemetryItem telemetry, [NotNull] Stack<string> path)
 		{
 			if (telemetry == null)
 				throw new ArgumentNullException("telemetry");
@@ -387,7 +387,7 @@ namespace ICD.Connect.Telemetry.MQTT
 
 			string programToService = BuildProgramToServiceTopic(path);
 			string serviceToProgram = BuildServiceToProgramTopic(path);
-			MQTTTelemetryBinding binding = new MQTTTelemetryBinding(telemetry, null, programToService, serviceToProgram, this);
+			MqttTelemetryBinding binding = new MqttTelemetryBinding(telemetry, null, programToService, serviceToProgram, this);
 
 			m_BindingsSection.Execute(() => m_ProgramToServiceBindings.Add(programToService, binding));
 		}
@@ -397,7 +397,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		/// </summary>
 		/// <param name="telemetry"></param>
 		/// <param name="path"></param>
-		private void CreateServiceToSystemBinding([NotNull] IManagementTelemetryItem telemetry, [NotNull] Stack<string> path)
+		private void CreateServiceToSystemBinding([NotNull] MethodTelemetryItem telemetry, [NotNull] Stack<string> path)
 		{
 			if (telemetry == null)
 				throw new ArgumentNullException("telemetry");
@@ -407,7 +407,7 @@ namespace ICD.Connect.Telemetry.MQTT
 
 			string programToService = BuildProgramToServiceTopic(path);
 			string serviceToProgram = BuildServiceToProgramTopic(path);
-			MQTTTelemetryBinding binding = new MQTTTelemetryBinding(null, telemetry, programToService, serviceToProgram, this);
+			MqttTelemetryBinding binding = new MqttTelemetryBinding(null, telemetry, programToService, serviceToProgram, this);
 
 			m_BindingsSection.Execute(() => m_ServiceToProgramBindings.Add(serviceToProgram, binding));
 		}

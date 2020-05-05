@@ -1,4 +1,4 @@
-﻿namespace ICD.Connect.Telemetry
+﻿namespace ICD.Connect.Telemetry.Nodes.External
 {
 	public interface IExternalTelemetryProvider : ITelemetryProvider
 	{
@@ -6,6 +6,6 @@
 		/// Sets the parent telemetry provider that this instance extends.
 		/// </summary>
 		/// <param name="provider"></param>
-		void SetParent(ITelemetryProvider provider); 
+		void SetParent(ITelemetryProvider provider);
 	}
 }

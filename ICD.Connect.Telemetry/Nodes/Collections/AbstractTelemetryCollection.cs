@@ -16,17 +16,6 @@ namespace ICD.Connect.Telemetry.Nodes.Collections
 			m_Children = new List<ITelemetryItem>();
 		}
 
-		public IEnumerable<ITelemetryItem> GetChildren()
-		{
-			return m_Children.ToList();
-		}
-
-		public IEnumerable<TChildren> GetChildren<TChildren>()
-			where TChildren : ITelemetryItem
-		{
-			return m_Children.OfType<TChildren>().ToList();
-		}
-
 		public virtual ITelemetryItem GetChildByName(string name)
 		{
 			return m_Children.FirstOrDefault(child => child.Name == name);
@@ -35,6 +24,7 @@ namespace ICD.Connect.Telemetry.Nodes.Collections
 		#region ICollection
 
 		public bool IsReadOnly { get { return false; } }
+
 		public int Count { get { return m_Children.Count; } }
 
 		public virtual void Add(ITelemetryItem item)

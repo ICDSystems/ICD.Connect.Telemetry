@@ -5,7 +5,7 @@ using ICD.Common.Properties;
 
 namespace ICD.Connect.Telemetry.MQTT
 {
-	public static class MQTTUtils
+	public static class MqttUtils
 	{
 		public const byte QOS_LEVEL_AT_MOST_ONCE = 0x00;
 		public const byte QOS_LEVEL_AT_LEAST_ONCE = 0x01;

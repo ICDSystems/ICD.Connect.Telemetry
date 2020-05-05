@@ -1,4 +1,4 @@
-﻿namespace ICD.Connect.Telemetry
+﻿namespace ICD.Connect.Telemetry.Nodes.External
 {
 	public abstract class AbstractExternalTelemetryProvider<TParent> : AbstractTelemetryProvider, IExternalTelemetryProvider
 		where TParent : ITelemetryProvider

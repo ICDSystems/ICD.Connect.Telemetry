@@ -22,18 +22,16 @@ namespace ICD.Connect.Telemetry.Crestron
 		private const int SIG_OFFSET = 49;
 
 		private static readonly IcdHashSet<IFusionSigMapping> s_Mappings =
-			new IcdHashSet<IFusionSigMapping>(
-				IcdDisplayFusionSigs.Sigs.ToIcdHashSet().Concat(
-				IcdSwitcherFusionSigs.Sigs.ToIcdHashSet().Concat(
-				IcdSwitcherFusionSigs.InputOutputSigs.ToIcdHashSet().Concat(
-				IcdStandardFusionSigs.Sigs.ToIcdHashSet().Concat(
-				IcdDialingDeviceFusionSigs.Sigs.ToIcdHashSet().Concat(
-				IcdOccupancyFusionSigs.Sigs.ToIcdHashSet().Concat(
-				IcdDspFusionSigs.Sigs.ToIcdHashSet().Concat(
-				IcdControlSystemFusionSigs.Sigs.ToIcdHashSet().Concat(
-				IcdVolumeDeviceControlFusionSigs.Sigs.ToIcdHashSet()
-				))))))))
-			);
+			IcdDisplayFusionSigs.Sigs
+			                    .Concat(IcdSwitcherFusionSigs.Sigs)
+			                    .Concat(IcdSwitcherFusionSigs.InputOutputSigs)
+			                    .Concat(IcdStandardFusionSigs.Sigs)
+			                    .Concat(IcdDialingDeviceFusionSigs.Sigs)
+			                    .Concat(IcdOccupancyFusionSigs.Sigs)
+			                    .Concat(IcdDspFusionSigs.Sigs)
+			                    .Concat(IcdControlSystemFusionSigs.Sigs)
+			                    .Concat(IcdVolumeDeviceControlFusionSigs.Sigs)
+			                    .ToIcdHashSet();
 
 		private readonly Dictionary<uint, IcdHashSet<FusionTelemetryBinding>> m_BindingsByAsset;
 		private readonly SafeCriticalSection m_BindingsSection;
@@ -152,15 +150,13 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (nodes == null || !nodes.Any())
 				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, nodes not found.");
 
-			DynamicTelemetryNodeItem<eOccupancyState> node = nodes.OfType<DynamicTelemetryNodeItem<eOccupancyState>>().First();
+			PropertyTelemetryItem node =
+				nodes.OfType<PropertyTelemetryItem>()
+				     .FirstOrDefault(n => n.PropertyInfo.PropertyType == typeof(eOccupancyState));
 			if (node == null)
 				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, matching node not found.");
 
-			IFusionSigMapping mapping = s_Mappings.First(m => m.TelemetryGetName == OccupancyTelemetryNames.OCCUPANCY_STATE);
-
-			if (mapping == null)
-				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, mapping not found.");
-
+			IFusionSigMapping mapping = IcdOccupancyFusionSigs.OccupancyState;
 			FusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, node, occAssetInfo.Number, null);
 			if (binding == null)
 				return;

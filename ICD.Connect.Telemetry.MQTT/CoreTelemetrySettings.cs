@@ -57,7 +57,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		/// </summary>
 		public CoreTelemetrySettings()
 		{
-			Port = MQTTUtils.DEFAULT_PORT;
+			Port = MqttUtils.DEFAULT_PORT;
 		}
 
 		#region Methods
@@ -88,7 +88,7 @@ namespace ICD.Connect.Telemetry.MQTT
 			Enabled = false;
 			PathPrefix = null;
 			Hostname = null;
-			Port = MQTTUtils.DEFAULT_PORT;
+			Port = MqttUtils.DEFAULT_PORT;
 			Username = null;
 			Password = null;
 			Secure = false;
@@ -130,7 +130,7 @@ namespace ICD.Connect.Telemetry.MQTT
 			Enabled = XmlUtils.TryReadChildElementContentAsBoolean(xml, ELEMENT_ENABLED) ?? false;
 			PathPrefix = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PATH_PREFIX);
 			Hostname = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_HOSTNAME);
-			Port = XmlUtils.TryReadChildElementContentAsUShort(xml, ELEMENT_PORT) ?? MQTTUtils.DEFAULT_PORT;
+			Port = XmlUtils.TryReadChildElementContentAsUShort(xml, ELEMENT_PORT) ?? MqttUtils.DEFAULT_PORT;
 			Username = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_USERNAME);
 			Password = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PASSWORD);
 			Secure = XmlUtils.TryReadChildElementContentAsBoolean(xml, ELEMENT_SECURE) ?? false;

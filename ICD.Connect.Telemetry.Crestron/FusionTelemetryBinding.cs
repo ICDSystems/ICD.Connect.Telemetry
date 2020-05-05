@@ -31,7 +31,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <param name="setTelemetry"></param>
 		/// <param name="asset"></param>
 		/// <param name="mapping"></param>
-		private FusionTelemetryBinding(IFusionRoom fusionRoom, IFeedbackTelemetryItem getTelemetry, IManagementTelemetryItem setTelemetry,
+		private FusionTelemetryBinding(IFusionRoom fusionRoom, PropertyTelemetryItem getTelemetry, MethodTelemetryItem setTelemetry,
 		                               IFusionAsset asset, FusionSigMapping mapping) 
 			: base(getTelemetry, setTelemetry)
 		{
@@ -39,10 +39,10 @@ namespace ICD.Connect.Telemetry.Crestron
 			Asset = asset;
 			Mapping = mapping;
 
-			UpdateAndSendValueToService();
+			SendValueToService();
 		}
 
-		public override void UpdateLocalNodeValueFromService()
+		public void UpdateLocalNodeValueFromService()
 		{
 			switch (Mapping.SigType)
 			{
@@ -125,7 +125,10 @@ namespace ICD.Connect.Telemetry.Crestron
 			SetTelemetry.Invoke(serial);
 		}
 
-		protected override void UpdateAndSendValueToService()
+		/// <summary>
+		/// Sends the wrapped property value to the telemetry service.
+		/// </summary>
+		protected override void SendValueToService()
 		{
 			if (GetTelemetry == null)
 				return;
@@ -284,8 +287,8 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (mapping.FusionAssetTypes != null && !asset.GetType().GetAllTypes().Any(t => mapping.FusionAssetTypes.Contains(t)))
 				return null;
 
-			IFeedbackTelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName) as IFeedbackTelemetryItem;
-			IManagementTelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName) as IManagementTelemetryItem;
+			PropertyTelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName) as PropertyTelemetryItem;
+			MethodTelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName) as MethodTelemetryItem;
 
 			if (getTelemetryItem == null && setTelemetryItem == null)
 				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");

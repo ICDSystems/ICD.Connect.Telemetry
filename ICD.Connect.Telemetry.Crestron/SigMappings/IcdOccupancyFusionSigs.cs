@@ -9,10 +9,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
 	public static class IcdOccupancyFusionSigs
 	{
-		public static IEnumerable<IFusionSigMapping> Sigs { get { return s_Sigs; } }
-
-		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>
-		{
+		private static readonly FusionSigMapping s_OccupancyState =
 			new FusionSigMapping
 			{
 				TelemetryGetName = OccupancyTelemetryNames.OCCUPANCY_STATE,
@@ -20,8 +17,16 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				FusionSigName = "Occupied",
 				Sig = 0,
 				SigType = eSigType.Digital,
-				FusionAssetTypes = new IcdHashSet<Type>{typeof(IFusionOccupancySensorAsset)}
-			}
+				FusionAssetTypes = new IcdHashSet<Type> {typeof(IFusionOccupancySensorAsset)}
+			};
+
+		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>
+		{
+			s_OccupancyState
 		};
+
+		public static FusionSigMapping OccupancyState { get { return s_OccupancyState; } }
+
+		public static IEnumerable<IFusionSigMapping> Sigs { get { return s_Sigs; } }
 	}
 }

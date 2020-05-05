@@ -12,7 +12,7 @@ using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public sealed class MethodTelemetryNodeItem : AbstractTelemetryNodeItemBase, IManagementTelemetryItem
+	public sealed class MethodTelemetryItem : AbstractTelemetryItem
 	{
 		private readonly MethodInfo m_MethodInfo;
 		private readonly ParameterInfo m_ParameterInfo;
@@ -37,7 +37,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <param name="name"></param>
 		/// <param name="parent"></param>
 		/// <param name="info"></param>
-		public MethodTelemetryNodeItem(string name, [NotNull] ITelemetryProvider parent, [NotNull] MethodInfo info)
+		public MethodTelemetryItem(string name, [NotNull] ITelemetryProvider parent, [NotNull] MethodInfo info)
 			: base(name, parent)
 		{
 			if (parent == null)

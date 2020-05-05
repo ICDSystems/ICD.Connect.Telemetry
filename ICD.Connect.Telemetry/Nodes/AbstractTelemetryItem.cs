@@ -1,15 +1,22 @@
 using System;
 using System.Collections.Generic;
+using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public abstract class AbstractTelemetryNodeItemBase : ITelemetryItem, IDisposable
+	public abstract class AbstractTelemetryItem : ITelemetryItem, IDisposable
 	{
+		/// <summary>
+		/// Gets the name of the telemetry item.
+		/// </summary>
 		public string Name { get; private set; }
 
+		/// <summary>
+		/// Gets the provider that this telemetry item is attached to.
+		/// </summary>
 		public ITelemetryProvider Parent { get; private set; }
 
 		/// <summary>
@@ -17,14 +24,35 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="parent"></param>
-		protected AbstractTelemetryNodeItemBase(string name, ITelemetryProvider parent)
+		protected AbstractTelemetryItem([NotNull] string name, [NotNull] ITelemetryProvider parent)
 		{
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentException("Name must not be null or empty", "name");
+
+			if (parent == null)
+				throw new ArgumentNullException("parent");
+
 			Name = name;
 			Parent = parent;
 		}
 
+		/// <summary>
+		/// Release resources.
+		/// </summary>
 		public virtual void Dispose()
 		{
+		}
+
+		/// <summary>
+		/// Gets the string representation for this instance.
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString()
+		{
+			return new ReprBuilder(this)
+				.AppendProperty("Name", Name)
+				.AppendProperty("Parent", Parent)
+				.ToString();
 		}
 
 		#region Console
@@ -55,6 +83,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		public virtual void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			addRow("Name", Name);
+			addRow("Parent", Parent);
 		}
 
 		/// <summary>
@@ -67,13 +96,5 @@ namespace ICD.Connect.Telemetry.Nodes
 		}
 
 		#endregion
-
-		public override string ToString()
-		{
-			var x = new ReprBuilder(this);
-			x.AppendProperty("Name", Name);
-			x.AppendProperty("Parent", Parent);
-			return x.ToString();
-		}
 	}
 }
