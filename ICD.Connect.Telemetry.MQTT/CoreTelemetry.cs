@@ -5,6 +5,7 @@ using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
@@ -92,7 +93,7 @@ namespace ICD.Connect.Telemetry.MQTT
 				DebugRx = eDebugMode.Ascii,
 				DebugTx = eDebugMode.Ascii
 			};
-			m_Client.OnMessageReceived += ClientOnMessageReceived;
+			Subscribe(m_Client);
 
 			m_ConnectionStateManager = new ConnectionStateManager(this);
 			m_ConnectionStateManager.SetPort(m_Client, false);
@@ -104,6 +105,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		public void Dispose()
 		{
 			Stop();
+			Unsubscribe(m_Client);
 		}
 
 		#region Methods
@@ -161,7 +163,9 @@ namespace ICD.Connect.Telemetry.MQTT
 				m_BindingsSection.Leave();
 			}
 
-			m_Client.Subscribe(new[] { topic }, new[] { MqttUtils.QOS_LEVEL_EXACTLY_ONCE });
+			// Don't bother subscribing unless we're connected
+			if (Port.IsConnected)
+				m_Client.Subscribe(new[] { topic }, new[] { MqttUtils.QOS_LEVEL_EXACTLY_ONCE });
 		}
 
 		/// <summary>
@@ -417,6 +421,25 @@ namespace ICD.Connect.Telemetry.MQTT
 		#region Client Callbacks
 
 		/// <summary>
+		/// Subscribe to the client events.
+		/// </summary>
+		/// <param name="client"></param>
+		private void Subscribe(IMqttClient client)
+		{
+			client.OnMessageReceived += ClientOnMessageReceived;
+			client.OnConnectedStateChanged += ClientOnConnectedStateChanged;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the client events.
+		/// </summary>
+		/// <param name="client"></param>
+		private void Unsubscribe(IMqttClient client)
+		{
+			client.OnMessageReceived -= ClientOnMessageReceived;
+		}
+
+		/// <summary>
 		/// Called when the client receives a message from the broker.
 		/// </summary>
 		/// <param name="sender"></param>
@@ -446,6 +469,23 @@ namespace ICD.Connect.Telemetry.MQTT
 			finally
 			{
 				m_BindingsSection.Leave();
+			}
+		}
+
+		/// <summary>
+		/// Called when the client connects/disconnects.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
+		private void ClientOnConnectedStateChanged(object sender, BoolEventArgs eventArgs)
+		{
+			// Resubscribe to everything on connection
+			if (eventArgs.Data)
+			{
+				string[] topics = m_BindingsSection.Execute(() => m_SubscriptionCallbacks.Keys.ToArray());
+				byte[] qosLevels = Enumerable.Repeat(MqttUtils.QOS_LEVEL_EXACTLY_ONCE, topics.Length).ToArray();
+
+				m_Client.Subscribe(topics, qosLevels);
 			}
 		}
 
