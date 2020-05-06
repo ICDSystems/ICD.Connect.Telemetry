@@ -93,9 +93,9 @@
       <Project>{FD46A717-5836-4B73-ADD0-2706639DA8ED}</Project>
       <Name>ICD.Connect.Devices_SimplSharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol.IoT\ICD.Connect.Protocol.IoT_SimplSharp.csproj">
+    <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol.NetworkPro\ICD.Connect.Protocol.NetworkPro_SimplSharp.csproj">
       <Project>{849A1900-1042-41F0-829A-E5B75339F6A1}</Project>
-      <Name>ICD.Connect.Protocol.IoT_SimplSharp</Name>
+      <Name>ICD.Connect.Protocol.NetworkPro_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_SimplSharp.csproj">
       <Project>{2E4E01B8-D4EA-4FB1-9FCE-0A0DC8D83C8A}</Project>
