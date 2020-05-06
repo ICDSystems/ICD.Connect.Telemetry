@@ -32,6 +32,8 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 
 		private readonly Dictionary<eSigType, Dictionary<uint, eTelemetryIoMask>> m_SigIoMasks;
 
+		private readonly SigCallbackManager m_SigCallbackManager;
+
 		private readonly Dictionary<uint, IMockFusionAsset> m_Assets;
 
 		private readonly MockFusionAssetDataCollection m_AssetDataCollection;
@@ -91,6 +93,8 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 			m_SigIoMasks = new Dictionary<eSigType, Dictionary<uint, eTelemetryIoMask>>();
 			m_Assets = new Dictionary<uint, IMockFusionAsset>();
 
+			m_SigCallbackManager = new SigCallbackManager();
+
 			m_AssetDataCollection = new MockFusionAssetDataCollection(m_Assets);
 
 		}
@@ -122,7 +126,7 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 		/// <param name="callback"></param>
 		public void RegisterOutputSigChangeCallback(uint number, eSigType type, Action<SigCallbackManager, SigInfoEventArgs> callback)
 		{
-			//throw new NotImplementedException();
+			m_SigCallbackManager.RegisterSigChangeCallback(number, type, callback);
 		}
 
 		/// <summary>
@@ -133,7 +137,7 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 		/// <param name="callback"></param>
 		public void UnregisterOutputSigChangeCallback(uint number, eSigType type, Action<SigCallbackManager, SigInfoEventArgs> callback)
 		{
-			//throw new NotImplementedException();
+			m_SigCallbackManager.UnregisterSigChangeCallback(number, type, callback);
 		}
 
 		/// <summary>
@@ -199,6 +203,8 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 					asset = null;
 					break;
 			}
+
+			Subscribe(asset);
 
 			if (asset != null)
 				m_Assets.Add(asset.Number, asset);
@@ -345,6 +351,29 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 			}
 		}
 
+		#region Asset Callbacks
+
+		private void Subscribe(IMockFusionAsset asset)
+		{
+			var staticAsset = asset as MockFusionStaticAsset;
+			if (staticAsset != null)
+			{
+				staticAsset.OnFusionAssetSigUpdated += StaticAssetOnOnFusionAssetSigUpdated;
+				staticAsset.OnFusionAssetPowerStateUpdated += StaticAssetOnOnFusionAssetPowerStateUpdated;
+			}
+		}
+
+		private void StaticAssetOnOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
+		{
+			OnFusionAssetSigUpdated.Raise(this, args);
+		}
+
+		private void StaticAssetOnOnFusionAssetPowerStateUpdated(object sender, FusionAssetPowerStateUpdatedArgs args)
+		{
+			OnFusionAssetPowerStateUpdated.Raise(this, args);
+		}
+
+		#endregion
 
 		#region Console
 
@@ -360,6 +389,15 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 			yield return new ConsoleCommand("PrintSigs", "Print all the registered sigs and their values", () => PrintSigs());
 			yield return new ConsoleCommand("PrintAssets", "Prints assets", () => PrintAssets());
 			yield return new ConsoleCommand("PrintAllMappings", "Print all avaliable telemetry mappings", () => PrintAllMappings());
+			yield return new GenericConsoleCommand<uint, bool>("SendOutputDigital",
+			                                                   "Sends Digital Sig From Mock Fusion <number> <value>",
+			                                                   (n, v) => SendOutputDigital(n, v));
+			yield return new GenericConsoleCommand<uint, ushort>("SendOutputAnalog",
+			                                                   "Sends Analog Sig From Mock Fusion <number> <value>",
+			                                                   (n, v) => SendOutputAnalog(n, v));
+			yield return new GenericConsoleCommand<uint, string>("SendOutputSerial",
+			                                                   "Sends Serial Sig From Mock Fusion <number> <value>",
+			                                                   (n, v) => SendOutputSerial(n, v));
 			yield return new GenericConsoleCommand<bool>("FusionActionSystemPower", "FusionActionSystemPower [true|false]", (b) => FusionActionSystemPower(b));
 			yield return new GenericConsoleCommand<bool>("FusionActionDisplayPower",
 			                                             "FusionActionDisplayPower [true|false]",
@@ -418,6 +456,24 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 				table.AddRow(asset.Number, asset.Name, asset.AssetType, asset.Type, asset.InstanceId);
 
 			return table.ToString();
+		}
+
+		private void SendOutputDigital(uint number, bool value)
+		{
+			SigInfo sigInfo = new SigInfo(number, "", 0, value);
+			m_SigCallbackManager.RaiseSigChangeCallback(sigInfo);
+		}
+
+		private void SendOutputAnalog(uint number, ushort value)
+		{
+			SigInfo sigInfo = new SigInfo(number, "", 0, value);
+			m_SigCallbackManager.RaiseSigChangeCallback(sigInfo);
+		}
+
+		private void SendOutputSerial(uint number, string value)
+		{
+			SigInfo sigInfo = new SigInfo(number, "", 0, value);
+			m_SigCallbackManager.RaiseSigChangeCallback(sigInfo);
 		}
 
 		public void FusionActionSystemPower(bool state)

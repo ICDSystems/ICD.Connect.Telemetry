@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Telemetry.Attributes;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Nodes.Collections;
@@ -43,17 +45,44 @@ namespace ICD.Connect.Telemetry
 				PropertyTelemetryAttribute.GetProperties(instance.GetType());
 
 			foreach (KeyValuePair<PropertyInfo, PropertyTelemetryAttribute> kvp in properties)
-				collection.Add(kvp.Value.InstantiateTelemetryItem(instance, kvp.Key));
+			{
+				try
+				{
+					PropertyTelemetryItem item =
+						kvp.Value.InstantiateTelemetryItem(instance, kvp.Key);
+					collection.Add(item);
+				}
+				catch (Exception e)
+				{
+					ServiceProvider.GetService<ILoggerService>()
+					               .AddEntry(eSeverity.Error, e.GetBaseException(),
+					                         "Failed to instantiate telemetry item - {0} - {1}",
+					                         instance, kvp.Value.Name);
+				}
+			}
 		}
 
 		private static void InstantiateCollectionTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
 		{
-			IEnumerable<ICollectionTelemetryItem> properties =
-				CollectionTelemetryAttribute.GetProperties(instance.GetType())
-				                            .Select(kvp => kvp.Value.InstantiateTelemetryItem(instance, kvp.Key));
+			IEnumerable<KeyValuePair<PropertyInfo, CollectionTelemetryAttribute>> properties =
+				CollectionTelemetryAttribute.GetProperties(instance.GetType());
 
-			foreach (ICollectionTelemetryItem item in properties)
-				collection.Add(item);
+			foreach (KeyValuePair<PropertyInfo, CollectionTelemetryAttribute> kvp in properties)
+			{
+				try
+				{
+					ICollectionTelemetryItem item =
+						kvp.Value.InstantiateTelemetryItem(instance, kvp.Key);
+					collection.Add(item);
+				}
+				catch (Exception e)
+				{
+					ServiceProvider.GetService<ILoggerService>()
+					               .AddEntry(eSeverity.Error, e.GetBaseException(),
+					                         "Failed to instantiate collection telemetry - {0} - {1}",
+					                         instance, kvp.Value.Name);
+				}
+			}
 		}
 
 		private static void InstantiateMethodTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
@@ -62,7 +91,20 @@ namespace ICD.Connect.Telemetry
 				MethodTelemetryAttribute.GetMethods(instance.GetType());
 
 			foreach (KeyValuePair<MethodInfo, MethodTelemetryAttribute> kvp in methods)
-				collection.Add(kvp.Value.InstantiateTelemetryItem(instance, kvp.Key));
+			{
+				try
+				{
+					MethodTelemetryItem item = kvp.Value.InstantiateTelemetryItem(instance, kvp.Key);
+					collection.Add(item);
+				}
+				catch (Exception e)
+				{
+					ServiceProvider.GetService<ILoggerService>()
+								   .AddEntry(eSeverity.Error, e.GetBaseException(),
+											 "Failed to instantiate method telemetry - {0} - {1}",
+											 instance, kvp.Value.Name);
+				}
+			}
 		}
 
 		private static void InstantiateExternalTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
