@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Using new GenericBaseUtils to standardize crestron device setup and teardown
 
+## [5.2.5] - 2020-05-06
+### Added
+ - MockFusionRoom supports Fusion To Program telemetry from the console
+
+### Changed
+ - Logging exceptions when failing to invoke telemetry members
+
 ## [5.2.4] - 2020-04-30
 ### Added
  - Fusion: Telemetry provider whitelist to Fusion Sig Mappings
