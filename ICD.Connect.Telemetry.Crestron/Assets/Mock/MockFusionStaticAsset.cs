@@ -6,17 +6,27 @@ using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Telemetry.Attributes;
+using ICD.Connect.Telemetry.Crestron.Devices;
 
 namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 {
 	public sealed class MockFusionStaticAsset : AbstractMockFusionAsset, IFusionStaticAsset
 	{
+		private const uint SIG_OFFSET = 49;
+
+		public event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
+		public event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated;
 
 		private readonly Dictionary<uint, bool> m_InputSigsDigital;
 
 		private readonly Dictionary<uint, ushort> m_InputSigsAnalog;
 
 		private readonly Dictionary<uint, string> m_InputSigsSerials;
+
+		private readonly Dictionary<uint, bool> m_OutputSigsDigital;
+		private readonly Dictionary<uint, ushort> m_OutputSigsAnalog;
+		private readonly Dictionary<uint, string> m_OutputSigsSerial;
 
 
 		private readonly Dictionary<eSigType, Dictionary<uint, string>> m_SigNames;
@@ -34,6 +44,10 @@ namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 			m_InputSigsDigital = new Dictionary<uint, bool>();
 			m_InputSigsAnalog = new Dictionary<uint, ushort>();
 			m_InputSigsSerials = new Dictionary<uint, string>();
+
+			m_OutputSigsDigital = new Dictionary<uint, bool>();
+			m_OutputSigsAnalog = new Dictionary<uint, ushort>();
+			m_OutputSigsSerial = new Dictionary<uint, string>();
 
 			m_SigNames = new Dictionary<eSigType, Dictionary<uint, string>>();
 			m_SigIoMasks = new Dictionary<eSigType, Dictionary<uint, eSigIoMask>>();
@@ -166,12 +180,21 @@ namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 				yield return command;
 
 			yield return new ConsoleCommand("PrintSigs", "Print the sigs for the asset", () => PrintSigs());
+			yield return new GenericConsoleCommand<uint, bool>("SendOutputDigital",
+			                                                   "Sends Digital Sig From Mock Fusion <number> <value>",
+			                                                   (n, v) => SendOutputDigital(n, v));
+			yield return new GenericConsoleCommand<uint, ushort>("SendOutputAnalog",
+			                                                     "Sends Analog Sig From Mock Fusion <number> <value>",
+			                                                     (n, v) => SendOutputAnalog(n, v));
+			yield return new GenericConsoleCommand<uint, string>("SendOutputSerial",
+			                                                     "Sends Serial Sig From Mock Fusion <number> <value>",
+			                                                     (n, v) => SendOutputSerial(n, v));
 		}
 
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
 		{ return base.GetConsoleCommands(); }
 
-		public string PrintSigs()
+		private string PrintSigs()
 		{
 			TableBuilder table = new TableBuilder("Type", "Sig Number", "SigName", "IoMask", "Value");
 
@@ -185,6 +208,33 @@ namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 			}
 
 			return table.ToString();
+		}
+
+		private void SendOutputDigital(uint sig, bool value)
+		{
+			uint offsetSig = sig - SIG_OFFSET;
+			m_OutputSigsDigital[sig] = value;
+			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(Number, eSigType.Digital, offsetSig));
+		}
+
+		private void SendOutputAnalog(uint sig, ushort value)
+		{
+			uint offsetSig = sig - SIG_OFFSET;
+			m_OutputSigsAnalog[sig] = value;
+			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(Number, eSigType.Analog, offsetSig));
+		}
+
+		private void SendOutputSerial(uint sig, string value)
+		{
+			uint offsetSig = sig - SIG_OFFSET;
+			m_OutputSigsSerial[sig] = value;
+			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(Number, eSigType.Serial, offsetSig));
+		}
+
+		private void SendPowerState(bool state)
+		{
+			PowerState = state;
+			OnFusionAssetPowerStateUpdated.Raise(this, new FusionAssetPowerStateUpdatedArgs(Number, state));
 		}
 
 		#endregion
@@ -201,20 +251,26 @@ namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 
 		public bool ReadDigitalSig(uint sig)
 		{
-			//todo: Implement
+			bool value;
+			if (m_OutputSigsDigital.TryGetValue(sig, out value))
+				return value;
 			return false;
 		}
 
 		public ushort ReadAnalogSig(uint sig)
 		{
-			//todo: Implement
+			ushort value;
+			if (m_OutputSigsAnalog.TryGetValue(sig, out value))
+				return value;
 			return 0;
 		}
 
 		public string ReadSerialSig(uint sig)
 		{
-			//todo: Implement
-			return "";
+			string value;
+			if (m_OutputSigsSerial.TryGetValue(sig, out value))
+				return value;
+			return string.Empty;
 		}
 	}
 }
