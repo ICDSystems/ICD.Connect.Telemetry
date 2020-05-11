@@ -3,12 +3,13 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
+using ICD.Connect.Settings.Services;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Nodes.Collections;
 
-namespace ICD.Connect.Telemetry.Service
+namespace ICD.Connect.Telemetry.Services
 {
-	public sealed class TelemetryService : ITelemetryService
+	public sealed class TelemetryService : AbstractService<ITelemetryService, TelemetryServiceSettings>, ITelemetryService
 	{
 		private readonly WeakKeyDictionary<ITelemetryProvider, ITelemetryCollection> m_TelemetryProviders;
 		private readonly SafeCriticalSection m_TelemetryProvidersSection;

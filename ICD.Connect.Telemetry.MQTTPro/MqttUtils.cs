@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 
-namespace ICD.Connect.Telemetry.MQTT
+namespace ICD.Connect.Telemetry.MQTTPro
 {
 	public static class MqttUtils
 	{

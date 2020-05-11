@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{9512C0A5-F966-4AC6-9668-62C6F343B0CD}</ProjectGuid>
+    <ProjectGuid>{0BED4D4C-3704-431C-B07F-CE78AE29E0F1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ICD.Connect.Telemetry</RootNamespace>
-    <AssemblyName>ICD.Connect.Telemetry</AssemblyName>
+    <RootNamespace>ICD.Connect.Telemetry.Services</RootNamespace>
+    <AssemblyName>ICD.Connect.Telemetry.Services</AssemblyName>
     <ProjectTypeGuids>{0B4745B0-194B-4BB6-8E21-E9057CA92500};{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PlatformFamilyName>WindowsCE</PlatformFamilyName>
     <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
@@ -45,7 +45,6 @@
     <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
     <GenerateSerializationAssemblies>off</GenerateSerializationAssemblies>
-    <DefineConstants>SIMPLSHARP</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -71,36 +70,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ObfuscationSettings.cs" />
-    <Compile Include="Nodes\External\AbstractExternalTelemetryProvider.cs" />
-    <Compile Include="AbstractTelemetryProvider.cs" />
-    <Compile Include="Attributes\PropertyTelemetryAttribute.cs" />
-    <Compile Include="Attributes\AbstractTelemetryAttribute.cs" />
-    <Compile Include="Attributes\CollectionTelemetryAttribute.cs" />
-    <Compile Include="Attributes\ExternalTelemetryAttribute.cs" />
-    <Compile Include="Attributes\ITelemetryAttribute.cs" />
-    <Compile Include="Attributes\TelemetryCollectionIdentityAttribute.cs" />
-    <Compile Include="Attributes\MethodTelemetryAttribute.cs" />
-    <Compile Include="Attributes\EventTelemetryAttribute.cs" />
-    <Compile Include="Bindings\AbstractTelemetryBinding.cs" />
-    <Compile Include="Comparers\TelemetryEventInfoEqualityComparer.cs" />
-    <Compile Include="eTelemetryIoMask.cs" />
-    <Compile Include="Nodes\External\IExternalTelemetryProvider.cs" />
-    <Compile Include="Nodes\Collections\ITelemetryCollection.cs" />
-    <Compile Include="ITelemetryProvider.cs" />
-    <Compile Include="Mappings\AbstractTelemetryMappingBase.cs" />
-    <Compile Include="Mappings\ITelemetryMapping.cs" />
-    <Compile Include="Nodes\AbstractTelemetryItem.cs" />
-    <Compile Include="Nodes\Collections\CollectionTelemetryNodeItem.cs" />
-    <Compile Include="Nodes\Collections\ICollectionTelemetryItem.cs" />
-    <Compile Include="Nodes\ITelemetryItem.cs" />
-    <Compile Include="Nodes\MethodTelemetryItem.cs" />
-    <Compile Include="Nodes\PropertyTelemetryItem.cs" />
+    <Compile Include="AbstractTelemetryServiceProvider.cs" />
+    <Compile Include="AbstractTelemetryServiceProviderSettings.cs" />
+    <Compile Include="ITelemetryService.cs" />
+    <Compile Include="ITelemetryServiceProvider.cs" />
+    <Compile Include="ITelemetryServiceProviderSettings.cs" />
+    <Compile Include="ITelemetryServiceSettings.cs" />
+    <Compile Include="KrangPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Nodes\Collections\AbstractTelemetryCollection.cs" />
-    <Compile Include="Nodes\Collections\TelemetryCollection.cs" />
-    <Compile Include="Comparers\TelemetryMethodInfoEqualityComparer.cs" />
-    <Compile Include="Comparers\TelemetryPropertyInfoEqualityComparer.cs" />
-    <Compile Include="TelemetryUtils.cs" />
+    <Compile Include="TelemetryService.cs" />
+    <Compile Include="TelemetryServiceSettings.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
@@ -111,6 +90,14 @@
     <ProjectReference Include="..\..\ICD.Connect.API\ICD.Connect.API\ICD.Connect.API_SimplSharp.csproj">
       <Project>{727F5820-5A61-440D-8899-E454FE8238D7}</Project>
       <Name>ICD.Connect.API_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_SimplSharp.csproj">
+      <Project>{5B84EB3C-1C3A-4C4D-98C2-69F67CF51D5A}</Project>
+      <Name>ICD.Connect.Settings_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ICD.Connect.Telemetry\ICD.Connect.Telemetry_SimplSharp.csproj">
+      <Project>{9512C0A5-F966-4AC6-9668-62C6F343B0CD}</Project>
+      <Name>ICD.Connect.Telemetry_SimplSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />

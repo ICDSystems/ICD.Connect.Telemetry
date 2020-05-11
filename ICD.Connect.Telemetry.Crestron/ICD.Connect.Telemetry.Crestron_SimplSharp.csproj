@@ -49,10 +49,6 @@
     <DefineConstants>SIMPLSHARP</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Crestron.SimplSharpPro.Fusion, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\ProgramData\Crestron\SDK\SSPDevices\Crestron.SimplSharpPro.Fusion.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="SimplSharpCustomAttributesInterface, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1099c178b3b54c3b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -167,6 +163,10 @@
     <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_SimplSharp.csproj">
       <Project>{5B84EB3C-1C3A-4C4D-98C2-69F67CF51D5A}</Project>
       <Name>ICD.Connect.Settings_SimplSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ICD.Connect.Telemetry.Services\ICD.Connect.Telemetry.Services_SimplSharp.csproj">
+      <Project>{0BED4D4C-3704-431C-B07F-CE78AE29E0F1}</Project>
+      <Name>ICD.Connect.Telemetry.Services_SimplSharp</Name>
     </ProjectReference>
     <ProjectReference Include="..\ICD.Connect.Telemetry\ICD.Connect.Telemetry_SimplSharp.csproj">
       <Project>{9512C0A5-F966-4AC6-9668-62C6F343B0CD}</Project>

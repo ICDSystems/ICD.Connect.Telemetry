@@ -14,14 +14,26 @@ using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Nodes;
+using ICD.Connect.Telemetry.Services;
 
 namespace ICD.Connect.Telemetry.Crestron
 {
 	public sealed class FusionTelemetryBinding : AbstractTelemetryBinding
 	{
+		#region Properties
+
 		public FusionSigMapping Mapping { get; private set; }
 		public IFusionRoom FusionRoom { get; private set; }
 		public IFusionAsset Asset { get; private set; }
+
+		/// <summary>
+		/// Gets the telemetry service.
+		/// </summary>
+		private static ITelemetryService TelemetryService { get { return ServiceProvider.GetService<ITelemetryService>(); } }
+
+		#endregion
+
+		#region Constructors
 
 		/// <summary>
 		/// Constructor.
@@ -42,6 +54,40 @@ namespace ICD.Connect.Telemetry.Crestron
 			SendValueToService();
 		}
 
+		public static FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryProvider provider,
+		                                          FusionSigMapping mapping, uint assetId)
+		{
+			if (fusionRoom == null)
+				throw new ArgumentNullException("fusionRoom");
+
+			if (provider == null)
+				throw new ArgumentException("provider");
+
+			if (mapping == null)
+				throw new ArgumentNullException("mapping");
+
+			// Check against the fusion asset whitelist for the mapping
+			IFusionAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset;
+			if (mapping.FusionAssetTypes != null && !asset.GetType().GetAllTypes().Any(t => mapping.FusionAssetTypes.Contains(t)))
+				return null;
+
+			PropertyTelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName) as PropertyTelemetryItem;
+			MethodTelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName) as MethodTelemetryItem;
+
+			if (getTelemetryItem == null && setTelemetryItem == null)
+				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
+
+			// If the sig number is 0, that indicates that the sig is special-handling
+			if (mapping.Sig != 0)
+				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
+
+			return new FusionTelemetryBinding(fusionRoom, getTelemetryItem, setTelemetryItem, asset, mapping);
+		}
+
+		#endregion
+
+		#region Methods
+
 		public void UpdateLocalNodeValueFromService()
 		{
 			switch (Mapping.SigType)
@@ -59,6 +105,10 @@ namespace ICD.Connect.Telemetry.Crestron
 					throw new ArgumentOutOfRangeException();
 			}
 		}
+
+		#endregion
+
+		#region Private Methods
 
 		private void UpdateDigitalTelemetryFromService()
 		{
@@ -270,34 +320,6 @@ namespace ICD.Connect.Telemetry.Crestron
 			return Convert.ToUInt16(RangeAttribute.Clamp(GetTelemetry.Value, typeof(ushort)));
 		}
 
-		public static FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryProvider provider,
-		                                          FusionSigMapping mapping, uint assetId)
-		{
-			if (fusionRoom == null)
-				throw new ArgumentNullException("fusionRoom");
-
-			if (provider == null)
-				throw new ArgumentException("provider");
-
-			if (mapping == null)
-				throw new ArgumentNullException("mapping");
-
-			// Check against the fusion asset whitelist for the mapping
-			IFusionAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset;
-			if (mapping.FusionAssetTypes != null && !asset.GetType().GetAllTypes().Any(t => mapping.FusionAssetTypes.Contains(t)))
-				return null;
-
-			PropertyTelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName) as PropertyTelemetryItem;
-			MethodTelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName) as MethodTelemetryItem;
-
-			if (getTelemetryItem == null && setTelemetryItem == null)
-				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
-
-			// If the sig number is 0, that indicates that the sig is special-handling
-			if (mapping.Sig != 0)
-				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
-
-			return new FusionTelemetryBinding(fusionRoom, getTelemetryItem, setTelemetryItem, asset, mapping);
-		}
+		#endregion
 	}
 }

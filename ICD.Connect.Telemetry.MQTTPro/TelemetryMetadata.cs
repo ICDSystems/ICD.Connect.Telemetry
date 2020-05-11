@@ -10,7 +10,7 @@ using ICD.Common.Utils.Json;
 using ICD.Connect.Telemetry.Nodes;
 using Newtonsoft.Json;
 
-namespace ICD.Connect.Telemetry
+namespace ICD.Connect.Telemetry.MQTTPro
 {
 	[Flags]
 	public enum eMetadataSupport

@@ -4,8 +4,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>ICD.Connect.Telemetry.Crestron</RootNamespace>
-    <AssemblyName>ICD.Connect.Telemetry.Crestron</AssemblyName>
+    <RootNamespace>ICD.Connect.Telemetry.MQTTPro</RootNamespace>
+    <AssemblyName>ICD.Connect.Telemetry.MQTTPro</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>true</Deterministic>
     <EazfuscatorIntegration>MSBuild</EazfuscatorIntegration>
@@ -28,21 +28,14 @@
     <Compile Remove="ObfuscationSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove=".gitignore" />
     <None Remove="ICD.Connect.Telemetry.projectinfo" />
-    <None Remove="ICD.Connect.projectinfo" />
-    <None Remove="ICD.SimplSharp.projectinfo" />
+    <None Remove="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ICD.Common.Utils\ICD.Common.Utils\ICD.Common.Utils_NetStandard.csproj" />
-    <ProjectReference Include="..\..\ICD.Connect.Audio\ICD.Connect.Audio.Biamp\ICD.Connect.Audio.Biamp_NetStandard.csproj" />
-    <ProjectReference Include="..\..\ICD.Connect.Conferencing\ICD.Connect.Conferencing\ICD.Connect.Conferencing_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Devices\ICD.Connect.Devices\ICD.Connect.Devices_NetStandard.csproj" />
-    <ProjectReference Include="..\..\ICD.Connect.Displays\ICD.Connect.Displays\ICD.Connect.Displays_NetStandard.csproj" />
-    <ProjectReference Include="..\..\ICD.Connect.Misc\ICD.Connect.Misc\ICD.Connect.Misc_NetStandard.csproj" />
-    <ProjectReference Include="..\..\ICD.Connect.Panels\ICD.Connect.Panels\ICD.Connect.Panels_NetStandard.csproj" />
+    <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol.NetworkPro\ICD.Connect.Protocol.NetworkPro_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
-    <ProjectReference Include="..\..\ICD.Connect.Routing\ICD.Connect.Routing.CrestronPro\ICD.Connect.Routing.CrestronPro_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Telemetry.Services\ICD.Connect.Telemetry.Services_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Telemetry\ICD.Connect.Telemetry_NetStandard.csproj" />

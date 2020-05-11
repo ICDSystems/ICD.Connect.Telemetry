@@ -1,10 +1,11 @@
 ﻿using ICD.Common.Properties;
+using ICD.Connect.Settings.Services;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Nodes.Collections;
 
-namespace ICD.Connect.Telemetry.Service
+namespace ICD.Connect.Telemetry.Services
 {
-	public interface ITelemetryService
+	public interface ITelemetryService : IService
 	{
 		[NotNull]
 		ITelemetryCollection GetTelemetryForProvider(ITelemetryProvider provider);

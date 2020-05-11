@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
@@ -13,25 +12,21 @@ using ICD.Connect.Protocol;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using ICD.Connect.Protocol.NetworkPro.Ports.Mqtt;
 using ICD.Connect.Protocol.Ports;
+using ICD.Connect.Settings;
 using ICD.Connect.Settings.Cores;
-using ICD.Connect.Telemetry.MQTT.Binding;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Nodes.Collections;
-using ICD.Connect.Telemetry.Service;
+using ICD.Connect.Telemetry.Services;
 
-namespace ICD.Connect.Telemetry.MQTT
+namespace ICD.Connect.Telemetry.MQTTPro
 {
-	public sealed class CoreTelemetry : IDisposable
+	public sealed class MqttTelemetryServiceProvider : AbstractTelemetryServiceProvider<MqttTelemetryServiceProviderSettings>
 	{
 		public delegate void SubscriptionCallback(byte[] data);
 
 		private const string PROGRAM_TO_SERVICE_PREFIX = "ProgramToService";
 		private const string SERVICE_TO_PROGRAM_PREFIX = "ServiceToProgram";
 		private const string SYSTEMS_PREFIX = "Systems";
-
-		[NotNull]
-		private readonly ICore m_Core;
-		private readonly ILoggingContext m_Logger;
 
 		private readonly Dictionary<string, MqttTelemetryBinding> m_ProgramToServiceBindings;
 		private readonly Dictionary<string, MqttTelemetryBinding> m_ServiceToProgramBindings;
@@ -41,17 +36,19 @@ namespace ICD.Connect.Telemetry.MQTT
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 		private readonly IcdMqttClient m_Client;
 
+		private ICore m_Core;
+
+		/// <summary>
+		/// Gets the Core instance.
+		/// </summary>
+		public ICore Core { get { return m_Core ?? (m_Core = ServiceProvider.TryGetService<ICore>()); } }
+
 		#region Properties
 
 		/// <summary>
 		/// Gets the telemetry service.
 		/// </summary>
 		private static ITelemetryService TelemetryService { get { return ServiceProvider.GetService<ITelemetryService>(); } }
-
-		/// <summary>
-		/// Gets the logging context.
-		/// </summary>
-		private ILoggingContext Logger { get { return m_Logger; } }
 
 		/// <summary>
 		/// Returns true if the core is actively sending/receiving telemetry.
@@ -73,15 +70,8 @@ namespace ICD.Connect.Telemetry.MQTT
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="core"></param>
-		public CoreTelemetry([NotNull] ICore core)
+		public MqttTelemetryServiceProvider()
 		{
-			if (core == null)
-				throw new ArgumentNullException("core");
-
-			m_Core = core;
-			m_Logger = new ServiceLoggingContext(this);
-
 			m_ProgramToServiceBindings = new Dictionary<string, MqttTelemetryBinding>();
 			m_ServiceToProgramBindings = new Dictionary<string, MqttTelemetryBinding>();
 			m_SubscriptionCallbacks = new Dictionary<string, IcdHashSet<SubscriptionCallback>>();
@@ -100,12 +90,15 @@ namespace ICD.Connect.Telemetry.MQTT
 		}
 
 		/// <summary>
-		/// Release resources.
+		/// Override to release resources.
 		/// </summary>
-		public void Dispose()
+		/// <param name="disposing"></param>
+		protected override void DisposeFinal(bool disposing)
 		{
 			Stop();
 			Unsubscribe(m_Client);
+
+			base.DisposeFinal(disposing);
 		}
 
 		#region Methods
@@ -282,7 +275,7 @@ namespace ICD.Connect.Telemetry.MQTT
 			IEnumerable<string> pathEnumerable =
 				PROGRAM_TO_SERVICE_PREFIX.Yield()
 				                         .Append(SYSTEMS_PREFIX)
-				                         .Append(m_Core.Uuid.ToString())
+				                         .Append(Core.Uuid.ToString())
 				                         .Concat(path.Reverse());
 
 			if (!string.IsNullOrEmpty(PathPrefix))
@@ -301,7 +294,7 @@ namespace ICD.Connect.Telemetry.MQTT
 			IEnumerable<string> pathEnumerable =
 				SERVICE_TO_PROGRAM_PREFIX.Yield()
 				                         .Append(SYSTEMS_PREFIX)
-				                         .Append(m_Core.Uuid.ToString())
+				                         .Append(Core.Uuid.ToString())
 				                         .Concat(path.Reverse());
 
 			if (!string.IsNullOrEmpty(PathPrefix))
@@ -319,7 +312,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		/// </summary>
 		private void GenerateBindingsForSystem()
 		{
-			ITelemetryCollection systemTelemetry = TelemetryService.GetTelemetryForProvider(m_Core);
+			ITelemetryCollection systemTelemetry = TelemetryService.GetTelemetryForProvider(Core);
 
 			GenerateTelemetryRecursive(systemTelemetry, new Stack<string>());
 		}
@@ -437,6 +430,7 @@ namespace ICD.Connect.Telemetry.MQTT
 		private void Unsubscribe(IMqttClient client)
 		{
 			client.OnMessageReceived -= ClientOnMessageReceived;
+			client.OnConnectedStateChanged -= ClientOnConnectedStateChanged;
 		}
 
 		/// <summary>
@@ -494,11 +488,14 @@ namespace ICD.Connect.Telemetry.MQTT
 		#region Settings
 
 		/// <summary>
-		/// Applies the core telemetry settings.
+		/// Override to apply settings to the instance.
 		/// </summary>
 		/// <param name="settings"></param>
-		public void ApplySettings(CoreTelemetrySettings settings)
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(MqttTelemetryServiceProviderSettings settings, IDeviceFactory factory)
 		{
+			base.ApplySettingsFinal(settings, factory);
+
 			PathPrefix = settings.PathPrefix;
 
 			m_Client.Hostname = settings.Hostname;
@@ -506,7 +503,9 @@ namespace ICD.Connect.Telemetry.MQTT
 			m_Client.Username = settings.Username;
 			m_Client.Password = settings.Password;
 			m_Client.Secure = settings.Secure;
-			m_Client.ClientId = m_Core.Uuid.ToString();
+
+			// Client ID is the System ID
+			m_Client.ClientId = Core.Uuid.ToString();
 
 			if (settings.Enabled)
 				Start();
@@ -515,10 +514,12 @@ namespace ICD.Connect.Telemetry.MQTT
 		}
 
 		/// <summary>
-		/// Clears the telemetry settings.
+		/// Override to clear the instance settings.
 		/// </summary>
-		public void Clear()
+		protected override void ClearSettingsFinal()
 		{
+			base.ClearSettingsFinal();
+
 			Stop();
 
 			PathPrefix = null;
@@ -526,21 +527,20 @@ namespace ICD.Connect.Telemetry.MQTT
 		}
 
 		/// <summary>
-		/// Returns a copy of the core telemetry settings.
+		/// Override to apply properties to the settings instance.
 		/// </summary>
-		/// <returns></returns>
-		public CoreTelemetrySettings CopySettings()
+		/// <param name="settings"></param>
+		protected override void CopySettingsFinal(MqttTelemetryServiceProviderSettings settings)
 		{
-			return new CoreTelemetrySettings
-			{
-				Enabled = IsRunning,
-				PathPrefix = PathPrefix,
-				Hostname = Port.Hostname,
-				Port = Port.Port,
-				Username = Port.Username,
-				Password = Port.Password,
-				Secure = Port.Secure
-			};
+			base.CopySettingsFinal(settings);
+
+			settings.Enabled = IsRunning;
+			settings.PathPrefix = PathPrefix;
+			settings.Hostname = Port.Hostname;
+			settings.Port = Port.Port;
+			settings.Username = Port.Username;
+			settings.Password = Port.Password;
+			settings.Secure = Port.Secure;
 		}
 
 		#endregion

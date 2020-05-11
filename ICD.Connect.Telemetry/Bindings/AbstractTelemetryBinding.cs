@@ -1,8 +1,6 @@
 using System;
 using ICD.Common.Properties;
-using ICD.Common.Utils.Services;
 using ICD.Connect.Telemetry.Nodes;
-using ICD.Connect.Telemetry.Service;
 
 namespace ICD.Connect.Telemetry.Bindings
 {
@@ -10,8 +8,6 @@ namespace ICD.Connect.Telemetry.Bindings
 	{
 		[CanBeNull] private readonly PropertyTelemetryItem m_GetTelemetry;
 		[CanBeNull] private readonly MethodTelemetryItem m_SetTelemetry;
-
-		protected static ITelemetryService TelemetryService { get { return ServiceProvider.GetService<ITelemetryService>(); } }
 
 		[CanBeNull]
 		public PropertyTelemetryItem GetTelemetry { get { return m_GetTelemetry; } }

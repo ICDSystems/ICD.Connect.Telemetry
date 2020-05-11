@@ -5,14 +5,14 @@ using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Nodes;
 using Newtonsoft.Json;
 
-namespace ICD.Connect.Telemetry.MQTT.Binding
+namespace ICD.Connect.Telemetry.MQTTPro
 {
 	public sealed class MqttTelemetryBinding : AbstractTelemetryBinding
 	{
 		private const string METADATA = "Metadata";
 
 		[NotNull]
-		private readonly CoreTelemetry m_CoreTelemetry;
+		private readonly MqttTelemetryServiceProvider m_TelemetryServiceProvider;
 
 		[NotNull]
 		private readonly string m_ProgramToServiceTopic;
@@ -45,15 +45,15 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 		/// <param name="setTelemetry"></param>
 		/// <param name="programToServiceTopic"></param>
 		/// <param name="serviceToProgramTopic"></param>
-		/// <param name="coreTelemetry"></param>
+		/// <param name="telemetryServiceProvider"></param>
 		public MqttTelemetryBinding([CanBeNull] PropertyTelemetryItem getTelemetry,
 		                            [CanBeNull] MethodTelemetryItem setTelemetry,
 		                            [NotNull] string programToServiceTopic,
 		                            [NotNull] string serviceToProgramTopic,
-		                            [NotNull] CoreTelemetry coreTelemetry)
+		                            [NotNull] MqttTelemetryServiceProvider telemetryServiceProvider)
 			: base(getTelemetry, setTelemetry)
 		{
-			if (coreTelemetry == null)
+			if (telemetryServiceProvider == null)
 				throw new ArgumentNullException("coreTelemetry");
 
 			if (string.IsNullOrEmpty(programToServiceTopic))
@@ -68,7 +68,7 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 
 			m_ProgramToServiceTopic = programToServiceTopic;
 			m_ServiceToProgramTopic = serviceToProgramTopic;
-			m_CoreTelemetry = coreTelemetry;
+			m_TelemetryServiceProvider = telemetryServiceProvider;
 
 			SubscribeToService();
 
@@ -102,7 +102,7 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 			string json = JsonConvert.SerializeObject(value);
 			byte[] data = Encoding.UTF8.GetBytes(json);
 
-			m_CoreTelemetry.Publish(ProgramToServiceTopic, data);
+			m_TelemetryServiceProvider.Publish(ProgramToServiceTopic, data);
 		}
 
 		/// <summary>
@@ -120,7 +120,7 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 
 			string topic = MqttUtils.Join(ProgramToServiceTopic, METADATA);
 
-			m_CoreTelemetry.Publish(topic, data);
+			m_TelemetryServiceProvider.Publish(topic, data);
 		}
 
 		#endregion
@@ -132,7 +132,7 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 		/// </summary>
 		private void SubscribeToService()
 		{
-			m_CoreTelemetry.Subscribe(ServiceToProgramTopic, HandleTopicMessage);
+			m_TelemetryServiceProvider.Subscribe(ServiceToProgramTopic, HandleTopicMessage);
 		}
 
 		/// <summary>
@@ -140,7 +140,7 @@ namespace ICD.Connect.Telemetry.MQTT.Binding
 		/// </summary>
 		private void UnsubscribeFromService()
 		{
-			m_CoreTelemetry.Unsubscribe(ServiceToProgramTopic, HandleTopicMessage);
+			m_TelemetryServiceProvider.Unsubscribe(ServiceToProgramTopic, HandleTopicMessage);
 		}
 
 		/// <summary>
