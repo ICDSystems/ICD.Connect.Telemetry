@@ -17,10 +17,12 @@ using ICD.Connect.Settings.Cores;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Nodes.Collections;
 using ICD.Connect.Telemetry.Services;
+using Newtonsoft.Json;
 
 namespace ICD.Connect.Telemetry.MQTTPro
 {
-	public sealed class MqttTelemetryServiceProvider : AbstractTelemetryServiceProvider<MqttTelemetryServiceProviderSettings>
+	public sealed class MqttTelemetryServiceProvider :
+		AbstractTelemetryServiceProvider<MqttTelemetryServiceProviderSettings>
 	{
 		public delegate void SubscriptionCallback(byte[] data);
 
@@ -158,7 +160,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			// Don't bother subscribing unless we're connected
 			if (Port.IsConnected)
-				m_Client.Subscribe(new[] { topic }, new[] { MqttUtils.QOS_LEVEL_EXACTLY_ONCE });
+				m_Client.Subscribe(new[] {topic}, new[] {MqttUtils.QOS_LEVEL_EXACTLY_ONCE});
 		}
 
 		/// <summary>
@@ -193,7 +195,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				m_BindingsSection.Leave();
 			}
 
-			m_Client.Unsubscribe(new[] { topic });
+			m_Client.Unsubscribe(new[] {topic});
 		}
 
 		/// <summary>
@@ -272,11 +274,31 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <returns></returns>
 		private string BuildProgramToServiceTopic([NotNull] Stack<string> path)
 		{
+			return BuildProgramToServiceTopic(path.Reverse());
+		}
+
+		/// <summary>
+		/// Returns an absolute topic for the given system telemetry path.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		private string BuildProgramToServiceTopic([NotNull] params string[] path)
+		{
+			return BuildProgramToServiceTopic((IEnumerable<string>)path);
+		}
+
+		/// <summary>
+		/// Returns an absolute topic for the given system telemetry path.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		private string BuildProgramToServiceTopic([NotNull] IEnumerable<string> path)
+		{
 			IEnumerable<string> pathEnumerable =
 				PROGRAM_TO_SERVICE_PREFIX.Yield()
 				                         .Append(SYSTEMS_PREFIX)
 				                         .Append(Core.Uuid.ToString())
-				                         .Concat(path.Reverse());
+				                         .Concat(path);
 
 			if (!string.IsNullOrEmpty(PathPrefix))
 				pathEnumerable = pathEnumerable.Prepend(PathPrefix);
@@ -291,11 +313,21 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <returns></returns>
 		private string BuildServiceToProgramTopic([NotNull] Stack<string> path)
 		{
+			return BuildServiceToProgramTopic((IEnumerable<string>)path);
+		}
+
+		/// <summary>
+		/// Returns an absolute topic for the given system telemetry path.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		private string BuildServiceToProgramTopic([NotNull] IEnumerable<string> path)
+		{
 			IEnumerable<string> pathEnumerable =
 				SERVICE_TO_PROGRAM_PREFIX.Yield()
 				                         .Append(SYSTEMS_PREFIX)
 				                         .Append(Core.Uuid.ToString())
-				                         .Concat(path.Reverse());
+				                         .Concat(path);
 
 			if (!string.IsNullOrEmpty(PathPrefix))
 				pathEnumerable = pathEnumerable.Prepend(PathPrefix);
@@ -312,8 +344,12 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		private void GenerateBindingsForSystem()
 		{
-			ITelemetryCollection systemTelemetry = TelemetryService.GetTelemetryForProvider(Core);
+			// Create the Last Will And Testament
+			m_Client.Will.Topic = BuildProgramToServiceTopic("IsOnline");
+			m_Client.Will.Message = JsonConvert.SerializeObject(false);
 
+			// Create system bindings
+			ITelemetryCollection systemTelemetry = TelemetryService.GetTelemetryForProvider(Core);
 			GenerateTelemetryRecursive(systemTelemetry, new Stack<string>());
 		}
 
@@ -322,7 +358,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		/// <param name="telemetryItems"></param>
 		/// <param name="path"></param>
-		private void GenerateTelemetryRecursive([NotNull] IEnumerable<ITelemetryItem> telemetryItems, [NotNull] Stack<string> path)
+		private void GenerateTelemetryRecursive([NotNull] IEnumerable<ITelemetryItem> telemetryItems,
+		                                        [NotNull] Stack<string> path)
 		{
 			if (telemetryItems == null)
 				throw new ArgumentNullException("telemetryItems");
