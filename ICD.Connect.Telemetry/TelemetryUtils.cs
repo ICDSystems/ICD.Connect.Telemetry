@@ -32,11 +32,22 @@ namespace ICD.Connect.Telemetry
 				throw new ArgumentNullException("instance");
 
 			TelemetryCollection collection = new TelemetryCollection();
+			InstantiateTelemetry(instance, collection);
+			return collection;
+		}
+
+		/// <summary>
+		/// Recursively creates the telemetry for the given provider.
+		/// </summary>
+		/// <param name="instance"></param>
+		/// <param name="collection"></param>
+		/// <returns></returns>
+		private static void InstantiateTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
+		{
 			InstantiatePropertyTelemetry(instance, collection);
 			InstantiateMethodTelemetry(instance, collection);
 			InstantiateCollectionTelemetry(instance, collection);
 			InstantiateExternalTelemetry(instance, collection);
-			return collection;
 		}
 
 		private static void InstantiatePropertyTelemetry(ITelemetryProvider instance, ITelemetryCollection collection)
@@ -113,11 +124,7 @@ namespace ICD.Connect.Telemetry
 				ExternalTelemetryAttribute.InstantiateExternalTelemetryProviders(instance);
 
 			foreach (IExternalTelemetryProvider provider in externalTelemetryProviders)
-			{
-				InstantiatePropertyTelemetry(provider, collection);
-				InstantiateMethodTelemetry(provider, collection);
-				InstantiateExternalTelemetry(provider, collection);
-			}
+				InstantiateTelemetry(provider, collection);
 		}
 
 		#endregion
