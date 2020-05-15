@@ -54,7 +54,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			: base(getTelemetry, setTelemetry)
 		{
 			if (telemetryServiceProvider == null)
-				throw new ArgumentNullException("coreTelemetry");
+				throw new ArgumentNullException("telemetryServiceProvider");
 
 			if (string.IsNullOrEmpty(programToServiceTopic))
 				throw new ArgumentException("Cannot create telemetry binding with a null or empty topic.");
@@ -70,7 +70,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_ServiceToProgramTopic = serviceToProgramTopic;
 			m_TelemetryServiceProvider = telemetryServiceProvider;
 
-			SubscribeToService();
+			if (setTelemetry != null)
+				SubscribeToService();
 
 			PublishMetadata();
 			SendValueToService();
@@ -81,9 +82,10 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		public override void Dispose()
 		{
-			base.Dispose();
+			if (SetTelemetry != null)
+				UnsubscribeFromService();
 
-			UnsubscribeFromService();
+			base.Dispose();
 		}
 
 		#endregion
