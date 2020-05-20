@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Nodes;
 using Newtonsoft.Json;
@@ -100,11 +101,14 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (GetTelemetry == null)
 				return;
 
-			object value = GetTelemetry.Value;
-			string json = JsonConvert.SerializeObject(value);
-			byte[] data = Encoding.UTF8.GetBytes(json);
+			PublishMessage message =
+				new PublishMessage
+				{
+					Date = IcdEnvironment.GetUtcTime(),
+					Data = GetTelemetry.Value
+				};
 
-			m_TelemetryServiceProvider.Publish(ProgramToServiceTopic, data);
+			m_TelemetryServiceProvider.Publish(ProgramToServiceTopic, message);
 		}
 
 		/// <summary>
@@ -117,12 +121,16 @@ namespace ICD.Connect.Telemetry.MQTTPro
 					? TelemetryMetadata.FromMethodTelemetry(SetTelemetry)
 					: TelemetryMetadata.FromPropertyTelemetry(GetTelemetry);
 
-			string json = JsonConvert.SerializeObject(metadata);
-			byte[] data = Encoding.UTF8.GetBytes(json);
+			PublishMessage message =
+				new PublishMessage
+				{
+					Date = IcdEnvironment.GetUtcTime(),
+					Data = metadata
+				};
 
 			string topic = MqttUtils.Join(ProgramToServiceTopic, METADATA);
 
-			m_TelemetryServiceProvider.Publish(topic, data);
+			m_TelemetryServiceProvider.Publish(topic, message);
 		}
 
 		#endregion

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
@@ -202,8 +203,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// Publishes telemetry data to the given topic.
 		/// </summary>
 		/// <param name="topic"></param>
-		/// <param name="data"></param>
-		public void Publish([NotNull] string topic, [NotNull] byte[] data)
+		/// <param name="message"></param>
+		public void Publish([NotNull] string topic, [NotNull] PublishMessage message)
 		{
 			if (string.IsNullOrEmpty(topic))
 				throw new ArgumentException("Topic must not be null or empty");
@@ -211,8 +212,11 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (!topic.StartsWith(PROGRAM_TO_SERVICE_PREFIX))
 				throw new ArgumentException("Publish topics must start with " + PROGRAM_TO_SERVICE_PREFIX);
 
-			if (data == null)
-				throw new ArgumentNullException("data");
+			if (message == null)
+				throw new ArgumentNullException("message");
+
+			string json = JsonConvert.SerializeObject(message);
+			byte[] data = Encoding.UTF8.GetBytes(json);
 
 			m_Client.Publish(topic, data);
 		}
