@@ -425,9 +425,24 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			string programToService = BuildProgramToServiceTopic(path);
 			string serviceToProgram = BuildServiceToProgramTopic(path);
-			MqttTelemetryBinding binding = new MqttTelemetryBinding(telemetry, null, programToService, serviceToProgram, this);
+			
+			m_BindingsSection.Enter();
 
-			m_BindingsSection.Execute(() => m_ProgramToServiceBindings.Add(programToService, binding));
+			try
+			{
+				if (m_ProgramToServiceBindings.ContainsKey(programToService))
+				{
+					Logger.Log(eSeverity.Error, "Failed to add binding for duplicate topic {0}", programToService);
+					return;
+				}
+
+				MqttTelemetryBinding binding = new MqttTelemetryBinding(telemetry, null, programToService, serviceToProgram, this);
+				m_ProgramToServiceBindings.Add(programToService, binding);
+			}
+			finally
+			{
+				m_BindingsSection.Leave();
+			}
 		}
 
 		/// <summary>
@@ -445,9 +460,24 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			string programToService = BuildProgramToServiceTopic(path);
 			string serviceToProgram = BuildServiceToProgramTopic(path);
-			MqttTelemetryBinding binding = new MqttTelemetryBinding(null, telemetry, programToService, serviceToProgram, this);
 
-			m_BindingsSection.Execute(() => m_ServiceToProgramBindings.Add(serviceToProgram, binding));
+			m_BindingsSection.Enter();
+
+			try
+			{
+				if (m_ServiceToProgramBindings.ContainsKey(serviceToProgram))
+				{
+					Logger.Log(eSeverity.Error, "Failed to add binding for duplicate topic {0}", serviceToProgram);
+					return;
+				}
+
+				MqttTelemetryBinding binding = new MqttTelemetryBinding(null, telemetry, programToService, serviceToProgram, this);
+				m_ServiceToProgramBindings.Add(serviceToProgram, binding);
+			}
+			finally
+			{
+				m_BindingsSection.Leave();
+			}
 		}
 
 		#endregion
