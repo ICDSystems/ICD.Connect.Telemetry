@@ -39,13 +39,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 		private readonly IcdMqttClient m_Client;
 
-		private ICore m_Core;
-
-		/// <summary>
-		/// Gets the Core instance.
-		/// </summary>
-		public ICore Core { get { return m_Core ?? (m_Core = ServiceProvider.TryGetService<ICore>()); } }
-
 		#region Properties
 
 		/// <summary>
