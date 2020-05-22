@@ -343,7 +343,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			// Create the Last Will And Testament
 			m_Client.Will.Topic = BuildProgramToServiceTopic("IsOnline");
-			m_Client.Will.Message = JsonConvert.SerializeObject(false);
+			m_Client.Will.Message = JsonConvert.SerializeObject(new PublishMessage {Data = false});
+			m_Client.Will.QosLevel = MqttUtils.QOS_LEVEL_EXACTLY_ONCE;
+			m_Client.Will.Flag = true;
 
 			// Create system bindings
 			ITelemetryCollection systemTelemetry = TelemetryService.GetTelemetryForProvider(Core);
