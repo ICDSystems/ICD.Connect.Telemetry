@@ -14,6 +14,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private const string ELEMENT_USERNAME = "Username";
 		private const string ELEMENT_PASSWORD = "Password";
 		private const string ELEMENT_SECURE = "Secure";
+		private const string ELEMENT_CA_CERT_PATH = "CaCertPath";
 
 		/// <summary>
 		/// Gets/sets the enabled state of the core MQTT telemetry.
@@ -51,6 +52,11 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		public bool Secure { get; set; }
 
 		/// <summary>
+		/// Gets/sets the path to the certificate-authority certificate.
+		/// </summary>
+		public string CaCertPath { get; set; }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public MqttTelemetryServiceProviderSettings()
@@ -73,6 +79,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			writer.WriteElementString(ELEMENT_USERNAME, Username);
 			writer.WriteElementString(ELEMENT_PASSWORD, Password);
 			writer.WriteElementString(ELEMENT_SECURE, IcdXmlConvert.ToString(Secure));
+			writer.WriteElementString(ELEMENT_CA_CERT_PATH, CaCertPath);
 		}
 
 		/// <summary>
@@ -90,6 +97,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			Username = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_USERNAME);
 			Password = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PASSWORD);
 			Secure = XmlUtils.TryReadChildElementContentAsBoolean(xml, ELEMENT_SECURE) ?? false;
+			CaCertPath = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_CA_CERT_PATH);
 		}
 	}
 }

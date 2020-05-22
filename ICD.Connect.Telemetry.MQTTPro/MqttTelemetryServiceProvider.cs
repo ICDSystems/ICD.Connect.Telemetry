@@ -567,6 +567,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_Client.Username = settings.Username;
 			m_Client.Password = settings.Password;
 			m_Client.Secure = settings.Secure;
+			m_Client.CaCertPath = settings.CaCertPath;
 
 			// Client ID is the System ID
 			m_Client.ClientId = Core.Uuid.ToString();
@@ -605,6 +606,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			settings.Username = Port.Username;
 			settings.Password = Port.Password;
 			settings.Secure = Port.Secure;
+			settings.CaCertPath = Port.CaCertPath;
 		}
 
 		#endregion
