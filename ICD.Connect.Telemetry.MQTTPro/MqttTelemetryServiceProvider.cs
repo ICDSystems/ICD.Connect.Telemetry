@@ -9,12 +9,12 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using ICD.Connect.Protocol.NetworkPro.Ports.Mqtt;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
-using ICD.Connect.Settings.Cores;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Nodes.Collections;
 using ICD.Connect.Telemetry.Services;
@@ -609,6 +609,43 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			settings.Password = Port.Password;
 			settings.Secure = Port.Secure;
 			settings.CaCertPath = Port.CaCertPath;
+		}
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Calls the delegate for each console status item.
+		/// </summary>
+		/// <param name="addRow"></param>
+		public override void BuildConsoleStatus(AddStatusRowDelegate addRow)
+		{
+			base.BuildConsoleStatus(addRow);
+
+			addRow("IsRunning", IsRunning);
+			addRow("PathPrefix", PathPrefix);
+		}
+
+		/// <summary>
+		/// Gets the child console nodes.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleNodeBase> GetConsoleNodes()
+		{
+			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
+				yield return node;
+
+			yield return Port;
+		}
+
+		/// <summary>
+		/// Workaround for "unverifiable code" warning.
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<IConsoleNodeBase> GetBaseConsoleNodes()
+		{
+			return base.GetConsoleNodes();
 		}
 
 		#endregion
