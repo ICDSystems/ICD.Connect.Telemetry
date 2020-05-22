@@ -2,6 +2,7 @@
 using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Json;
 using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Nodes;
 using Newtonsoft.Json;
@@ -171,7 +172,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			// Method call with parameter
 			string json = Encoding.UTF8.GetString(data, 0, data.Length);
-			object value = JsonConvert.DeserializeObject(json, SetTelemetry.ParameterInfo.ParameterType);
+			object value = JsonConvert.DeserializeObject(json, SetTelemetry.ParameterInfo.ParameterType, JsonUtils.CommonSettings);
 
 			HandleValueFromService(value);
 		}

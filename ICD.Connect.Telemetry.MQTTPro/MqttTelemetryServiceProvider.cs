@@ -7,6 +7,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.Json;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
@@ -208,7 +209,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (message == null)
 				throw new ArgumentNullException("message");
 
-			string json = JsonConvert.SerializeObject(message);
+			string json = JsonConvert.SerializeObject(message, Formatting.None, JsonUtils.CommonSettings);
 			byte[] data = Encoding.UTF8.GetBytes(json);
 
 			m_Client.Publish(topic, data);
@@ -343,7 +344,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			// Create the Last Will And Testament
 			m_Client.Will.Topic = BuildProgramToServiceTopic("IsOnline");
-			m_Client.Will.Message = JsonConvert.SerializeObject(new PublishMessage {Data = false});
+			m_Client.Will.Message = JsonConvert.SerializeObject(new PublishMessage {Data = false}, Formatting.None,
+			                                                    JsonUtils.CommonSettings);
 			m_Client.Will.QosLevel = MqttUtils.QOS_LEVEL_EXACTLY_ONCE;
 			m_Client.Will.Flag = true;
 
