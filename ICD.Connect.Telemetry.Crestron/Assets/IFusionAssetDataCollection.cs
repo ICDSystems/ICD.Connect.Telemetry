@@ -1,6 +1,4 @@
-﻿using ICD.Common.Properties;
-
-namespace ICD.Connect.Telemetry.Crestron.Assets
+﻿namespace ICD.Connect.Telemetry.Crestron.Assets
 {
 	public interface IFusionAssetDataCollection
 	{

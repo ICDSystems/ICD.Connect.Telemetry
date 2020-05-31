@@ -55,7 +55,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// Creates metadata for the given feedback telemetry.
 		/// </summary>
 		/// <param name="propertyTelemetry"></param>
-		public static TelemetryMetadata FromPropertyTelemetry([NotNull] PropertyTelemetryItem propertyTelemetry)
+		public static TelemetryMetadata FromPropertyTelemetry([NotNull] PropertyTelemetryNode propertyTelemetry)
 		{
 			TelemetryMetadata output = new TelemetryMetadata
 			{
@@ -84,7 +84,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// Creates metadata for the given method telemetry.
 		/// </summary>
 		/// <param name="methodTelemetry"></param>
-		public static TelemetryMetadata FromMethodTelemetry(MethodTelemetryItem methodTelemetry)
+		public static TelemetryMetadata FromMethodTelemetry(MethodTelemetryNode methodTelemetry)
 		{
 			TelemetryMetadata output = new TelemetryMetadata
 			{

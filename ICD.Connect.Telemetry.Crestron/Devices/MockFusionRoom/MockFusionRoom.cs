@@ -14,6 +14,7 @@ using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Assets.Mock;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
+using ICD.Connect.Telemetry.Mappings;
 
 namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 {

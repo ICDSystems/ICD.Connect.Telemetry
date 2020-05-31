@@ -34,6 +34,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			FusionAssetTypes = new IcdHashSet<Type> {typeof(IFusionStaticAsset)};
 		}
 
-		public abstract FusionTelemetryBinding Bind(IFusionRoom room, ITelemetryItem node, uint assetId, RangeMappingUsageTracker mappingUsage);
+		public abstract FusionTelemetryBinding Bind(IFusionRoom room, ITelemetryNode node, uint assetId, RangeMappingUsageTracker mappingUsage);
 	}
 }

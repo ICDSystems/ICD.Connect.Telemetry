@@ -5,6 +5,7 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Telemetry.Providers;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -13,7 +14,7 @@ using System.Reflection;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public sealed class PropertyTelemetryItem : AbstractTelemetryItem
+	public sealed class PropertyTelemetryNode : AbstractTelemetryNode
 	{
 		/// <summary>
 		/// Raised when the underlying property value changes.
@@ -55,7 +56,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <summary>
 		/// Gets the value from the property.
 		/// </summary>
-		public object Value { get { return m_PropertyInfo.GetValue(Parent, null); } }
+		public object Value { get { return m_PropertyInfo.GetValue(Provider, null); } }
 
 		/// <summary>
 		/// Gets the property info for the property.
@@ -68,20 +69,20 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// Constructor.
 		/// </summary>
 		/// <param name="name"></param>
-		/// <param name="parent"></param>
+		/// <param name="provider"></param>
 		/// <param name="propertyInfo"></param>
 		/// <param name="methodInfo"></param>
 		/// <param name="eventInfo"></param>
-		public PropertyTelemetryItem([NotNull] string name, [NotNull] ITelemetryProvider parent,
+		public PropertyTelemetryNode([NotNull] string name, [NotNull] ITelemetryProvider provider,
 		                             [NotNull] PropertyInfo propertyInfo, [CanBeNull] MethodInfo methodInfo,
 		                             [CanBeNull] EventInfo eventInfo)
-			: base(name, parent)
+			: base(name, provider)
 		{
 			if (name == null)
 				throw new ArgumentNullException("name");
 
-			if (parent == null)
-				throw new ArgumentNullException("parent");
+			if (provider == null)
+				throw new ArgumentNullException("Provider");
 
 			m_PropertyInfo = propertyInfo;
 			m_MethodInfo = methodInfo;
@@ -89,7 +90,7 @@ namespace ICD.Connect.Telemetry.Nodes
 
 			// Subscribe to the event.
 			if (m_EventInfo != null)
-				m_Delegate = ReflectionUtils.SubscribeEvent(parent, m_EventInfo, this, CallbackMethodInfo);
+				m_Delegate = ReflectionUtils.SubscribeEvent(provider, m_EventInfo, this, CallbackMethodInfo);
 
 			Update();
 		}
@@ -103,7 +104,7 @@ namespace ICD.Connect.Telemetry.Nodes
 
 			base.Dispose();
 
-			ReflectionUtils.UnsubscribeEvent(Parent, m_EventInfo, m_Delegate);
+			ReflectionUtils.UnsubscribeEvent(Provider, m_EventInfo, m_Delegate);
 		}
 
 		#region Methods

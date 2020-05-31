@@ -20,6 +20,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		IEnumerable<Type> TelemetryProviderTypes { get; }
 
 		[CanBeNull]
-		FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryItem node, uint assetId, RangeMappingUsageTracker mappingUsage);
+		FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryNode node, uint assetId, RangeMappingUsageTracker mappingUsage);
 	}
 }

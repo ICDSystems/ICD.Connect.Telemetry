@@ -6,21 +6,21 @@ namespace ICD.Connect.Telemetry.Bindings
 {
 	public abstract class AbstractTelemetryBinding : IDisposable
 	{
-		[CanBeNull] private readonly PropertyTelemetryItem m_GetTelemetry;
-		[CanBeNull] private readonly MethodTelemetryItem m_SetTelemetry;
+		[CanBeNull] private readonly PropertyTelemetryNode m_GetTelemetry;
+		[CanBeNull] private readonly MethodTelemetryNode m_SetTelemetry;
 
 		[CanBeNull]
-		public PropertyTelemetryItem GetTelemetry { get { return m_GetTelemetry; } }
+		public PropertyTelemetryNode GetTelemetry { get { return m_GetTelemetry; } }
 
 		[CanBeNull]
-		public MethodTelemetryItem SetTelemetry { get { return m_SetTelemetry; } }
+		public MethodTelemetryNode SetTelemetry { get { return m_SetTelemetry; } }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="getTelemetry"></param>
 		/// <param name="setTelemetry"></param>
-		protected AbstractTelemetryBinding([CanBeNull] PropertyTelemetryItem getTelemetry, [CanBeNull] MethodTelemetryItem setTelemetry)
+		protected AbstractTelemetryBinding([CanBeNull] PropertyTelemetryNode getTelemetry, [CanBeNull] MethodTelemetryNode setTelemetry)
 		{
 			m_GetTelemetry = getTelemetry;
 			m_SetTelemetry = setTelemetry;

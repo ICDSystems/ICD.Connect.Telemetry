@@ -71,8 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ObfuscationSettings.cs" />
-    <Compile Include="Nodes\External\AbstractExternalTelemetryProvider.cs" />
-    <Compile Include="AbstractTelemetryProvider.cs" />
+    <Compile Include="Providers\External\AbstractExternalTelemetryProvider.cs" />
+    <Compile Include="Providers\AbstractTelemetryProvider.cs" />
     <Compile Include="Attributes\PropertyTelemetryAttribute.cs" />
     <Compile Include="Attributes\AbstractTelemetryAttribute.cs" />
     <Compile Include="Attributes\CollectionTelemetryAttribute.cs" />
@@ -83,24 +83,19 @@
     <Compile Include="Attributes\EventTelemetryAttribute.cs" />
     <Compile Include="Bindings\AbstractTelemetryBinding.cs" />
     <Compile Include="Comparers\TelemetryEventInfoEqualityComparer.cs" />
-    <Compile Include="eTelemetryIoMask.cs" />
-    <Compile Include="Nodes\External\IExternalTelemetryProvider.cs" />
-    <Compile Include="Nodes\Collections\ITelemetryCollection.cs" />
-    <Compile Include="ITelemetryProvider.cs" />
+    <Compile Include="Mappings\eTelemetryIoMask.cs" />
+    <Compile Include="Providers\External\IExternalTelemetryProvider.cs" />
+    <Compile Include="Providers\ITelemetryProvider.cs" />
     <Compile Include="Mappings\AbstractTelemetryMappingBase.cs" />
     <Compile Include="Mappings\ITelemetryMapping.cs" />
-    <Compile Include="Nodes\AbstractTelemetryItem.cs" />
-    <Compile Include="Nodes\Collections\CollectionTelemetryNodeItem.cs" />
-    <Compile Include="Nodes\Collections\ICollectionTelemetryItem.cs" />
-    <Compile Include="Nodes\ITelemetryItem.cs" />
-    <Compile Include="Nodes\MethodTelemetryItem.cs" />
-    <Compile Include="Nodes\PropertyTelemetryItem.cs" />
+    <Compile Include="Nodes\AbstractTelemetryNode.cs" />
+    <Compile Include="Nodes\TelemetryCollection.cs" />
+    <Compile Include="Nodes\ITelemetryNode.cs" />
+    <Compile Include="Nodes\MethodTelemetryNode.cs" />
+    <Compile Include="Nodes\PropertyTelemetryNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Nodes\Collections\AbstractTelemetryCollection.cs" />
-    <Compile Include="Nodes\Collections\TelemetryCollection.cs" />
     <Compile Include="Comparers\TelemetryMethodInfoEqualityComparer.cs" />
     <Compile Include="Comparers\TelemetryPropertyInfoEqualityComparer.cs" />
-    <Compile Include="TelemetryUtils.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

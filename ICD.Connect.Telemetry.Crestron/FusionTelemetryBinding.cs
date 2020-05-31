@@ -14,6 +14,7 @@ using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Nodes;
+using ICD.Connect.Telemetry.Providers;
 using ICD.Connect.Telemetry.Services;
 
 namespace ICD.Connect.Telemetry.Crestron
@@ -43,7 +44,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <param name="setTelemetry"></param>
 		/// <param name="asset"></param>
 		/// <param name="mapping"></param>
-		private FusionTelemetryBinding(IFusionRoom fusionRoom, PropertyTelemetryItem getTelemetry, MethodTelemetryItem setTelemetry,
+		private FusionTelemetryBinding(IFusionRoom fusionRoom, PropertyTelemetryNode getTelemetry, MethodTelemetryNode setTelemetry,
 		                               IFusionAsset asset, FusionSigMapping mapping) 
 			: base(getTelemetry, setTelemetry)
 		{
@@ -71,17 +72,17 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (mapping.FusionAssetTypes != null && !asset.GetType().GetAllTypes().Any(t => mapping.FusionAssetTypes.Contains(t)))
 				return null;
 
-			PropertyTelemetryItem getTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetryGetName) as PropertyTelemetryItem;
-			MethodTelemetryItem setTelemetryItem = TelemetryService.GetTelemetryForProvider(provider, mapping.TelemetrySetName) as MethodTelemetryItem;
+			PropertyTelemetryNode getTelemetryNode = TelemetryService.GetTelemetryForProvider(provider).GetChildByName(mapping.TelemetryGetName) as PropertyTelemetryNode;
+			MethodTelemetryNode setTelemetryNode = TelemetryService.GetTelemetryForProvider(provider).GetChildByName(mapping.TelemetrySetName) as MethodTelemetryNode;
 
-			if (getTelemetryItem == null && setTelemetryItem == null)
+			if (getTelemetryNode == null && setTelemetryNode == null)
 				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
 
 			// If the sig number is 0, that indicates that the sig is special-handling
 			if (mapping.Sig != 0)
 				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
 
-			return new FusionTelemetryBinding(fusionRoom, getTelemetryItem, setTelemetryItem, asset, mapping);
+			return new FusionTelemetryBinding(fusionRoom, getTelemetryNode, setTelemetryNode, asset, mapping);
 		}
 
 		#endregion

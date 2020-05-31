@@ -1,4 +1,4 @@
-﻿namespace ICD.Connect.Telemetry
+﻿namespace ICD.Connect.Telemetry.Providers
 {
 	public interface ITelemetryProvider
 	{

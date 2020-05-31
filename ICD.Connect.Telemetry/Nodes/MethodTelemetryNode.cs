@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Connect.Telemetry.Providers;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -12,7 +13,7 @@ using ICD.Connect.API.Nodes;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public sealed class MethodTelemetryItem : AbstractTelemetryItem
+	public sealed class MethodTelemetryNode : AbstractTelemetryNode
 	{
 		private readonly MethodInfo m_MethodInfo;
 		private readonly ParameterInfo m_ParameterInfo;
@@ -35,13 +36,13 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// Constructor.
 		/// </summary>
 		/// <param name="name"></param>
-		/// <param name="parent"></param>
+		/// <param name="provider"></param>
 		/// <param name="info"></param>
-		public MethodTelemetryItem(string name, [NotNull] ITelemetryProvider parent, [NotNull] MethodInfo info)
-			: base(name, parent)
+		public MethodTelemetryNode(string name, [NotNull] ITelemetryProvider provider, [NotNull] MethodInfo info)
+			: base(name, provider)
 		{
-			if (parent == null)
-				throw new ArgumentNullException("parent");
+			if (provider == null)
+				throw new ArgumentNullException("Provider");
 
 			if (info == null)
 				throw new ArgumentNullException("info");
@@ -54,11 +55,11 @@ namespace ICD.Connect.Telemetry.Nodes
 		{
 			try
 			{
-				m_MethodInfo.Invoke(Parent, parameters);
+				m_MethodInfo.Invoke(Provider, parameters);
 			}
 			catch (ArgumentException ex)
 			{
-				throw new ArgumentException(string.Format("Exception invoking telemetry method Name:{0} Parent:{1}", Name, Parent),
+				throw new ArgumentException(string.Format("Exception invoking telemetry method Name:{0} Provider:{1}", Name, Provider),
 				                            ex);
 			}
 		}

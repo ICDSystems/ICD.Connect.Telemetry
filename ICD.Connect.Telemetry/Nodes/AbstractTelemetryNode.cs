@@ -4,36 +4,37 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Telemetry.Providers;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public abstract class AbstractTelemetryItem : ITelemetryItem, IDisposable
+	public abstract class AbstractTelemetryNode : ITelemetryNode, IDisposable
 	{
 		/// <summary>
-		/// Gets the name of the telemetry item.
+		/// Gets the name of the telemetry node.
 		/// </summary>
 		public string Name { get; private set; }
 
 		/// <summary>
-		/// Gets the provider that this telemetry item is attached to.
+		/// Gets the provider that this telemetry node is attached to.
 		/// </summary>
-		public ITelemetryProvider Parent { get; private set; }
+		public ITelemetryProvider Provider { get; private set; }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
 		/// <param name="name"></param>
-		/// <param name="parent"></param>
-		protected AbstractTelemetryItem([NotNull] string name, [NotNull] ITelemetryProvider parent)
+		/// <param name="provider"></param>
+		protected AbstractTelemetryNode([NotNull] string name, [NotNull] ITelemetryProvider provider)
 		{
 			if (string.IsNullOrEmpty(name))
 				throw new ArgumentException("Name must not be null or empty", "name");
 
-			if (parent == null)
-				throw new ArgumentNullException("parent");
+			if (provider == null)
+				throw new ArgumentNullException("provider");
 
 			Name = name;
-			Parent = parent;
+			Provider = provider;
 		}
 
 		/// <summary>
@@ -51,7 +52,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		{
 			return new ReprBuilder(this)
 				.AppendProperty("Name", Name)
-				.AppendProperty("Parent", Parent)
+				.AppendProperty("Provider", Provider)
 				.ToString();
 		}
 
@@ -65,7 +66,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <summary>
 		/// Gets the help information for the node.
 		/// </summary>
-		public string ConsoleHelp { get { return "Telemetry Item"; } }
+		public string ConsoleHelp { get { return "Telemetry Node"; } }
 
 		/// <summary>
 		/// Gets the child console nodes.
@@ -83,7 +84,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		public virtual void BuildConsoleStatus(AddStatusRowDelegate addRow)
 		{
 			addRow("Name", Name);
-			addRow("Parent", Parent);
+			addRow("Provider", Provider);
 		}
 
 		/// <summary>

@@ -48,8 +48,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <param name="programToServiceTopic"></param>
 		/// <param name="serviceToProgramTopic"></param>
 		/// <param name="telemetryServiceProvider"></param>
-		public MqttTelemetryBinding([CanBeNull] PropertyTelemetryItem getTelemetry,
-		                            [CanBeNull] MethodTelemetryItem setTelemetry,
+		public MqttTelemetryBinding([CanBeNull] PropertyTelemetryNode getTelemetry,
+		                            [CanBeNull] MethodTelemetryNode setTelemetry,
 		                            [NotNull] string programToServiceTopic,
 		                            [NotNull] string serviceToProgramTopic,
 		                            [NotNull] MqttTelemetryServiceProvider telemetryServiceProvider)

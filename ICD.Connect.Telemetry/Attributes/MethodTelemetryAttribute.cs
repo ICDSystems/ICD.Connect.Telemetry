@@ -5,6 +5,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Comparers;
+using ICD.Connect.Telemetry.Providers;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -51,14 +52,14 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// <param name="methodInfo"></param>
 		/// <returns></returns>
 		[NotNull]
-		public MethodTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, MethodInfo methodInfo)
+		public MethodTelemetryNode InstantiateTelemetryItem(ITelemetryProvider instance, MethodInfo methodInfo)
 		{
 			ParameterInfo[] parameters = methodInfo.GetParameters();
 
 			if (parameters.Length > 1)
 				throw new NotSupportedException("Method Telemetry is unsupported for methods with 2 or more parameters");
 
-			return new MethodTelemetryItem(Name, instance, methodInfo);
+			return new MethodTelemetryNode(Name, instance, methodInfo);
 		}
 
 		/// <summary>
@@ -110,6 +111,19 @@ namespace ICD.Connect.Telemetry.Attributes
 			{
 				s_CacheSection.Leave();
 			}
+		}
+
+		[NotNull]
+		public static MethodInfo GetMethodInfo([NotNull] ITelemetryProvider instance, [NotNull] string methodName)
+		{
+			if (instance == null)
+				throw new ArgumentNullException("instance");
+
+			if (string.IsNullOrEmpty(methodName))
+				throw new ArgumentException("Method name must not be null or empty", "methodName");
+
+			Type type = instance.GetType();
+			return GetMethods(type).First(kvp => kvp.Value.Name == methodName).Key;
 		}
 
 		[CanBeNull]

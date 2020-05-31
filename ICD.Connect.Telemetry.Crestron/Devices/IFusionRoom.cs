@@ -5,6 +5,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Telemetry.Mappings;
 
 namespace ICD.Connect.Telemetry.Crestron.Devices
 {

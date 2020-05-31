@@ -5,6 +5,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Comparers;
+using ICD.Connect.Telemetry.Providers;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -69,12 +70,12 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// <param name="instance"></param>
 		/// <param name="propertyInfo"></param>
 		/// <returns></returns>
-		public PropertyTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
+		public PropertyTelemetryNode InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
 		{
-			MethodInfo methodInfo = MethodName == null ? null : TelemetryUtils.GetMethodInfo(instance, MethodName);
-			EventInfo eventInfo = EventName == null ? null :  TelemetryUtils.GetEventInfo(instance, EventName);
+			MethodInfo methodInfo = MethodName == null ? null : MethodTelemetryAttribute.GetMethodInfo(instance, MethodName);
+			EventInfo eventInfo = EventName == null ? null : EventTelemetryAttribute.GetEventInfo(instance, EventName);
 
-			return new PropertyTelemetryItem(Name, instance, propertyInfo, methodInfo, eventInfo);
+			return new PropertyTelemetryNode(Name, instance, propertyInfo, methodInfo, eventInfo);
 		}
 
 		/// <summary>

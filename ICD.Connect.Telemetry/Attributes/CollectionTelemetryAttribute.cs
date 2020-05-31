@@ -6,13 +6,12 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Comparers;
-using ICD.Connect.Telemetry.Nodes.Collections;
+using ICD.Connect.Telemetry.Providers;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
 #endif
-using ICD.Common.Utils.Collections;
 using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes
@@ -37,7 +36,6 @@ namespace ICD.Connect.Telemetry.Attributes
 			s_CacheSection = new SafeCriticalSection();
 		}
 
-
 		/// <summary>
 		/// Constructor.
 		/// </summary>
@@ -48,41 +46,43 @@ namespace ICD.Connect.Telemetry.Attributes
 		}
 
 		/// <summary>
-		/// Instantiates a new telemetry item for the given instance and property.
+		/// Returns the child telemetry nodes for the given instance and collection property.
 		/// </summary>
 		/// <param name="instance"></param>
 		/// <param name="propertyInfo"></param>
+		/// <param name="getTelemetryForProvider"></param>
 		/// <returns></returns>
-		public ICollectionTelemetryItem InstantiateTelemetryItem(ITelemetryProvider instance, PropertyInfo propertyInfo)
+		public IEnumerable<ITelemetryNode> InstantiateTelemetryNodes([NotNull] ITelemetryProvider instance,
+		                                                             [NotNull] PropertyInfo propertyInfo,
+		                                                             Func<string, ITelemetryProvider,
+			                                                             TelemetryCollection> getTelemetryForProvider)
 		{
-			if (!typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType))
-				throw new InvalidOperationException(
-					string.Format("Cannot generate collection telemetry for non-enumerable property {0}, {1}", propertyInfo.Name,
-					              propertyInfo.PropertyType));
+			if (instance == null)
+				throw new ArgumentNullException("instance");
 
-			IEnumerable childInstances = (IEnumerable)propertyInfo.GetValue(instance, null);
-			if (childInstances == null)
-				throw new InvalidProgramException(string.Format("Property {0} value is null", propertyInfo.Name));
+			if (propertyInfo == null)
+				throw new ArgumentNullException("propertyInfo");
+
+			IEnumerable childInstances =
+				typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType)
+					? (IEnumerable)propertyInfo.GetValue(instance, null)
+					: propertyInfo.GetValue(instance, null).Yield();
 
 			IEnumerable<ITelemetryProvider> childrenProviders = childInstances.OfType<ITelemetryProvider>();
 
-			IcdHashSet<ITelemetryItem> listItemNodes = new IcdHashSet<ITelemetryItem>();
 			int index = 0;
 			foreach (ITelemetryProvider provider in childrenProviders)
 			{
-				PropertyInfo nameProperty = TelemetryCollectionIdentityAttribute.GetProperty(provider);
+				PropertyInfo idProperty = TelemetryCollectionIdentityAttribute.GetProperty(provider);
 
 				string name =
-					nameProperty == null
+					idProperty == null
 						? string.Format("{0}{1}", Name, index)
-						: nameProperty.GetValue(provider, null).ToString();
+						: idProperty.GetValue(provider, null).ToString();
 
-				ITelemetryCollection innerTelemetry = TelemetryUtils.InstantiateTelemetry(provider);
-				listItemNodes.Add(new CollectionTelemetryNodeItem(name, instance, innerTelemetry));
+				yield return getTelemetryForProvider(name, provider);
 				index++;
 			}
-
-			return new CollectionTelemetryNodeItem(Name, instance, listItemNodes);
 		}
 
 		/// <summary>
@@ -90,7 +90,7 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public static IEnumerable<KeyValuePair<PropertyInfo, CollectionTelemetryAttribute>> GetProperties(Type type)
+		public static IEnumerable<KeyValuePair<PropertyInfo, CollectionTelemetryAttribute>> GetProperties([NotNull] Type type)
 		{
 			if (type == null)
 				throw new ArgumentNullException("type");
@@ -116,11 +116,11 @@ namespace ICD.Connect.Telemetry.Attributes
 					// Then get the properties for this type
 					IEnumerable<KeyValuePair<PropertyInfo, CollectionTelemetryAttribute>> typeProperties =
 #if SIMPLSHARP
- ((CType)type)
+						((CType)type)
 #else
 						type.GetTypeInfo()
 #endif
-.GetProperties(BINDING_FLAGS)
+							.GetProperties(BINDING_FLAGS)
 							.Select(p => new KeyValuePair<PropertyInfo, CollectionTelemetryAttribute>(p, GetTelemetryAttribute(p)))
 							.Where(kvp => kvp.Value != null);
 
@@ -138,7 +138,7 @@ namespace ICD.Connect.Telemetry.Attributes
 		}
 
 		[CanBeNull]
-		private static CollectionTelemetryAttribute GetTelemetryAttribute(PropertyInfo property)
+		private static CollectionTelemetryAttribute GetTelemetryAttribute([NotNull] PropertyInfo property)
 		{
 			if (property == null)
 				throw new ArgumentNullException("property");

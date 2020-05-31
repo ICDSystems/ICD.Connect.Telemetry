@@ -1,4 +1,4 @@
-﻿namespace ICD.Connect.Telemetry.Nodes.External
+﻿namespace ICD.Connect.Telemetry.Providers.External
 {
 	public abstract class AbstractExternalTelemetryProvider<TParent> : AbstractTelemetryProvider, IExternalTelemetryProvider
 		where TParent : ITelemetryProvider
@@ -25,7 +25,7 @@
 		/// Sets the parent telemetry provider that this instance extends.
 		/// </summary>
 		/// <param name="parent"></param>
-		public virtual void SetParent(TParent parent)
+		protected virtual void SetParent(TParent parent)
 		{
 			Unsubscribe(m_Parent);
 			m_Parent = parent;
@@ -34,7 +34,7 @@
 
 		#endregion
 
-		#region Parent Callbacks
+		#region Provider Callbacks
 
 		/// <summary>
 		/// Subscribe to the parent events.

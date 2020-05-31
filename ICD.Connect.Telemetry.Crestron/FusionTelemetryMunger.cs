@@ -12,7 +12,6 @@ using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Nodes;
-using ICD.Connect.Telemetry.Nodes.Collections;
 using ICD.Connect.Telemetry.Services;
 
 namespace ICD.Connect.Telemetry.Crestron
@@ -55,43 +54,12 @@ namespace ICD.Connect.Telemetry.Crestron
 		#region Methods
 
 		/// <summary>
-		/// Adds the devices as assets to fusion and builds the sigs from the telemetry.
+		/// Disposes and clears all of the generated bindings.
 		/// </summary>
-		/// <param name="devices"></param>
-		/// <returns></returns>
-		public void BuildAssets(IEnumerable<IDevice> devices)
-		{
-			Clear();
-
-			foreach (IDevice device in devices)
-				BuildAssets(device);
-		}
-
-		/// <summary>
-		/// Adds the device as assets to fusion and builds the sigs from the telemetry.
-		/// </summary>
-		/// <param name="device"></param>
-		/// <returns></returns>
-		public void BuildAssets(IDevice device)
-		{
-			// Create the sig bindings
-			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
-
-			// Add the assets to fusion
-			if (device.Controls.GetControls<IOccupancySensorControl>().Any())
-				GenerateOccupancySensorAsset(device);
-
-			GenerateStaticAsset(device, nodes);
-		}
-
-		public static void RegisterMappingSet(Type type, IEnumerable<IFusionSigMapping> mappings)
-		{
-			s_Mappings.AddRange(mappings);
-		}
-
 		public void Clear()
 		{
 			m_BindingsSection.Enter();
+
 			try
 			{
 				foreach (FusionTelemetryBinding binding in m_BindingsByAsset.Values.SelectMany(v => v))
@@ -105,6 +73,24 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
+		/// <summary>
+		/// Adds the devices as assets to fusion and builds the sigs from the telemetry.
+		/// </summary>
+		/// <param name="devices"></param>
+		/// <returns></returns>
+		public void BuildAssets(IEnumerable<IDevice> devices)
+		{
+			Clear();
+
+			foreach (IDevice device in devices)
+				BuildAssets(device);
+		}
+
+		public static void RegisterMappingSet(Type type, IEnumerable<IFusionSigMapping> mappings)
+		{
+			s_Mappings.AddRange(mappings);
+		}
+
 		public static IEnumerable<IFusionSigMapping> GetMappings()
 		{
 			return s_Mappings.ToList(s_Mappings.Count);
@@ -112,7 +98,29 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		#endregion
 
-		private void GenerateStaticAsset(IDeviceBase device, ITelemetryCollection nodes)
+		#region Private Methods
+
+		/// <summary>
+		/// Adds the device as assets to fusion and builds the sigs from the telemetry.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <returns></returns>
+		private void BuildAssets(IDevice device)
+		{
+			// Ensure the Core telemetry has been built
+			ServiceProvider.GetService<ITelemetryService>().InitializeCoreTelemetry();
+
+			// Create the sig bindings
+			TelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
+
+			// Add the assets to fusion
+			if (device.Controls.GetControls<IOccupancySensorControl>().Any())
+				GenerateOccupancySensorAsset(device);
+
+			GenerateStaticAsset(device, nodes);
+		}
+
+		private void GenerateStaticAsset(IDeviceBase device, TelemetryCollection nodes)
 		{
 			uint staticAssetId = GetNextAssetId();
 			AssetInfo staticAssetInfo = new AssetInfo(eAssetType.StaticAsset,
@@ -146,12 +154,12 @@ namespace ICD.Connect.Telemetry.Crestron
 			if(control == null)
 				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, control not found.");
 
-			ITelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(control);
+			TelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(control);
 			if (nodes == null || !nodes.Any())
 				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, nodes not found.");
 
-			PropertyTelemetryItem node =
-				nodes.OfType<PropertyTelemetryItem>()
+			PropertyTelemetryNode node =
+				nodes.OfType<PropertyTelemetryNode>()
 				     .FirstOrDefault(n => n.PropertyInfo.PropertyType == typeof(eOccupancyState));
 			if (node == null)
 				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, matching node not found.");
@@ -214,15 +222,15 @@ namespace ICD.Connect.Telemetry.Crestron
 		}
 
 		[CanBeNull]
-		private static IFusionSigMapping GetMapping(ITelemetryItem node)
+		private static IFusionSigMapping GetMapping(ITelemetryNode node)
 		{
-			return s_Mappings/*.Where(kvp => node.Parent.GetType().IsAssignableTo(kvp.Key))*/
+			return s_Mappings/*.Where(kvp => node.Provider.GetType().IsAssignableTo(kvp.Key))*/
 				.FirstOrDefault(m => (node.Name == m.TelemetryGetName || node.Name == m.TelemetrySetName) &&
 				                     (m.TelemetryProviderTypes == null ||
-				                      node.Parent.GetType().GetAllTypes().Any(t => m.TelemetryProviderTypes.Contains(t))));
+				                      node.Provider.GetType().GetAllTypes().Any(t => m.TelemetryProviderTypes.Contains(t))));
 		}
 
-		private IEnumerable<FusionTelemetryBinding> BuildBindingsRecursive(ITelemetryCollection nodes,
+		private IEnumerable<FusionTelemetryBinding> BuildBindingsRecursive(TelemetryCollection nodes,
 		                                                                   uint assetId, RangeMappingUsageTracker mappingUsage)
 		{
 			if (nodes == null)
@@ -231,8 +239,8 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (mappingUsage == null)
 				throw new ArgumentNullException("mappingUsage");
 
-			IEnumerable<ITelemetryCollection> childCollections = nodes.OfType<ITelemetryCollection>();
-			foreach (ITelemetryCollection collection in childCollections)
+			IEnumerable<TelemetryCollection> childCollections = nodes.OfType<TelemetryCollection>();
+			foreach (TelemetryCollection collection in childCollections)
 			{
 				IEnumerable<FusionTelemetryBinding> children = BuildBindingsRecursive(collection, assetId, mappingUsage);
 				foreach (FusionTelemetryBinding child in children)
@@ -240,7 +248,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 
 
-			foreach (var nodeMappingPair in nodes.Where(n => !n.GetType().IsAssignableTo(typeof(ITelemetryCollection)))
+			foreach (var nodeMappingPair in nodes.Where(n => !n.GetType().IsAssignableTo(typeof(TelemetryCollection)))
 												 .Select(n => new {Node = n, Mapping = GetMapping(n)})
 												 .Where(a => a.Mapping != null)
 												 .Distinct(a => a.Mapping))
@@ -252,12 +260,12 @@ namespace ICD.Connect.Telemetry.Crestron
 		}
 
 		[CanBeNull]
-		private FusionTelemetryBinding Bind(ITelemetryItem node, IFusionSigMapping mapping, uint assetId, RangeMappingUsageTracker mappingUsage)
+		private FusionTelemetryBinding Bind(ITelemetryNode node, IFusionSigMapping mapping, uint assetId, RangeMappingUsageTracker mappingUsage)
 		{
 			FusionSigMapping singleMapping = mapping as FusionSigMapping;
 			if (singleMapping != null)
 			{
-				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, node.Parent, singleMapping, assetId);
+				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, node.Provider, singleMapping, assetId);
 				return binding;
 			}
 
@@ -272,7 +280,7 @@ namespace ICD.Connect.Telemetry.Crestron
 					TelemetryGetName = multiMapping.TelemetryGetName,
 					TelemetrySetName = multiMapping.TelemetrySetName
 				};
-				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, node.Parent, tempMapping, assetId);
+				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, node.Provider, tempMapping, assetId);
 				return binding;
 			}
 
@@ -316,5 +324,7 @@ namespace ICD.Connect.Telemetry.Crestron
 					binding.SetTelemetry.Invoke();
 			}
 		}
+
+		#endregion
 	}
 }

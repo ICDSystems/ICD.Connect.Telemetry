@@ -17,7 +17,6 @@ using ICD.Connect.Protocol.NetworkPro.Ports.Mqtt;
 using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 using ICD.Connect.Telemetry.Nodes;
-using ICD.Connect.Telemetry.Nodes.Collections;
 using ICD.Connect.Telemetry.Services;
 using Newtonsoft.Json;
 
@@ -350,54 +349,54 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_Client.Will.Flag = true;
 
 			// Create system bindings
-			ITelemetryCollection systemTelemetry = TelemetryService.GetTelemetryForProvider(Core);
+			TelemetryCollection systemTelemetry = TelemetryService.InitializeCoreTelemetry();
 			GenerateTelemetryRecursive(systemTelemetry, new Stack<string>());
 		}
 
 		/// <summary>
-		/// Creates the bindings for the given telemetry items recursively.
+		/// Creates the bindings for the given telemetry collection recursively.
 		/// </summary>
-		/// <param name="telemetryItems"></param>
+		/// <param name="telemetryCollection"></param>
 		/// <param name="path"></param>
-		private void GenerateTelemetryRecursive([NotNull] IEnumerable<ITelemetryItem> telemetryItems,
+		private void GenerateTelemetryRecursive([NotNull] TelemetryCollection telemetryCollection,
 		                                        [NotNull] Stack<string> path)
 		{
-			if (telemetryItems == null)
-				throw new ArgumentNullException("telemetryItems");
+			if (telemetryCollection == null)
+				throw new ArgumentNullException("telemetryCollection");
 
 			if (path == null)
 				throw new ArgumentNullException("path");
 
-			foreach (ITelemetryItem item in telemetryItems)
+			foreach (ITelemetryNode item in telemetryCollection)
 				GenerateTelemetryRecursive(item, path);
 		}
 
 		/// <summary>
-		/// Creates the bindings for the given telemetry item recursively.
+		/// Creates the bindings for the given telemetry node recursively.
 		/// </summary>
-		/// <param name="telemetryItem"></param>
+		/// <param name="telemetryNode"></param>
 		/// <param name="path"></param>
-		private void GenerateTelemetryRecursive([NotNull] ITelemetryItem telemetryItem, [NotNull] Stack<string> path)
+		private void GenerateTelemetryRecursive([NotNull] ITelemetryNode telemetryNode, [NotNull] Stack<string> path)
 		{
-			if (telemetryItem == null)
-				throw new ArgumentNullException("telemetryItem");
+			if (telemetryNode == null)
+				throw new ArgumentNullException("telemetryNode");
 
 			if (path == null)
 				throw new ArgumentNullException("path");
 
-			path.Push(telemetryItem.Name);
+			path.Push(telemetryNode.Name);
 
 			try
 			{
-				ITelemetryCollection collection = telemetryItem as ITelemetryCollection;
+				TelemetryCollection collection = telemetryNode as TelemetryCollection;
 				if (collection != null)
 					GenerateTelemetryRecursive(collection, path);
 
-				PropertyTelemetryItem feedback = telemetryItem as PropertyTelemetryItem;
+				PropertyTelemetryNode feedback = telemetryNode as PropertyTelemetryNode;
 				if (feedback != null)
 					CreateSystemToServiceBinding(feedback, path);
 
-				MethodTelemetryItem method = telemetryItem as MethodTelemetryItem;
+				MethodTelemetryNode method = telemetryNode as MethodTelemetryNode;
 				if (method != null)
 					CreateServiceToSystemBinding(method, path);
 			}
@@ -412,7 +411,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		/// <param name="telemetry"></param>
 		/// <param name="path"></param>
-		private void CreateSystemToServiceBinding([NotNull] PropertyTelemetryItem telemetry, [NotNull] Stack<string> path)
+		private void CreateSystemToServiceBinding([NotNull] PropertyTelemetryNode telemetry, [NotNull] Stack<string> path)
 		{
 			if (telemetry == null)
 				throw new ArgumentNullException("telemetry");
@@ -447,7 +446,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		/// <param name="telemetry"></param>
 		/// <param name="path"></param>
-		private void CreateServiceToSystemBinding([NotNull] MethodTelemetryItem telemetry, [NotNull] Stack<string> path)
+		private void CreateServiceToSystemBinding([NotNull] MethodTelemetryNode telemetry, [NotNull] Stack<string> path)
 		{
 			if (telemetry == null)
 				throw new ArgumentNullException("telemetry");

@@ -50,7 +50,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			return string.Format(FusionSigName, positionInRange.ToString("D5"));
 		}
 
-		public override FusionTelemetryBinding Bind(IFusionRoom room, ITelemetryItem node, uint assetId,
+		public override FusionTelemetryBinding Bind(IFusionRoom room, ITelemetryNode node, uint assetId,
 		                                            RangeMappingUsageTracker mappingUsage)
 		{
 			FusionSigMapping tempMapping = new FusionSigMapping
@@ -63,7 +63,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				TelemetryProviderTypes = TelemetryProviderTypes
 			};
 
-			return FusionTelemetryBinding.Bind(room, node.Parent, tempMapping, assetId);
+			return FusionTelemetryBinding.Bind(room, node.Provider, tempMapping, assetId);
 		}
 	}
 }
