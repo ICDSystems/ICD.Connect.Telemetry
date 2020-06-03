@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ObfuscationSettings.cs" />
+    <Compile Include="Providers\ActivityExternalTelemetryProvider.cs" />
     <Compile Include="Providers\External\AbstractExternalTelemetryProvider.cs" />
     <Compile Include="Providers\AbstractTelemetryProvider.cs" />
     <Compile Include="Attributes\PropertyTelemetryAttribute.cs" />
