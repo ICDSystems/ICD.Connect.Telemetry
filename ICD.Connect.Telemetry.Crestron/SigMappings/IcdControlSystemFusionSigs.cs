@@ -13,40 +13,35 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		{
 			new FusionSigMapping
 			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROGRAM_UPTIME,
-				TelemetrySetName = string.Empty,
+				TelemetryName = ControlSystemExternalTelemetryNames.PROGRAM_UPTIME,
 				FusionSigName = "Program Uptime",
 				SigType = eSigType.Serial,
 				Sig = 58
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROGRAMMER_NAME,
-				TelemetrySetName = string.Empty,
+				TelemetryName = ControlSystemExternalTelemetryNames.PROGRAMMER_NAME,
 				FusionSigName = "Programmer Name",
 				SigType = eSigType.Serial,
 				Sig = 59
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.SYSTEM_NAME,
-				TelemetrySetName = string.Empty,
+				TelemetryName = ControlSystemExternalTelemetryNames.SYSTEM_NAME,
 				FusionSigName = "System Name",
 				SigType = eSigType.Serial,
 				Sig = 60
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROGRAM_SOURCE_FILE,
-				TelemetrySetName = string.Empty,
+				TelemetryName = ControlSystemExternalTelemetryNames.PROGRAM_SOURCE_FILE,
 				FusionSigName = "Program Source File",
 				SigType = eSigType.Serial,
 				Sig = 61
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = ControlSystemExternalTelemetryNames.PROGRAM_COMPLIE_DATE,
-				TelemetrySetName = string.Empty,
+				TelemetryName = ControlSystemExternalTelemetryNames.PROGRAM_COMPLIE_DATE,
 				FusionSigName = "Program Compile Date",
 				SigType = eSigType.Serial,
 				Sig = 62

@@ -31,8 +31,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private const string SERVICE_TO_PROGRAM_PREFIX = "ServiceToProgram";
 		private const string SYSTEMS_PREFIX = "Systems";
 
-		private readonly Dictionary<string, MqttTelemetryBinding> m_ProgramToServiceBindings;
-		private readonly Dictionary<string, MqttTelemetryBinding> m_ServiceToProgramBindings;
+		private readonly Dictionary<string, MqttTelemetryBinding> m_Bindings;
 		private readonly Dictionary<string, IcdHashSet<SubscriptionCallback>> m_SubscriptionCallbacks;
 		private readonly SafeCriticalSection m_BindingsSection;
 
@@ -68,8 +67,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		public MqttTelemetryServiceProvider()
 		{
-			m_ProgramToServiceBindings = new Dictionary<string, MqttTelemetryBinding>();
-			m_ServiceToProgramBindings = new Dictionary<string, MqttTelemetryBinding>();
+			m_Bindings = new Dictionary<string, MqttTelemetryBinding>();
 			m_SubscriptionCallbacks = new Dictionary<string, IcdHashSet<SubscriptionCallback>>();
 			m_BindingsSection = new SafeCriticalSection();
 
@@ -250,13 +248,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			try
 			{
-				foreach (MqttTelemetryBinding binding in m_ProgramToServiceBindings.Values)
+				foreach (MqttTelemetryBinding binding in m_Bindings.Values)
 					binding.Dispose();
-				m_ProgramToServiceBindings.Clear();
-
-				foreach (MqttTelemetryBinding binding in m_ServiceToProgramBindings.Values)
-					binding.Dispose();
-				m_ServiceToProgramBindings.Clear();
+				m_Bindings.Clear();
 			}
 			finally
 			{
@@ -392,13 +386,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				if (collection != null)
 					GenerateTelemetryRecursive(collection, path);
 
-				PropertyTelemetryNode feedback = telemetryNode as PropertyTelemetryNode;
+				TelemetryLeaf feedback = telemetryNode as TelemetryLeaf;
 				if (feedback != null)
-					CreateSystemToServiceBinding(feedback, path);
-
-				MethodTelemetryNode method = telemetryNode as MethodTelemetryNode;
-				if (method != null)
-					CreateServiceToSystemBinding(method, path);
+					CreateBinding(feedback, path);
 			}
 			finally
 			{
@@ -411,7 +401,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		/// <param name="telemetry"></param>
 		/// <param name="path"></param>
-		private void CreateSystemToServiceBinding([NotNull] PropertyTelemetryNode telemetry, [NotNull] Stack<string> path)
+		private void CreateBinding([NotNull] TelemetryLeaf telemetry, [NotNull] Stack<string> path)
 		{
 			if (telemetry == null)
 				throw new ArgumentNullException("telemetry");
@@ -426,49 +416,21 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			try
 			{
-				if (m_ProgramToServiceBindings.ContainsKey(programToService))
+				if (m_Bindings.ContainsKey(programToService))
 				{
 					Logger.Log(eSeverity.Error, "Failed to add binding for duplicate topic {0}", programToService);
 					return;
 				}
 
-				MqttTelemetryBinding binding = new MqttTelemetryBinding(telemetry, null, programToService, serviceToProgram, this);
-				m_ProgramToServiceBindings.Add(programToService, binding);
-			}
-			finally
-			{
-				m_BindingsSection.Leave();
-			}
-		}
-
-		/// <summary>
-		/// Adds the binding to the cache and subscribes to the binding path.
-		/// </summary>
-		/// <param name="telemetry"></param>
-		/// <param name="path"></param>
-		private void CreateServiceToSystemBinding([NotNull] MethodTelemetryNode telemetry, [NotNull] Stack<string> path)
-		{
-			if (telemetry == null)
-				throw new ArgumentNullException("telemetry");
-
-			if (path == null)
-				throw new ArgumentNullException("path");
-
-			string programToService = BuildProgramToServiceTopic(path);
-			string serviceToProgram = BuildServiceToProgramTopic(path);
-
-			m_BindingsSection.Enter();
-
-			try
-			{
-				if (m_ServiceToProgramBindings.ContainsKey(serviceToProgram))
+				if (m_Bindings.ContainsKey(serviceToProgram))
 				{
 					Logger.Log(eSeverity.Error, "Failed to add binding for duplicate topic {0}", serviceToProgram);
 					return;
 				}
 
-				MqttTelemetryBinding binding = new MqttTelemetryBinding(null, telemetry, programToService, serviceToProgram, this);
-				m_ServiceToProgramBindings.Add(serviceToProgram, binding);
+				MqttTelemetryBinding binding = new MqttTelemetryBinding(telemetry, programToService, serviceToProgram, this);
+				m_Bindings.Add(programToService, binding);
+				m_Bindings.Add(serviceToProgram, binding);
 			}
 			finally
 			{

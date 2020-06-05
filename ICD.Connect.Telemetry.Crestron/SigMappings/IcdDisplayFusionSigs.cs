@@ -13,8 +13,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		{
 			new FusionSigMapping
 			{
-				TelemetryGetName = DisplayTelemetryNames.ACTIVE_INPUT_STATE,
-				TelemetrySetName = DisplayTelemetryNames.SET_ACTIVE_INPUT,
+				TelemetryName = DisplayTelemetryNames.ACTIVE_INPUT_STATE,
 				FusionSigName = "Input Selection",
 				SigType = eSigType.Analog,
 				Sig = 1701

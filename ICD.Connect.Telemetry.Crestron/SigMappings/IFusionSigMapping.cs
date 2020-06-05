@@ -10,8 +10,9 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
 	public interface IFusionSigMapping : ITelemetryMapping
 	{
-		string FusionSigName { get; set; }
-		eSigType SigType { get; set; }
+		string FusionSigName { get; }
+
+		eSigType SigType { get; }
 		
 		/// <summary>
 		/// What provider types this binding can use

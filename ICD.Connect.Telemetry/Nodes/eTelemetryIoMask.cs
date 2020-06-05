@@ -1,7 +1,7 @@
 ﻿using System;
 using ICD.Common.Properties;
 
-namespace ICD.Connect.Telemetry.Mappings
+namespace ICD.Connect.Telemetry.Nodes
 {
 	[PublicAPI]
 	[Flags]

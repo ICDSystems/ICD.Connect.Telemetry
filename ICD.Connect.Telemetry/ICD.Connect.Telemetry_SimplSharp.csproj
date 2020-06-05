@@ -84,7 +84,7 @@
     <Compile Include="Attributes\EventTelemetryAttribute.cs" />
     <Compile Include="Bindings\AbstractTelemetryBinding.cs" />
     <Compile Include="Comparers\TelemetryEventInfoEqualityComparer.cs" />
-    <Compile Include="Mappings\eTelemetryIoMask.cs" />
+    <Compile Include="Nodes\eTelemetryIoMask.cs" />
     <Compile Include="Providers\External\IExternalTelemetryProvider.cs" />
     <Compile Include="Providers\IActivityTelemetryProvider.cs" />
     <Compile Include="Providers\ITelemetryProvider.cs" />
@@ -93,8 +93,7 @@
     <Compile Include="Nodes\AbstractTelemetryNode.cs" />
     <Compile Include="Nodes\TelemetryCollection.cs" />
     <Compile Include="Nodes\ITelemetryNode.cs" />
-    <Compile Include="Nodes\MethodTelemetryNode.cs" />
-    <Compile Include="Nodes\PropertyTelemetryNode.cs" />
+    <Compile Include="Nodes\TelemetryLeaf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Comparers\TelemetryMethodInfoEqualityComparer.cs" />
     <Compile Include="Comparers\TelemetryPropertyInfoEqualityComparer.cs" />

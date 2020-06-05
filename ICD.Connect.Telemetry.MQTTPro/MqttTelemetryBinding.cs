@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
+using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Json;
 using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Nodes;
@@ -43,18 +46,19 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="getTelemetry"></param>
-		/// <param name="setTelemetry"></param>
+		/// <param name="telemetry"></param>
 		/// <param name="programToServiceTopic"></param>
 		/// <param name="serviceToProgramTopic"></param>
 		/// <param name="telemetryServiceProvider"></param>
-		public MqttTelemetryBinding([CanBeNull] PropertyTelemetryNode getTelemetry,
-		                            [CanBeNull] MethodTelemetryNode setTelemetry,
+		public MqttTelemetryBinding([NotNull] TelemetryLeaf telemetry,
 		                            [NotNull] string programToServiceTopic,
 		                            [NotNull] string serviceToProgramTopic,
 		                            [NotNull] MqttTelemetryServiceProvider telemetryServiceProvider)
-			: base(getTelemetry, setTelemetry)
+			: base(telemetry)
 		{
+			if (telemetry == null)
+				throw new ArgumentNullException("telemetry");
+
 			if (telemetryServiceProvider == null)
 				throw new ArgumentNullException("telemetryServiceProvider");
 
@@ -64,19 +68,17 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (string.IsNullOrEmpty(serviceToProgramTopic))
 				throw new ArgumentException("Cannot create telemetry binding with a null or empty topic.");
 
-			if (getTelemetry == null && setTelemetry == null)
-				throw new
-					InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
-
 			m_ProgramToServiceTopic = programToServiceTopic;
 			m_ServiceToProgramTopic = serviceToProgramTopic;
 			m_TelemetryServiceProvider = telemetryServiceProvider;
 
-			if (setTelemetry != null)
+			if (telemetry.MethodInfo != null)
 				SubscribeToService();
 
 			PublishMetadata();
-			SendValueToService();
+
+			if (telemetry.PropertyInfo != null)
+				SendValueToService(telemetry.Value);
 		}
 
 		/// <summary>
@@ -84,7 +86,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		public override void Dispose()
 		{
-			if (SetTelemetry != null)
+			if (Telemetry.MethodInfo != null)
 				UnsubscribeFromService();
 
 			base.Dispose();
@@ -97,16 +99,14 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <summary>
 		/// Sends the wrapped property value to the telemetry service.
 		/// </summary>
-		protected override void SendValueToService()
+		/// <param name="value"></param>
+		protected override void SendValueToService(object value)
 		{
-			if (GetTelemetry == null)
-				return;
-
 			PublishMessage message =
 				new PublishMessage
 				{
 					Date = IcdEnvironment.GetUtcTime(),
-					Data = GetTelemetry.Value
+					Data = value
 				};
 
 			m_TelemetryServiceProvider.Publish(ProgramToServiceTopic, message);
@@ -117,16 +117,11 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		private void PublishMetadata()
 		{
-			TelemetryMetadata metadata =
-				GetTelemetry == null
-					? TelemetryMetadata.FromMethodTelemetry(SetTelemetry)
-					: TelemetryMetadata.FromPropertyTelemetry(GetTelemetry);
-
 			PublishMessage message =
 				new PublishMessage
 				{
 					Date = IcdEnvironment.GetUtcTime(),
-					Data = metadata
+					Data = TelemetryMetadata.FromTelemetry(Telemetry)
 				};
 
 			string topic = MqttUtils.Join(ProgramToServiceTopic, METADATA);
@@ -136,7 +131,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 		#endregion
 
-		#region Core Telemetry Callbacks
+		#region Service Callbacks
 
 		/// <summary>
 		/// Subscribe to topic changes from the service.
@@ -160,21 +155,36 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <param name="data"></param>
 		private void HandleTopicMessage(byte[] data)
 		{
-			if (SetTelemetry == null)
+			if (Telemetry.MethodInfo == null)
 				throw new InvalidOperationException();
 
-			// Simple method call
-			if (SetTelemetry.ParameterInfo == null)
+			string json = Encoding.UTF8.GetString(data, 0, data.Length);
+
+			Type[] types =
+				Telemetry.Parameters
+				         .Select(p => p.ParameterType)
+#if SIMPLSHARP
+				         .Select(t => (Type)t)
+#endif
+				         .ToArray();
+
+			// Trying to deserialize an array of different typed objects gets gross
+			JsonSerializer serializer = JsonSerializer.Create(JsonUtils.CommonSettings);
+			object[] values;
+
+			using (IcdTextReader textReader = new IcdStringReader(json))
 			{
-				HandleValueFromService();
-				return;
+				using (JsonReader reader = new JsonTextReader(textReader.WrappedTextReader))
+				{
+					int index = 0;
+					values =
+						serializer
+							.DeserializeArray(reader, (s, r) => s.Deserialize(r, types[index++]))
+							.ToArray();
+				}
 			}
 
-			// Method call with parameter
-			string json = Encoding.UTF8.GetString(data, 0, data.Length);
-			object value = JsonConvert.DeserializeObject(json, SetTelemetry.ParameterInfo.ParameterType, JsonUtils.CommonSettings);
-
-			HandleValueFromService(value);
+			HandleValuesFromService(values);
 		}
 
 		#endregion

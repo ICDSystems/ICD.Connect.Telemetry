@@ -5,7 +5,6 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Comparers;
-using ICD.Connect.Telemetry.Providers;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -93,19 +92,6 @@ namespace ICD.Connect.Telemetry.Attributes
 			{
 				s_CacheSection.Leave();
 			}
-		}
-
-		[NotNull]
-		public static EventInfo GetEventInfo([NotNull] ITelemetryProvider instance, [NotNull] string eventName)
-		{
-			if (instance == null)
-				throw new ArgumentNullException("instance");
-
-			if (string.IsNullOrEmpty(eventName))
-				throw new ArgumentException("Event name must not be null or empty", "eventName");
-
-			Type type = instance.GetType();
-			return GetEvents(type).First(kvp => kvp.Value.Name == eventName).Key;
 		}
 
 		[CanBeNull]

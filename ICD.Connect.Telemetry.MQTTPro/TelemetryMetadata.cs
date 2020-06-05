@@ -2,160 +2,255 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+#if SIMPLSHARP
+using Crestron.SimplSharp.Reflection;
+#else
+using System.Reflection;
+#endif
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Attributes;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
-using ICD.Common.Utils.Json;
 using ICD.Connect.Telemetry.Nodes;
 using Newtonsoft.Json;
 
 namespace ICD.Connect.Telemetry.MQTTPro
 {
-	[Flags]
-	public enum eMetadataSupport
-	{
-		None = 0,
-		EnumerationValues = 1,
-		Range = 2
-	}
-
 	[JsonConverter(typeof(TelemetryMetadataConverter))]
 	public sealed class TelemetryMetadata
 	{
-		#region Properties
+		/// <summary>
+		/// Gets/sets the IO mask for the telemetry.
+		/// </summary>
+		public eTelemetryIoMask IoMask { get; set; }
 
 		/// <summary>
-		/// Gets the data type of the property this metadata is for 
+		/// Gets/sets metadata about the messages being published from the application.
 		/// </summary>
-		public Type DataType { get; private set; }
+		[CanBeNull]
+		public TelemetryPublishMetadata PublishMetadata { get; set; }
 
 		/// <summary>
-		/// Sets which properties of this metadata should be serialized.
+		/// Gets/sets metadata about the messages that will be accepted from the service.
 		/// </summary>
-		public eMetadataSupport Supports { get; private set; }
-
-		#endregion
-
-		#region Range
+		[CanBeNull]
+		public TelemetrySubscribeMetadata SubscribeMetadata { get; set; }
 
 		/// <summary>
-		/// get/set the minimum range
+		/// Creates metadata for the given telemetry.
 		/// </summary>
-		public double RangeMin { get; private set; }
-
-		/// <summary>
-		/// get/set the maximum range
-		/// </summary>
-		public double RangeMax { get; private set; }
-
-		#endregion
-
-		/// <summary>
-		/// Creates metadata for the given feedback telemetry.
-		/// </summary>
-		/// <param name="propertyTelemetry"></param>
-		public static TelemetryMetadata FromPropertyTelemetry([NotNull] PropertyTelemetryNode propertyTelemetry)
+		/// <param name="telemetry"></param>
+		/// <returns></returns>
+		public static TelemetryMetadata FromTelemetry([NotNull] TelemetryLeaf telemetry)
 		{
-			TelemetryMetadata output = new TelemetryMetadata
+			if (telemetry == null)
+				throw new ArgumentNullException("telemetry");
+
+			return new TelemetryMetadata
 			{
-				DataType = propertyTelemetry.PropertyInfo.PropertyType
+				IoMask = telemetry.IoMask,
+				PublishMetadata = TelemetryPublishMetadata.FromTelemetry(telemetry),
+				SubscribeMetadata = TelemetrySubscribeMetadata.FromTelemetry(telemetry)
 			};
-
-			eMetadataSupport supports = eMetadataSupport.None;
-
-			if (output.DataType != null && output.DataType.IsEnum)
-				supports |= eMetadataSupport.EnumerationValues;
-
-			RangeAttribute rangeAttr = propertyTelemetry.PropertyInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
-			if (rangeAttr != null)
-			{
-				supports |= eMetadataSupport.Range;
-				output.RangeMin = (double)Convert.ChangeType(rangeAttr.Min, TypeCode.Double, CultureInfo.InvariantCulture);
-				output.RangeMax = (double)Convert.ChangeType(rangeAttr.Max, TypeCode.Double, CultureInfo.InvariantCulture);
-			}
-
-			output.Supports = supports;
-
-			return output;
-		}
-
-		/// <summary>
-		/// Creates metadata for the given method telemetry.
-		/// </summary>
-		/// <param name="methodTelemetry"></param>
-		public static TelemetryMetadata FromMethodTelemetry(MethodTelemetryNode methodTelemetry)
-		{
-			TelemetryMetadata output = new TelemetryMetadata
-			{
-				DataType = methodTelemetry.ParameterInfo == null
-					? null
-					: methodTelemetry.ParameterInfo.ParameterType
-			};
-
-			eMetadataSupport supports = eMetadataSupport.None;
-
-			if (output.DataType != null && output.DataType.IsEnum)
-				supports |= eMetadataSupport.EnumerationValues;
-
-			RangeAttribute rangeAttr =
-				methodTelemetry.ParameterInfo == null
-					? null
-					: methodTelemetry.ParameterInfo.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
-
-			if (rangeAttr != null)
-			{
-				supports |= eMetadataSupport.Range;
-				output.RangeMin = (double)Convert.ChangeType(rangeAttr.Min, TypeCode.Double, CultureInfo.InvariantCulture);
-				output.RangeMax = (double)Convert.ChangeType(rangeAttr.Max, TypeCode.Double, CultureInfo.InvariantCulture);
-			}
-
-			output.Supports = supports;
-
-			return output;
 		}
 	}
 
-	public sealed class TelemetryMetadataConverter : AbstractGenericJsonConverter<TelemetryMetadata>
+	[JsonConverter(typeof(TelemetryPublishMetadataConverter))]
+	public sealed class TelemetryPublishMetadata
 	{
-		private const string TYPE_TOKEN = "type";
-		private const string ENUM_ITEMS_TOKEN = "enum";
-		private const string RANGE_TOKEN = "range";
-		private const string MIN_TOKEN = "min";
-		private const string MAX_TOKEN = "max";
+		/// <summary>
+		/// Gets/sets the metadata for the published property.
+		/// </summary>
+		[CanBeNull]
+		public TelemetryMemberMetadata Property { get; set; }
 
 		/// <summary>
-		/// Override to write properties to the writer.
+		/// Creates metadata for the given telemetry.
+		/// Returns null if the telemetry does not publish.
 		/// </summary>
-		/// <param name="writer"></param>
-		/// <param name="value"></param>
-		/// <param name="serializer"></param>
-		protected override void WriteProperties(JsonWriter writer, TelemetryMetadata value, JsonSerializer serializer)
+		/// <param name="telemetry"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		public static TelemetryPublishMetadata FromTelemetry([NotNull] TelemetryLeaf telemetry)
 		{
-			base.WriteProperties(writer, value, serializer);
+			if (telemetry == null)
+				throw new ArgumentNullException("telemetry");
 
-			if (value.DataType != null)
-				writer.WriteProperty(TYPE_TOKEN, value.DataType.GetMinimalName());
+			TelemetryMemberMetadata property;
 
-			if (value.Supports.HasFlag(eMetadataSupport.EnumerationValues))
+			if (telemetry.PropertyInfo != null)
+				property = TelemetryMemberMetadata.FromProperty(telemetry.PropertyInfo);
+			else if (telemetry.EventInfo != null)
+				property = TelemetryMemberMetadata.FromEvent(telemetry.EventInfo);
+			else
+				return null;
+
+			return new TelemetryPublishMetadata
 			{
-				Dictionary<int, string> enumStrings =
-					EnumUtils.GetValues(value.DataType)
-					         .ToDictionary(k => (int)k, k => k.ToString());
+				Property = property
+			};
+		}
+	}
 
-				writer.WritePropertyName(ENUM_ITEMS_TOKEN);
-				serializer.SerializeDict(writer, enumStrings);
+	[JsonConverter(typeof(TelemetrySubscribeMetadataConverter))]
+	public sealed class TelemetrySubscribeMetadata
+	{
+		/// <summary>
+		/// Gets/sets the metadata for the parameters that will be accepted.
+		/// </summary>
+		[CanBeNull]
+		public IEnumerable<TelemetryMemberMetadata> Parameters { get; set; }
+
+		/// <summary>
+		/// Creates metadata for the given telemetry.
+		/// Returns null if the telemetry does not subscribe.
+		/// </summary>
+		/// <param name="telemetry"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		public static TelemetrySubscribeMetadata FromTelemetry([NotNull] TelemetryLeaf telemetry)
+		{
+			if (telemetry == null)
+				throw new ArgumentNullException("telemetry");
+
+			if (telemetry.MethodInfo == null)
+				return null;
+
+			return new TelemetrySubscribeMetadata
+			{
+				Parameters =
+					telemetry.Parameters
+					         .Select(p => TelemetryMemberMetadata.FromParameter(p))
+					         .ToArray()
+			};
+		}
+	}
+
+	[JsonConverter(typeof(TelemetryMemberMetadataConverter))]
+	public sealed class TelemetryMemberMetadata
+	{
+		/// <summary>
+		/// Gets/sets the parameter type.
+		/// </summary>
+		[CanBeNull]
+		public string Type { get; set; }
+
+		/// <summary>
+		/// Gets/sets a dictionary describing the valid enumeration values.
+		/// </summary>
+		[CanBeNull]
+		public Dictionary<int, string> Enumeration { get; set; }
+
+		/// <summary>
+		/// Gets/sets the range minimum.
+		/// </summary>
+		[CanBeNull]
+		public double? RangeMin { get; set; }
+
+		/// <summary>
+		/// Gets/sets the range maximum.
+		/// </summary>
+		[CanBeNull]
+		public double? RangeMax { get; set; }
+
+		/// <summary>
+		/// Creates member metadata for the given method parameter.
+		/// </summary>
+		/// <param name="parameterInfo"></param>
+		/// <returns></returns>
+		[NotNull]
+		public static TelemetryMemberMetadata FromParameter([NotNull] ParameterInfo parameterInfo)
+		{
+			if (parameterInfo == null)
+				throw new ArgumentNullException("parameterInfo");
+
+			Type type = parameterInfo.ParameterType;
+			return FromMember(parameterInfo, type);
+		}
+
+		/// <summary>
+		/// Creates member metadata for the given property.
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		/// <returns></returns>
+		[NotNull]
+		public static TelemetryMemberMetadata FromProperty([NotNull] PropertyInfo propertyInfo)
+		{
+			if (propertyInfo == null)
+				throw new ArgumentNullException("propertyInfo");
+
+			Type type = propertyInfo.PropertyType;
+			return FromMember(propertyInfo, type);
+		}
+
+		/// <summary>
+		/// Creates member metadata for the given event.
+		/// </summary>
+		/// <param name="eventInfo"></param>
+		/// <returns></returns>
+		[NotNull]
+		public static TelemetryMemberMetadata FromEvent([NotNull] EventInfo eventInfo)
+		{
+			if (eventInfo == null)
+				throw new ArgumentNullException("eventInfo");
+
+			Type eventArgsType = eventInfo.GetEventArgsType();
+			Type type = eventArgsType.GetInnerGenericTypes(typeof(IGenericEventArgs<>)).Single(); 
+
+			return FromMember(eventInfo, type);
+		}
+
+		/// <summary>
+		/// Creates member metadata for the given member and member type.
+		/// </summary>
+		/// <param name="member"></param>
+		/// <param name="memberType"></param>
+		/// <returns></returns>
+		[NotNull]
+		private static TelemetryMemberMetadata FromMember([NotNull] ICustomAttributeProvider member, [NotNull] Type memberType)
+		{
+			if (member == null)
+				throw new ArgumentNullException("member");
+
+			if (memberType == null)
+				throw new ArgumentNullException("memberType");
+
+			double? rangeMin = null;
+			double? rangeMax = null;
+
+			RangeAttribute rangeAttr = member.GetCustomAttributes<RangeAttribute>().FirstOrDefault();
+			if (rangeAttr != null)
+			{
+				rangeMin = (double)Convert.ChangeType(rangeAttr.Min, TypeCode.Double, CultureInfo.InvariantCulture);
+				rangeMax = (double)Convert.ChangeType(rangeAttr.Max, TypeCode.Double, CultureInfo.InvariantCulture);
 			}
 
-			if (value.Supports.HasFlag(eMetadataSupport.Range))
+			return new TelemetryMemberMetadata
 			{
-				writer.WritePropertyName(RANGE_TOKEN);
+				Type = memberType.GetMinimalName(),
+				Enumeration = BuildEnumerationMetadata(memberType),
+				RangeMin = rangeMin,
+				RangeMax = rangeMax
+			};
+		}
 
-				writer.WriteStartObject();
-				writer.WriteProperty(MIN_TOKEN, value.RangeMin);
-				writer.WriteProperty(MAX_TOKEN, value.RangeMax);
-				writer.WriteEndObject();
-			}
+		/// <summary>
+		/// Builds a dictionary of integer to enum value for the given type.
+		/// Returns null if the type is not an enum type.
+		/// </summary>
+		/// <param name="memberType"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		private static Dictionary<int, string> BuildEnumerationMetadata([NotNull] Type memberType)
+		{
+			if (memberType == null)
+				throw new ArgumentNullException("memberType");
+
+			return EnumUtils.IsEnumType(memberType)
+				       ? EnumUtils.GetValues(memberType)
+				                  .ToDictionary(k => (int)k, k => k.ToString())
+				       : null;
 		}
 	}
 }

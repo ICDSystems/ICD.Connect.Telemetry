@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using ICD.Common.Properties;
 using ICD.Common.Utils.Attributes;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
@@ -23,14 +24,23 @@ namespace ICD.Connect.Telemetry.Crestron
 	{
 		#region Properties
 
+		[NotNull]
 		public FusionSigMapping Mapping { get; private set; }
+
+		[NotNull]
 		public IFusionRoom FusionRoom { get; private set; }
+
+		[NotNull]
 		public IFusionAsset Asset { get; private set; }
 
 		/// <summary>
 		/// Gets the telemetry service.
 		/// </summary>
+		[NotNull]
 		private static ITelemetryService TelemetryService { get { return ServiceProvider.GetService<ITelemetryService>(); } }
+
+		[CanBeNull]
+		private RangeAttribute RangeAttribute { get; set; }
 
 		#endregion
 
@@ -40,23 +50,51 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// Constructor.
 		/// </summary>
 		/// <param name="fusionRoom"></param>
-		/// <param name="getTelemetry"></param>
-		/// <param name="setTelemetry"></param>
+		/// <param name="telemetry"></param>
 		/// <param name="asset"></param>
 		/// <param name="mapping"></param>
-		private FusionTelemetryBinding(IFusionRoom fusionRoom, PropertyTelemetryNode getTelemetry, MethodTelemetryNode setTelemetry,
-		                               IFusionAsset asset, FusionSigMapping mapping) 
-			: base(getTelemetry, setTelemetry)
+		private FusionTelemetryBinding([NotNull] IFusionRoom fusionRoom, [NotNull] TelemetryLeaf telemetry,
+		                               [NotNull] IFusionAsset asset, [NotNull] FusionSigMapping mapping) 
+			: base(telemetry)
 		{
+			if (fusionRoom == null)
+				throw new ArgumentNullException("fusionRoom");
+
+			if (asset == null)
+				throw new ArgumentNullException("asset");
+
+			if (mapping == null)
+				throw new ArgumentNullException("mapping");
+
+			if (telemetry.ParameterCount > 1)
+				throw new NotSupportedException("Method telemetry with more than 1 parameter is not supported by Fusion");
+
 			FusionRoom = fusionRoom;
 			Asset = asset;
 			Mapping = mapping;
 
-			SendValueToService();
+			RangeAttribute =
+				Telemetry.PropertyInfo == null
+					? null
+					: Telemetry.PropertyInfo
+					           .GetCustomAttributes<RangeAttribute>()
+					           .FirstOrDefault();
+
+			if (telemetry.PropertyInfo != null)
+				SendValueToService(telemetry.Value);
 		}
 
-		public static FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryProvider provider,
-		                                          FusionSigMapping mapping, uint assetId)
+		/// <summary>
+		/// Creates the Fusion telemetry binding for the given mapping.
+		/// </summary>
+		/// <param name="fusionRoom"></param>
+		/// <param name="provider"></param>
+		/// <param name="mapping"></param>
+		/// <param name="assetId"></param>
+		/// <returns></returns>
+		[CanBeNull]
+		public static FusionTelemetryBinding Bind([NotNull] IFusionRoom fusionRoom, [NotNull] ITelemetryProvider provider,
+		                                          [NotNull] FusionSigMapping mapping, uint assetId)
 		{
 			if (fusionRoom == null)
 				throw new ArgumentNullException("fusionRoom");
@@ -72,22 +110,150 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (mapping.FusionAssetTypes != null && !asset.GetType().GetAllTypes().Any(t => mapping.FusionAssetTypes.Contains(t)))
 				return null;
 
-			PropertyTelemetryNode getTelemetryNode = TelemetryService.GetTelemetryForProvider(provider).GetChildByName(mapping.TelemetryGetName) as PropertyTelemetryNode;
-			MethodTelemetryNode setTelemetryNode = TelemetryService.GetTelemetryForProvider(provider).GetChildByName(mapping.TelemetrySetName) as MethodTelemetryNode;
+			TelemetryLeaf telemetryLeaf =
+				(TelemetryLeaf)TelemetryService.GetTelemetryForProvider(provider)
+				                               .GetChildByName(mapping.TelemetryName);
 
-			if (getTelemetryNode == null && setTelemetryNode == null)
-				throw new InvalidOperationException("Cannot create telemetry binding with neither a getter nor a setter.");
+			if (telemetryLeaf.ParameterCount > 1)
+				throw new NotSupportedException("Method telemetry with more than 1 parameter is not supported by Fusion");
 
 			// If the sig number is 0, that indicates that the sig is special-handling
 			if (mapping.Sig != 0)
-				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, mapping.IoMask);
+				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, telemetryLeaf.IoMask);
 
-			return new FusionTelemetryBinding(fusionRoom, getTelemetryNode, setTelemetryNode, asset, mapping);
+			return new FusionTelemetryBinding(fusionRoom, telemetryLeaf, asset, mapping);
 		}
 
 		#endregion
 
-		#region Methods
+		#region Program to Service
+
+		/// <summary>
+		/// Sends the value to the telemetry service.
+		/// </summary>
+		/// <param name="value"></param>
+		protected override void SendValueToService(object value)
+		{
+			if (Mapping.Sig == 0)
+			{
+				SendReservedSigToService(value);
+				return;
+			}
+
+			switch (Mapping.SigType)
+			{
+				case eSigType.Digital:
+					SendDigitalSigToService(value);
+					break;
+				case eSigType.Analog:
+					SendAnalogSigToService(value);
+					break;
+				case eSigType.Serial:
+					SendSerialSigToService(value);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		/// <summary>
+		/// Sends the reserved sig to the service.
+		/// </summary>
+		/// <param name="value"></param>
+		private void SendReservedSigToService(object value)
+		{
+			IFusionStaticAsset staticAsset = Asset as IFusionStaticAsset;
+			if (staticAsset != null)
+			{
+				switch (Mapping.TelemetryName)
+				{
+					case DeviceTelemetryNames.ONLINE_STATE:
+						staticAsset.SetOnlineState((bool)value);
+						break;
+
+					case DeviceTelemetryNames.POWER_STATE:
+						ePowerState powerState = (ePowerState)value;
+						bool powered = powerState == ePowerState.PowerOn || powerState == ePowerState.Warming;
+						staticAsset.SetPoweredState(powered);
+						break;
+				}
+			}
+
+			IFusionOccupancySensorAsset sensorAsset = Asset as IFusionOccupancySensorAsset;
+			if (sensorAsset != null)
+			{
+				switch (Mapping.TelemetryName)
+				{
+					case OccupancyTelemetryNames.OCCUPANCY_STATE:
+						bool occupied = (eOccupancyState)value == eOccupancyState.Occupied;
+						sensorAsset.SetRoomOccupied(occupied);
+						break;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Sends the digital sig to the service.
+		/// </summary>
+		/// <param name="value"></param>
+		private void SendDigitalSigToService(object value)
+		{
+			((IFusionStaticAsset)Asset).UpdateDigitalSig(Mapping.Sig, (bool)value);
+		}
+
+		/// <summary>
+		/// Sends the analog sig to the service.
+		/// </summary>
+		/// <param name="value"></param>
+		private void SendAnalogSigToService(object value)
+		{
+			ushort analog;
+
+			try
+			{
+				analog = GetValueAsAnalog(value);
+			}
+			catch (Exception e)
+			{
+				ServiceProvider.GetService<ILoggerService>()
+				               .AddEntry(eSeverity.Error, "{0} - Failed to convert value to analog - {1}", this, e.Message);
+				return;
+			}
+
+			((IFusionStaticAsset)Asset).UpdateAnalogSig(Mapping.Sig, analog);
+		}
+
+		/// <summary>
+		/// Sends the serial sig to the service.
+		/// </summary>
+		/// <param name="value"></param>
+		private void SendSerialSigToService(object value)
+		{
+			string serial = value == null ? string.Empty : value.ToString();
+			((IFusionStaticAsset)Asset).UpdateSerialSig(Mapping.Sig, serial);
+		}
+
+		/// <summary>
+		/// Converts the given numeric value to a ushort for Fusion.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		private ushort GetValueAsAnalog(object value)
+		{
+			if (RangeAttribute != null)
+				return Convert.ToUInt16(RangeAttribute.ClampMinMaxThenRemap(value, typeof(ushort)));
+
+			// If decimal map dec min-max to ushort min-max
+			if (value.GetType().IsDecimalNumeric())
+				return Convert.ToUInt16(RangeAttribute.Remap(value, typeof(ushort)));
+
+			// Integral types are clamped
+			return Convert.ToUInt16(RangeAttribute.Clamp(value, typeof(ushort)));
+		}
+
+		#endregion
+
+		#region Service to Program
 
 		public void UpdateLocalNodeValueFromService()
 		{
@@ -107,38 +273,26 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
-		#endregion
-
-		#region Private Methods
-
 		private void UpdateDigitalTelemetryFromService()
 		{
-			FusionSigMapping singleMapping = Mapping;
-			if (singleMapping == null)
-				return;
-
 			if (Mapping.Sig == 0)
 				return;
 
-			bool digital = ((IFusionStaticAsset)Asset).ReadDigitalSig(singleMapping.Sig);
+			bool digital = ((IFusionStaticAsset)Asset).ReadDigitalSig(Mapping.Sig);
 
 			// Handle case where two separate digitals are used to set true and false
-			if (SetTelemetry.ParameterInfo == null && digital)
-				SetTelemetry.Invoke();
+			if (Telemetry.ParameterCount == 0 && digital)
+				Telemetry.Invoke();
 			else
-				SetTelemetry.Invoke(digital);
+				Telemetry.Invoke(digital);
 		}
 
 		private void UpdateAnalogTelemetryFromService()
 		{
-			FusionSigMapping singleMapping = Mapping;
-			if (singleMapping == null)
-				return;
-
 			if (Mapping.Sig == 0)
 				return;
 
-			ushort analog = ((IFusionStaticAsset)Asset).ReadAnalogSig(singleMapping.Sig);
+			ushort analog = ((IFusionStaticAsset)Asset).ReadAnalogSig(Mapping.Sig);
 			object rescaledValue;
 
 			try
@@ -154,171 +308,35 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			try
 			{
-				SetTelemetry.Invoke(rescaledValue);
+				Telemetry.Invoke(rescaledValue);
 			}
 			catch (Exception e)
 			{
 				ServiceProvider.GetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "{0} - Failed to invoke SetTelemetry method - {1}", this, e.Message);
+				               .AddEntry(eSeverity.Error, "{0} - Failed to invoke Telemetry method - {1}", this, e.Message);
 			}
 		}
 
 		private void UpdateSerialTelemetryFromService()
 		{
-			FusionSigMapping singleMapping = Mapping;
-			if (singleMapping == null)
-				return;
-
 			if (Mapping.Sig == 0)
 				return;
 
-			string serial = ((IFusionStaticAsset)Asset).ReadSerialSig(singleMapping.Sig);
-			SetTelemetry.Invoke(serial);
-		}
-
-		/// <summary>
-		/// Sends the wrapped property value to the telemetry service.
-		/// </summary>
-		protected override void SendValueToService()
-		{
-			if (GetTelemetry == null)
-				return;
-
-			if (Mapping.Sig == 0)
-			{
-				UpdateReservedSigToService();
-				return;
-			}
-
-			switch (Mapping.SigType)
-			{
-				case eSigType.Digital:
-					UpdateDigitalSigToService();
-					break;
-				case eSigType.Analog:
-					UpdateAnalogSigToService();
-					break;
-				case eSigType.Serial:
-					UpdateSerialSigToService();
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-		}
-
-		private void UpdateReservedSigToService()
-		{
-			IFusionStaticAsset asset = Asset as IFusionStaticAsset;
-			if (asset != null)
-			{
-				if (Mapping.TelemetryGetName == DeviceTelemetryNames.ONLINE_STATE)
-				{
-					bool value = (bool)GetTelemetry.Value;
-					asset.SetOnlineState(value);
-					return;
-				}
-				if (Mapping.TelemetryGetName == DeviceTelemetryNames.POWER_STATE)
-				{
-					ePowerState value = (ePowerState)GetTelemetry.Value;
-					bool powered = value == ePowerState.PowerOn || value == ePowerState.Warming;
-					asset.SetPoweredState(powered);
-					return;
-				}
-			}
-
-			IFusionOccupancySensorAsset sensorAsset = Asset as IFusionOccupancySensorAsset;
-			if (sensorAsset != null)
-			{
-				if (Mapping.TelemetryGetName == OccupancyTelemetryNames.OCCUPANCY_STATE)
-				{
-					bool value = (eOccupancyState)GetTelemetry.Value == eOccupancyState.Occupied;
-					sensorAsset.SetRoomOccupied(value);
-				}
-			}
-		}
-
-		private void UpdateDigitalSigToService()
-		{
-			FusionSigMapping singleMapping = Mapping;
-			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
-				return;
-
-			bool digital = (bool)GetTelemetry.Value;
-			((IFusionStaticAsset)Asset).UpdateDigitalSig(singleMapping.Sig, digital);
-		}
-
-		private void UpdateAnalogSigToService()
-		{
-			FusionSigMapping singleMapping = Mapping;
-			if (singleMapping == null || GetTelemetry == null || GetTelemetry.Value == null)
-				return;
-
-			ushort analog;
-
-			try
-			{
-				analog = GetValueAsAnalog();
-			}
-			catch (Exception e)
-			{
-				ServiceProvider.GetService<ILoggerService>()
-				               .AddEntry(eSeverity.Error, "{0} - Failed to convert value to analog - {1}", this, e.Message);
-				return;
-			}
-
-			((IFusionStaticAsset)Asset).UpdateAnalogSig(singleMapping.Sig, analog);
-		}
-
-		private void UpdateSerialSigToService()
-		{
-			FusionSigMapping singleMapping = Mapping;
-			if (singleMapping == null || GetTelemetry == null)
-				return;
-
-			string serial;
-			if (GetTelemetry.Value == null)
-				serial = String.Empty;
-			else
-				serial = GetTelemetry.Value.ToString();
-
-			((IFusionStaticAsset)Asset).UpdateSerialSig(singleMapping.Sig, serial);
+			string serial = ((IFusionStaticAsset)Asset).ReadSerialSig(Mapping.Sig);
+			Telemetry.Invoke(serial);
 		}
 
 		private object GetRescaledAnalogValue(ushort analog)
 		{
-			if (SetTelemetry == null || SetTelemetry.ParameterInfo == null)
-				throw new InvalidOperationException("Set telemetry is null or has no parameters");
+			if (Telemetry.ParameterCount != 1)
+				throw new InvalidOperationException("Telemetry must have exactly 1 parameter");
 
-			Type targetType = SetTelemetry.ParameterInfo.ParameterType;
+			Type targetType = Telemetry.Parameters.First().ParameterType;
 
-			RangeAttribute rangeAttribute =
-				GetTelemetry.PropertyInfo
-				            .GetCustomAttributes<RangeAttribute>()
-				            .FirstOrDefault();
-
-			if (rangeAttribute != null)
-				return Convert.ChangeType(rangeAttribute.RemapMinMax(analog), targetType, CultureInfo.InvariantCulture);
+			if (RangeAttribute != null)
+				return Convert.ChangeType(RangeAttribute.RemapMinMax(analog), targetType, CultureInfo.InvariantCulture);
 
 			return RangeAttribute.Clamp(analog, targetType);
-		}
-
-		private ushort GetValueAsAnalog()
-		{
-			RangeAttribute rangeAttribute =
-				GetTelemetry.PropertyInfo
-				            .GetCustomAttributes<RangeAttribute>()
-				            .FirstOrDefault();
-
-			if (rangeAttribute != null)
-				return Convert.ToUInt16(rangeAttribute.ClampMinMaxThenRemap(GetTelemetry.Value, typeof(ushort)));
-
-			// If decimal map dec min-max to ushort min-max
-			Type propertyType = GetTelemetry.PropertyInfo.PropertyType;
-			if (propertyType.IsDecimalNumeric())
-				return Convert.ToUInt16(RangeAttribute.Remap(GetTelemetry.Value, typeof(ushort)));
-
-			// Integral types are clamped
-			return Convert.ToUInt16(RangeAttribute.Clamp(GetTelemetry.Value, typeof(ushort)));
 		}
 
 		#endregion

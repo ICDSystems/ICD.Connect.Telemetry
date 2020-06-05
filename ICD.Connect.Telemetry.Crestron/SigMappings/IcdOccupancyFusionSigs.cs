@@ -12,8 +12,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		private static readonly FusionSigMapping s_OccupancyState =
 			new FusionSigMapping
 			{
-				TelemetryGetName = OccupancyTelemetryNames.OCCUPANCY_STATE,
-				TelemetrySetName = string.Empty,
+				TelemetryName = OccupancyTelemetryNames.OCCUPANCY_STATE,
 				FusionSigName = "Occupied",
 				Sig = 0,
 				SigType = eSigType.Digital,

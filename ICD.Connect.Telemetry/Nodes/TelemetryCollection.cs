@@ -29,10 +29,22 @@ namespace ICD.Connect.Telemetry.Nodes
 			m_Children.AddRange(children, c => c.Name);
 		}
 
-		[CanBeNull]
+		/// <summary>
+		/// Gets the child node with the given name.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		[NotNull]
 		public ITelemetryNode GetChildByName([NotNull] string name)
 		{
-			return m_Children.GetDefault(name);
+			if (name == null)
+				throw new ArgumentNullException("name");
+
+			ITelemetryNode output = m_Children[name];
+			if (output == null)
+				throw new InvalidProgramException("Child is null");
+
+			return output;
 		}
 
 		#region ICollection

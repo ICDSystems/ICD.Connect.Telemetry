@@ -2,8 +2,6 @@
 {
 	public interface ITelemetryMapping
 	{
-		string TelemetrySetName { get; set; }
-		string TelemetryGetName { get; set; }
-		eTelemetryIoMask IoMask { get; }
+		string TelemetryName { get; }
 	}
 }

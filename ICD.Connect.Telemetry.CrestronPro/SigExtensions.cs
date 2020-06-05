@@ -1,4 +1,4 @@
-﻿using ICD.Connect.Telemetry.Mappings;
+﻿using ICD.Connect.Telemetry.Nodes;
 #if SIMPLSHARP
 using System;
 using Crestron.SimplSharpPro;

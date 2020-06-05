@@ -16,24 +16,21 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		{
 			new FusionSigMapping
 			{
-				TelemetryGetName = DspTelemetryNames.CALL_ACTIVE,
-				TelemetrySetName = string.Empty,
+				TelemetryName = DspTelemetryNames.CALL_ACTIVE,
 				FusionSigName = "ATC Call Active",
 				Sig = 301,
 				SigType = eSigType.Digital
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = DspTelemetryNames.ACTIVE_FAULT_STATE,
-				TelemetrySetName = string.Empty,
+				TelemetryName = DspTelemetryNames.ACTIVE_FAULT_STATE,
 				FusionSigName = "Active Faults",
 				Sig = 300,
 				SigType = eSigType.Digital
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = DspTelemetryNames.ACTIVE_FAULT_MESSAGE,
-				TelemetrySetName =  string.Empty,
+				TelemetryName = DspTelemetryNames.ACTIVE_FAULT_MESSAGE,
 				FusionSigName = "Active Fault Message",
 				Sig = 300, //todo: Verify Join Number is OK!
 				SigType =  eSigType.Serial
@@ -49,8 +46,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		{
 			new FusionSigMultiMapping
 			{
-				TelemetryGetName = ControlTelemetryNames.NAME,
-				TelemetrySetName = string.Empty,
+				TelemetryName = ControlTelemetryNames.NAME,
 				FusionSigName = "Volume Control {0} Name",
 				FirstSig = 10000,
 				LastSig = 10999,
@@ -59,8 +55,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			},
 			new FusionSigMultiMapping
 			{
-				TelemetryGetName = VolumeTelemetryNames.VOLUME_CONTROL_PERCENT,
-				TelemetrySetName = VolumeTelemetryNames.VOLUME_CONTROL_PERCENT_COMMAND,
+				TelemetryName = VolumeTelemetryNames.VOLUME_CONTROL_PERCENT,
 				FusionSigName = "Volume Control {0} Level",
 				FirstSig = 10000,
 				LastSig = 10999,
@@ -69,8 +64,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			},
 			new FusionSigMultiMapping
 			{
-				TelemetryGetName = VolumeTelemetryNames.VOLUME_CONTROL_IS_MUTED,
-				TelemetrySetName = VolumeTelemetryNames.VOLUME_CONTROL_MUTE_COMMAND,
+				TelemetryName = VolumeTelemetryNames.VOLUME_CONTROL_IS_MUTED,
 				FusionSigName = "Volume Control {0} Mute",
 				FirstSig = 10000,
 				LastSig = 10999,

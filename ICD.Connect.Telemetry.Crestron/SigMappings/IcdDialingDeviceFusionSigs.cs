@@ -13,56 +13,49 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		{
 			new FusionSigMapping
 			{
-				TelemetryGetName = DialingTelemetryNames.CALL_IN_PROGRESS,
-				TelemetrySetName = string.Empty,
+				TelemetryName = DialingTelemetryNames.CALL_IN_PROGRESS,
 				FusionSigName = "Call In Progress",
 				Sig = 201,
 				SigType = eSigType.Digital
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = string.Empty,
-				TelemetrySetName = DialingTelemetryNames.END_CALL_COMMAND,
+				TelemetryName = DialingTelemetryNames.END_CALL_COMMAND,
 				FusionSigName = "End Call",
 				Sig = 203,
 				SigType = eSigType.Digital
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = DialingTelemetryNames.SIP_ENABLED,
-				TelemetrySetName = string.Empty,
+				TelemetryName = DialingTelemetryNames.SIP_ENABLED,
 				FusionSigName = "Sip Enabled",
 				Sig = 204,
 				SigType = eSigType.Digital
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = DialingTelemetryNames.CALL_TYPE,
-				TelemetrySetName = string.Empty,
+				TelemetryName = DialingTelemetryNames.CALL_TYPE,
 				FusionSigName = "Call Type",
 				Sig = 201,
 				SigType = eSigType.Serial
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = DialingTelemetryNames.CALL_NUMBER,
-				TelemetrySetName = string.Empty,
+				TelemetryName = DialingTelemetryNames.CALL_NUMBER,
 				FusionSigName = "Call Number",
 				Sig = 202,
 				SigType = eSigType.Serial
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = DialingTelemetryNames.SIP_LOCAL_NAME,
-				TelemetrySetName = string.Empty,
+				TelemetryName = DialingTelemetryNames.SIP_LOCAL_NAME,
 				FusionSigName = "Sip Name",
 				Sig = 206,
 				SigType = eSigType.Serial
 			},
 			new FusionSigMapping
 			{
-				TelemetryGetName = DialingTelemetryNames.SIP_STATUS,
-				TelemetrySetName = string.Empty,
+				TelemetryName = DialingTelemetryNames.SIP_STATUS,
 				FusionSigName = "Sip Registration Status",
 				Sig = 210,
 				SigType = eSigType.Serial

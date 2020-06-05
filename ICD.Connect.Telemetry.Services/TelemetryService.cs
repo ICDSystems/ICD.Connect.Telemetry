@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+#if SIMPLSHARP
+using Crestron.SimplSharp.Reflection;
+#else
+using System.Reflection;
+#endif
 using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
@@ -28,7 +33,7 @@ namespace ICD.Connect.Telemetry.Services
 			m_TelemetryProvidersSection = new SafeCriticalSection();
 		}
 
-		#region Methods
+#region Methods
 
 		/// <summary>
 		/// Lazy-loads telemetry for the core and returns the root telemetry.
@@ -50,9 +55,9 @@ namespace ICD.Connect.Telemetry.Services
 			return m_TelemetryProvidersSection.Execute(() => m_TelemetryProviders[provider]);
 		}
 
-		#endregion
+#endregion
 
-		#region Private Methods
+#region Private Methods
 
 		/// <summary>
 		/// Lazy-loads telemetry recursively for a given provider. 
@@ -105,48 +110,73 @@ namespace ICD.Connect.Telemetry.Services
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 
-			foreach (PropertyTelemetryNode node in InstantiatePropertyTelemetry(instance))
-				yield return node;
+			foreach (TelemetryLeaf leaf in InstantiateLeafTelemetry(instance))
+				yield return leaf;
 
-			foreach (MethodTelemetryNode node in InstantiateMethodTelemetry(instance))
-				yield return node;
-
-			foreach (TelemetryCollection node in InstantiateCollectionTelemetry(instance))
-				yield return node;
+			foreach (TelemetryCollection collection in InstantiateCollectionTelemetry(instance))
+				yield return collection;
 
 			foreach (ITelemetryNode node in InstantiateExternalTelemetry(instance))
 				yield return node;
 		}
 
 		/// <summary>
-		/// Generates the property telemetry nodes for the given provider.
+		/// Generates leaf telemetry nodes for the given provider.
 		/// </summary>
 		/// <param name="instance"></param>
+		/// <returns></returns>
 		[NotNull]
-		private IEnumerable<PropertyTelemetryNode> InstantiatePropertyTelemetry([NotNull] ITelemetryProvider instance)
+		private IEnumerable<TelemetryLeaf> InstantiateLeafTelemetry([NotNull] ITelemetryProvider instance)
 		{
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 
-			return
-				PropertyTelemetryAttribute
-					.GetProperties(instance.GetType())
-					.Select(kvp =>
-					{
-						try
-						{
-							return kvp.Value.InstantiateTelemetryItem(instance, kvp.Key);
-						}
-						catch (Exception e)
-						{
-							Logger.Log(eSeverity.Error, e.GetBaseException(),
-							           "Failed to instantiate telemetry node - {0} - {1}",
-							           instance, kvp.Value.Name);
-							return null;
-						}
-					})
-					.Where(n => n != null);
+			// There are a number of different leaf types to account for:
+			// 1 - Property Only static telemetry
+			// 2 - Method Only input telemetry
+			// 3 - Event Only output telemetry
+			// 4 - Event + Property output telemetry
+			// 5 - Event + Property + Method input/output telemetry
+
+			Dictionary<string, KeyValuePair<PropertyInfo, PropertyTelemetryAttribute>> properties =
+				PropertyTelemetryAttribute.GetProperties(instance.GetType())
+				                          .ToDictionary(kvp => kvp.Value.Name);
+
+			Dictionary<string, MethodInfo> methods =
+				MethodTelemetryAttribute.GetMethods(instance.GetType())
+				                        .ToDictionary(kvp => kvp.Value.Name, kvp => kvp.Key);
+
+			Dictionary<string, EventInfo> events =
+				EventTelemetryAttribute.GetEvents(instance.GetType())
+				                       .ToDictionary(kvp => kvp.Value.Name, kvp => kvp.Key);
+
+			// Property attributes point to events and methods, so start with those
+			foreach (KeyValuePair<PropertyInfo, PropertyTelemetryAttribute> kvp in properties.Values)
+			{
+				MethodInfo methodInfo = default(MethodInfo);
+				if (kvp.Value.MethodName != null && !methods.Remove(kvp.Value.MethodName, out methodInfo))
+					Logger.Log(eSeverity.Error,
+					           "Failed to find MethodInfo {0} for PropertyInfo {1} on TelemetryProvider {2}",
+					           kvp.Value.MethodName, kvp.Value.Name, instance);
+
+				EventInfo eventInfo = default(EventInfo);
+				if (kvp.Value.EventName != null && !events.Remove(kvp.Value.EventName, out eventInfo))
+					Logger.Log(eSeverity.Error,
+					           "Failed to find EventInfo {0} for PropertyInfo {1} on TelemetryProvider {2}",
+					           kvp.Value.EventName, kvp.Value.Name, instance);
+
+				yield return new TelemetryLeaf(kvp.Value.Name, instance, kvp.Key, methodInfo, eventInfo);
+			}
+
+			// Loose Methods
+			foreach (MethodInfo methodInfo in methods.Values)
+				yield return new TelemetryLeaf(methodInfo.Name, instance, null, methodInfo, null);
+
+			// Loose Events
+			foreach (EventInfo eventInfo in events.Values)
+				yield return new TelemetryLeaf(eventInfo.Name, instance, null, null, eventInfo);
 		}
+
 
 		/// <summary>
 		/// Generates the collection telemetry nodes for the given provider.
@@ -180,35 +210,6 @@ namespace ICD.Connect.Telemetry.Services
 		}
 
 		/// <summary>
-		/// Generates the method telemetry nodes for the given provider.
-		/// </summary>
-		/// <param name="instance"></param>
-		[NotNull]
-		private IEnumerable<MethodTelemetryNode> InstantiateMethodTelemetry([NotNull] ITelemetryProvider instance)
-		{
-			if (instance == null)
-				throw new ArgumentNullException("instance");
-
-			return
-				MethodTelemetryAttribute
-					.GetMethods(instance.GetType())
-					.Select(kvp =>
-					{
-						try
-						{
-							return kvp.Value.InstantiateTelemetryItem(instance, kvp.Key);
-						}
-						catch (Exception e)
-						{
-							Logger.Log(eSeverity.Error, e.GetBaseException(), "Failed to instantiate method telemetry - {0} - {1}",
-							           instance, kvp.Value.Name);
-							return null;
-						}
-					})
-					.Where(n => n != null);
-		}
-
-		/// <summary>
 		/// Generates the external telemetry nodes for the given provider and adds them to the collection.
 		/// </summary>
 		/// <param name="instance"></param>
@@ -223,6 +224,6 @@ namespace ICD.Connect.Telemetry.Services
 					.SelectMany(e => InstantiateTelemetryNodes(e));
 		}
 
-		#endregion
+#endregion
 	}
 }

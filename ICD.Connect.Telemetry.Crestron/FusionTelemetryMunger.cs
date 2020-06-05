@@ -158,8 +158,8 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (nodes == null || !nodes.Any())
 				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, nodes not found.");
 
-			PropertyTelemetryNode node =
-				nodes.OfType<PropertyTelemetryNode>()
+			TelemetryLeaf node =
+				nodes.OfType<TelemetryLeaf>()
 				     .FirstOrDefault(n => n.PropertyInfo.PropertyType == typeof(eOccupancyState));
 			if (node == null)
 				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, matching node not found.");
@@ -225,7 +225,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		private static IFusionSigMapping GetMapping(ITelemetryNode node)
 		{
 			return s_Mappings/*.Where(kvp => node.Provider.GetType().IsAssignableTo(kvp.Key))*/
-				.FirstOrDefault(m => (node.Name == m.TelemetryGetName || node.Name == m.TelemetrySetName) &&
+				.FirstOrDefault(m => node.Name == m.TelemetryName &&
 				                     (m.TelemetryProviderTypes == null ||
 				                      node.Provider.GetType().GetAllTypes().Any(t => m.TelemetryProviderTypes.Contains(t))));
 		}
@@ -247,7 +247,6 @@ namespace ICD.Connect.Telemetry.Crestron
 					yield return child;
 			}
 
-
 			foreach (var nodeMappingPair in nodes.Where(n => !n.GetType().IsAssignableTo(typeof(TelemetryCollection)))
 												 .Select(n => new {Node = n, Mapping = GetMapping(n)})
 												 .Where(a => a.Mapping != null)
@@ -257,34 +256,6 @@ namespace ICD.Connect.Telemetry.Crestron
 				if (output != null)
 					yield return output;
 			}
-		}
-
-		[CanBeNull]
-		private FusionTelemetryBinding Bind(ITelemetryNode node, IFusionSigMapping mapping, uint assetId, RangeMappingUsageTracker mappingUsage)
-		{
-			FusionSigMapping singleMapping = mapping as FusionSigMapping;
-			if (singleMapping != null)
-			{
-				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, node.Provider, singleMapping, assetId);
-				return binding;
-			}
-
-			FusionSigMultiMapping multiMapping = mapping as FusionSigMultiMapping;
-			if (multiMapping != null)
-			{
-				FusionSigMapping tempMapping = new FusionSigMapping
-				{
-					FusionSigName = string.Format(multiMapping.FusionSigName, mappingUsage.GetCurrentOffset(multiMapping) + 1),
-					Sig = mappingUsage.GetNextSig(multiMapping),
-					SigType = multiMapping.SigType,
-					TelemetryGetName = multiMapping.TelemetryGetName,
-					TelemetrySetName = multiMapping.TelemetrySetName
-				};
-				FusionTelemetryBinding binding = FusionTelemetryBinding.Bind(m_FusionRoom, node.Provider, tempMapping, assetId);
-				return binding;
-			}
-
-			return null;
 		}
 
 		private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
@@ -310,18 +281,18 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (args.Powered)
 			{
 				FusionTelemetryBinding binding =
-					bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetrySetName == DeviceTelemetryNames.POWER_ON);
+					bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetryName == DeviceTelemetryNames.POWER_ON);
 
 				if (binding != null)
-					binding.SetTelemetry.Invoke();
+					binding.Telemetry.Invoke();
 			}
 			else
 			{
 				FusionTelemetryBinding binding =
-					bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetrySetName == DeviceTelemetryNames.POWER_OFF);
+					bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetryName == DeviceTelemetryNames.POWER_OFF);
 
 				if (binding != null)
-					binding.SetTelemetry.Invoke();
+					binding.Telemetry.Invoke();
 			}
 		}
 

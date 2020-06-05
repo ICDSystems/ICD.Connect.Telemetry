@@ -4,7 +4,7 @@ using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
-using ICD.Connect.Telemetry.Mappings;
+using ICD.Connect.Telemetry.Nodes;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;

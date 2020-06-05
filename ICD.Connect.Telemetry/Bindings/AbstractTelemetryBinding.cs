@@ -1,32 +1,32 @@
 using System;
 using ICD.Common.Properties;
+using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Bindings
 {
 	public abstract class AbstractTelemetryBinding : IDisposable
 	{
-		[CanBeNull] private readonly PropertyTelemetryNode m_GetTelemetry;
-		[CanBeNull] private readonly MethodTelemetryNode m_SetTelemetry;
+		[NotNull] private readonly TelemetryLeaf m_Telemetry;
 
-		[CanBeNull]
-		public PropertyTelemetryNode GetTelemetry { get { return m_GetTelemetry; } }
-
-		[CanBeNull]
-		public MethodTelemetryNode SetTelemetry { get { return m_SetTelemetry; } }
+		/// <summary>
+		/// Gets the wrapped telemetry leaf.
+		/// </summary>
+		[NotNull]
+		public TelemetryLeaf Telemetry { get { return m_Telemetry; } }
 
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="getTelemetry"></param>
-		/// <param name="setTelemetry"></param>
-		protected AbstractTelemetryBinding([CanBeNull] PropertyTelemetryNode getTelemetry, [CanBeNull] MethodTelemetryNode setTelemetry)
+		/// <param name="telemetry"></param>
+		protected AbstractTelemetryBinding([NotNull] TelemetryLeaf telemetry)
 		{
-			m_GetTelemetry = getTelemetry;
-			m_SetTelemetry = setTelemetry;
+			if (telemetry == null)
+				throw new ArgumentNullException("telemetry");
 
-			if (m_GetTelemetry != null)
-				m_GetTelemetry.OnValueChanged += UpdateableOnValueChanged;
+			m_Telemetry = telemetry;
+
+			m_Telemetry.OnValueRaised += UpdateableOnValueRaised;
 		}
 
 		/// <summary>
@@ -34,8 +34,7 @@ namespace ICD.Connect.Telemetry.Bindings
 		/// </summary>
 		public virtual void Dispose()
 		{
-			if (m_GetTelemetry != null)
-				m_GetTelemetry.OnValueChanged -= UpdateableOnValueChanged;
+			m_Telemetry.OnValueRaised -= UpdateableOnValueRaised;
 		}
 
 		/// <summary>
@@ -43,37 +42,24 @@ namespace ICD.Connect.Telemetry.Bindings
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="eventArgs"></param>
-		private void UpdateableOnValueChanged(object sender, EventArgs eventArgs)
+		private void UpdateableOnValueRaised(object sender, GenericEventArgs<object> eventArgs)
 		{
-			SendValueToService();
+			SendValueToService(eventArgs.Data);
 		}
 
 		/// <summary>
-		/// Sends the wrapped property value to the telemetry service.
-		/// </summary>
-		protected abstract void SendValueToService();
-
-		/// <summary>
-		/// Handles a simple method call from the service.
-		/// </summary>
-		protected void HandleValueFromService()
-		{
-			if (SetTelemetry == null || SetTelemetry.ParameterInfo != null)
-				throw new NotSupportedException();
-
-			SetTelemetry.Invoke();
-		}
-
-		/// <summary>
-		/// Handles a method call with parameter from the service.
+		/// Sends the value to the telemetry service.
 		/// </summary>
 		/// <param name="value"></param>
-		protected void HandleValueFromService(object value)
-		{
-			if (SetTelemetry == null || SetTelemetry.ParameterInfo == null)
-				throw new NotSupportedException();
+		protected abstract void SendValueToService(object value);
 
-			SetTelemetry.Invoke(value);
+		/// <summary>
+		/// Handles a method call with parameters from the service.
+		/// </summary>
+		/// <param name="values"></param>
+		protected void HandleValuesFromService(object[] values)
+		{
+			Telemetry.Invoke(values);
 		}
 	}
 }

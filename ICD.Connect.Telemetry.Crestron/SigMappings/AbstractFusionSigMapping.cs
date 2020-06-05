@@ -24,7 +24,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		public IEnumerable<Type> TelemetryProviderTypes { get; set; }
 
 		public eSigType SigType { get; set; }
-		public IEnumerable<Type> TargetAssetTypes { get; set; }
 
 		/// <summary>
 		/// Constructor.
