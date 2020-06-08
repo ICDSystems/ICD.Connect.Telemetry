@@ -1,7 +1,7 @@
 ﻿#if SIMPLSHARP
 using Crestron.SimplSharpPro.Fusion;
-using ICD.Connect.Misc.Occupancy;
 using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 
 namespace ICD.Connect.Telemetry.CrestronPro.Assets
 {

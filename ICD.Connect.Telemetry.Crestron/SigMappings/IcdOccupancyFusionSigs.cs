@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
-using ICD.Connect.Misc.Occupancy;
+using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Crestron.Assets;
 
