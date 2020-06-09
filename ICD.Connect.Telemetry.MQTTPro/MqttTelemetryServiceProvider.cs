@@ -73,9 +73,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			m_Client = new IcdMqttClient
 			{
-				Name = GetType().Name,
-				DebugRx = eDebugMode.Ascii,
-				DebugTx = eDebugMode.Ascii
+				Name = GetType().Name
 			};
 			Subscribe(m_Client);
 
