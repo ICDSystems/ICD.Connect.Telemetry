@@ -7,7 +7,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 	[KrangSettings("MqttTelemetryServiceProvider", typeof(MqttTelemetryServiceProvider))]
 	public sealed class MqttTelemetryServiceProviderSettings : AbstractTelemetryServiceProviderSettings
 	{
-		private const string ELEMENT_ENABLED = "Enabled";
 		private const string ELEMENT_PATH_PREFIX = "PathPrefix";
 		private const string ELEMENT_HOSTNAME = "Hostname";
 		private const string ELEMENT_PORT = "Port";
@@ -15,11 +14,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private const string ELEMENT_PASSWORD = "Password";
 		private const string ELEMENT_SECURE = "Secure";
 		private const string ELEMENT_CA_CERT_PATH = "CaCertPath";
-
-		/// <summary>
-		/// Gets/sets the enabled state of the core MQTT telemetry.
-		/// </summary>
-		public bool Enabled { get; set; }
 
 		/// <summary>
 		/// Gets/sets the path prefix for the core MQTT telemetry topics.
@@ -72,7 +66,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			base.WriteElements(writer);
 
-			writer.WriteElementString(ELEMENT_ENABLED, IcdXmlConvert.ToString(Enabled));
 			writer.WriteElementString(ELEMENT_PATH_PREFIX, PathPrefix);
 			writer.WriteElementString(ELEMENT_HOSTNAME, Hostname);
 			writer.WriteElementString(ELEMENT_PORT, IcdXmlConvert.ToString(Port));
@@ -90,7 +83,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			base.ParseXml(xml);
 
-			Enabled = XmlUtils.TryReadChildElementContentAsBoolean(xml, ELEMENT_ENABLED) ?? false;
 			PathPrefix = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PATH_PREFIX);
 			Hostname = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_HOSTNAME);
 			Port = XmlUtils.TryReadChildElementContentAsUShort(xml, ELEMENT_PORT) ?? MqttUtils.DEFAULT_PORT;

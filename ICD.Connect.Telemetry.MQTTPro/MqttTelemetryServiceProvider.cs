@@ -14,7 +14,6 @@ using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using ICD.Connect.Protocol.NetworkPro.Ports.Mqtt;
-using ICD.Connect.Protocol.Ports;
 using ICD.Connect.Settings;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Services;
@@ -37,6 +36,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 		private readonly IcdMqttClient m_Client;
+
+		private bool m_CoreSettingsApplied;
 
 		#region Properties
 
@@ -79,6 +80,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			m_ConnectionStateManager = new ConnectionStateManager(this);
 			m_ConnectionStateManager.SetPort(m_Client, false);
+
+			IcdEnvironment.OnProgramInitializationComplete += IcdEnvironmentOnProgramInitializationComplete;
+			Core.OnSettingsApplied += CoreOnSettingsApplied;
 		}
 
 		/// <summary>
@@ -102,9 +106,11 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			Stop();
 
-			GenerateBindingsForSystem();
-
+			GenerateLastWillAndTestament();
 			m_ConnectionStateManager.Start();
+
+			// Build the telemetry asynchronously - it's heavy on startup
+			ThreadingUtils.SafeInvoke(GenerateBindingsForSystem);
 		}
 
 		/// <summary>
@@ -329,18 +335,22 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		#region Binding
 
 		/// <summary>
-		/// Creates the bindings from the system telemetry to the client recursively.
+		/// Sets the LWT properties on the MQTT client.
 		/// </summary>
-		private void GenerateBindingsForSystem()
+		private void GenerateLastWillAndTestament()
 		{
-			// Create the Last Will And Testament
 			m_Client.Will.Topic = BuildProgramToServiceTopic("IsOnline");
 			m_Client.Will.Message = JsonConvert.SerializeObject(new PublishMessage {Data = false}, Formatting.None,
 			                                                    JsonUtils.CommonSettings);
 			m_Client.Will.QosLevel = MqttUtils.QOS_LEVEL_EXACTLY_ONCE;
 			m_Client.Will.Flag = true;
+		}
 
-			// Create system bindings
+		/// <summary>
+		/// Creates the bindings from the system telemetry to the client recursively.
+		/// </summary>
+		private void GenerateBindingsForSystem()
+		{
 			TelemetryCollection systemTelemetry = TelemetryService.InitializeCoreTelemetry();
 			GenerateTelemetryRecursive(systemTelemetry, new Stack<string>());
 		}
@@ -409,7 +419,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			string programToService = BuildProgramToServiceTopic(path);
 			string serviceToProgram = BuildServiceToProgramTopic(path);
-			
+
 			m_BindingsSection.Enter();
 
 			try
@@ -523,6 +533,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			base.ApplySettingsFinal(settings, factory);
 
+			m_CoreSettingsApplied = false;
+
 			PathPrefix = settings.PathPrefix;
 
 			m_Client.Hostname = settings.Hostname;
@@ -534,11 +546,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			// Client ID is the System ID
 			m_Client.ClientId = Core.Uuid.ToString();
-
-			if (settings.Enabled)
-				Start();
-			else
-				Stop();
 		}
 
 		/// <summary>
@@ -547,8 +554,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		protected override void ClearSettingsFinal()
 		{
 			base.ClearSettingsFinal();
-
-			Stop();
 
 			PathPrefix = null;
 			m_Client.ClearSettings();
@@ -562,7 +567,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			base.CopySettingsFinal(settings);
 
-			settings.Enabled = IsRunning;
 			settings.PathPrefix = PathPrefix;
 			settings.Hostname = Port.Hostname;
 			settings.Port = Port.Port;
@@ -570,6 +574,38 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			settings.Password = Port.Password;
 			settings.Secure = Port.Secure;
 			settings.CaCertPath = Port.CaCertPath;
+		}
+
+		/// <summary>
+		/// Called when the Core finishes applying settings.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
+		private void CoreOnSettingsApplied(object sender, EventArgs eventArgs)
+		{
+			m_CoreSettingsApplied = true;
+
+			StartConnectionStateManagerIfReady();
+		}
+
+		/// <summary>
+		/// Called when the application initialization state changes.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="eventArgs"></param>
+		private void IcdEnvironmentOnProgramInitializationComplete(object sender, EventArgs eventArgs)
+		{
+			StartConnectionStateManagerIfReady();
+		}
+
+		/// <summary>
+		/// Called when the application finishes initializing or the core finishes loading.
+		/// Starts the connection state manager if both have started.
+		/// </summary>
+		private void StartConnectionStateManagerIfReady()
+		{
+			if (m_CoreSettingsApplied && IcdEnvironment.ProgramIsInitialized)
+				m_ConnectionStateManager.Start();
 		}
 
 		#endregion
