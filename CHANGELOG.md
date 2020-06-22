@@ -6,8 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [6.0.0] - 2020-06-22
+### Added
+ - Added telemetry service
+ - Added MQTT telemetry service provider
+ - Added support for event-only telemetry
+ - Added support for recursive telemetry under external telemetry providers
+
 ### Changed
  - Using new logging context
+ - Substantial simplification of telemetry attributes and nodes
+ - Fixed a bug where originator telemetry was not being lazy-loaded correctly
 
 ## [5.4.0] - 2020-03-20
 ### Added
