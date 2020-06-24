@@ -605,7 +605,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private void StartConnectionStateManagerIfReady()
 		{
 			if (m_CoreSettingsApplied && IcdEnvironment.ProgramIsInitialized)
-				m_ConnectionStateManager.Start();
+				Start();
 		}
 
 		#endregion
