@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+ - FusionBindings properly format TimeSpans to expected Fusion format
+
 ## [6.0.0] - 2020-06-22
 ### Added
  - Added telemetry service

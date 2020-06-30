@@ -230,7 +230,19 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <param name="value"></param>
 		private void SendSerialSigToService(object value)
 		{
-			string serial = value == null ? string.Empty : value.ToString();
+			string serial;
+
+			try
+			{
+				serial = GetValueAsSerial(value);
+			}
+			catch (Exception e)
+			{
+				ServiceProvider.GetService<ILoggerService>()
+							   .AddEntry(eSeverity.Error, "{0} - Failed to convert value to analog - {1}", this, e.Message);
+				return;
+			}
+
 			((IFusionStaticAsset)Asset).UpdateSerialSig(Mapping.Sig, serial);
 		}
 
@@ -250,6 +262,30 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			// Integral types are clamped
 			return Convert.ToUInt16(RangeAttribute.Clamp(value, typeof(ushort)));
+		}
+
+		/// <summary>
+		/// Converts the given object to a serial for Fusion.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		private static string GetValueAsSerial(object value)
+		{
+			if (value == null)
+				return string.Empty;
+
+			if (value is TimeSpan)
+			{
+				TimeSpan timeSpan = (TimeSpan)value;
+				return string.Format("{0} days {1:D2}:{2:D2}:{3:D2}.{4:D3}",
+									 timeSpan.Days,
+									 timeSpan.Hours,
+									 timeSpan.Minutes,
+									 timeSpan.Seconds,
+									 timeSpan.Milliseconds);
+			}
+
+			return value.ToString();
 		}
 
 		#endregion
