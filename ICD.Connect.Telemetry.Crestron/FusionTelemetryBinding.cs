@@ -8,7 +8,6 @@ using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
-using ICD.Connect.Misc.Occupancy;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Bindings;
@@ -283,6 +282,12 @@ namespace ICD.Connect.Telemetry.Crestron
 									 timeSpan.Minutes,
 									 timeSpan.Seconds,
 									 timeSpan.Milliseconds);
+			}
+
+			if (value is DateTime)
+			{
+				DateTime dateTime = (DateTime)value;
+				return dateTime.ToString("yyyy-MM-ddTHH:mm:ssZ");
 			}
 
 			return value.ToString();
