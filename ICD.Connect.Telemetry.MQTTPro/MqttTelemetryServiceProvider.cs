@@ -18,6 +18,11 @@ using ICD.Connect.Settings;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Services;
 using Newtonsoft.Json;
+#if SIMPLSHARP
+using Crestron.SimplSharpPro.CrestronThread;
+#else
+using System.Threading;
+#endif
 
 namespace ICD.Connect.Telemetry.MQTTPro
 {
@@ -38,6 +43,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private readonly IcdMqttClient m_Client;
 
 		private bool m_CoreSettingsApplied;
+		private Thread m_StartHandle;
 
 		#region Properties
 
@@ -110,7 +116,16 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_ConnectionStateManager.Start();
 
 			// Build the telemetry asynchronously - it's heavy on startup
-			ThreadingUtils.SafeInvoke(GenerateBindingsForSystem);
+#if SIMPLSHARP
+			m_StartHandle = new Thread(o =>
+			                           {
+				                           GenerateBindingsForSystem();
+				                           return null;
+			                           }, null) {Priority = Thread.eThreadPriority.LowestPriority};
+#else
+			m_StartHandle = new Thread(GenerateBindingsForSystem) { Priority = ThreadPriority.Lowest };
+			m_StartHandle.Start();
+#endif
 		}
 
 		/// <summary>
@@ -118,6 +133,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		public void Stop()
 		{
+			if (m_StartHandle != null)
+				m_StartHandle.Abort();
+
 			m_ConnectionStateManager.Stop();
 
 			UnsubscribeAll();
