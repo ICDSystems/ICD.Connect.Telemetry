@@ -49,7 +49,7 @@ namespace ICD.Connect.Telemetry.Nodes
 					.GetMethod("EventCallback", BindingFlags.NonPublic | BindingFlags.Instance);
 
 				if (output == null)
-					throw new InvalidProgramException();
+					throw new InvalidProgramException("Failed to find MethodInfo with name EventCallback");
 
 				return output;
 			}
@@ -212,6 +212,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// Called when the provider event is raised.
 		/// </summary>
 		[UsedImplicitly]
+		[System.Reflection.Obfuscation(Exclude = true)]
 		private void EventCallback(object sender, EventArgs args)
 		{
 			// Use the property to get the current value
