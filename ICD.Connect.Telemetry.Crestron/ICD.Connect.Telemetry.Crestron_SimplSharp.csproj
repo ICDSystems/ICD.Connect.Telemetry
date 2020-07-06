@@ -72,7 +72,7 @@
     <Compile Include="Assets\FusionAssetData.cs" />
     <Compile Include="Assets\IFusionAsset.cs" />
     <Compile Include="Assets\IFusionAssetDataCollection.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Assets\IFusionOccupancySensorAsset.cs" />
     <Compile Include="Assets\IFusionRemoteOccupancySensorAsset.cs" />
     <Compile Include="Assets\IFusionStaticAsset.cs" />

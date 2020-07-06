@@ -80,7 +80,7 @@
     <Compile Include="MqttTelemetryBinding.cs" />
     <Compile Include="MqttTelemetryServiceProviderSettings.cs" />
     <Compile Include="MqttUtils.cs" />
-    <None Include="ObfuscationSettings.cs" />
+    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PublishMessage.cs" />
     <Compile Include="TelemetryMetadata.cs" />
