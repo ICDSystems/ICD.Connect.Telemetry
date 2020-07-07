@@ -113,6 +113,9 @@ namespace ICD.Connect.Telemetry.Services
 			foreach (TelemetryLeaf leaf in InstantiateLeafTelemetry(instance))
 				yield return leaf;
 
+			foreach (ITelemetryNode node in InstantiateNodeTelemetry(instance))
+				yield return node;
+
 			foreach (TelemetryCollection collection in InstantiateCollectionTelemetry(instance))
 				yield return collection;
 
@@ -177,6 +180,34 @@ namespace ICD.Connect.Telemetry.Services
 				yield return new TelemetryLeaf(eventInfo.Name, instance, null, null, eventInfo);
 		}
 
+		/// <summary>
+		/// Generates the child telemetry nodes for the given provider.
+		/// </summary>
+		/// <param name="instance"></param>
+		[NotNull]
+		private IEnumerable<ITelemetryNode> InstantiateNodeTelemetry([NotNull] ITelemetryProvider instance)
+		{
+			if (instance == null)
+				throw new ArgumentNullException("instance");
+
+			return
+				NodeTelemetryAttribute
+					.GetProperties(instance.GetType())
+					.Select(kvp =>
+					{
+						try
+						{
+							return kvp.Value.InstantiateTelemetryNode(instance, kvp.Key, LazyLoadTelemetry);
+						}
+						catch (Exception e)
+						{
+							Logger.Log(eSeverity.Error, e.GetBaseException(), "Failed to instantiate node telemetry - {0} - {1}",
+									   instance, kvp.Value.Name);
+							return null;
+						}
+					})
+					.Where(n => n != null);
+		}
 
 		/// <summary>
 		/// Generates the collection telemetry nodes for the given provider.
