@@ -12,6 +12,7 @@ using ICD.Common.Utils.Extensions;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
+	[MeansImplicitUse]
 	[AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
 	public sealed class TelemetryCollectionIdentityAttribute : AbstractIcdAttribute
 	{
