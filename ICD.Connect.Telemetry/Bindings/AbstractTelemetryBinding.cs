@@ -26,7 +26,7 @@ namespace ICD.Connect.Telemetry.Bindings
 
 			m_Telemetry = telemetry;
 
-			m_Telemetry.OnValueRaised += UpdateableOnValueRaised;
+			m_Telemetry.OnValueRaised += TelemetryOnValueRaised;
 		}
 
 		/// <summary>
@@ -34,7 +34,18 @@ namespace ICD.Connect.Telemetry.Bindings
 		/// </summary>
 		public virtual void Dispose()
 		{
-			m_Telemetry.OnValueRaised -= UpdateableOnValueRaised;
+			m_Telemetry.OnValueRaised -= TelemetryOnValueRaised;
+		}
+
+		/// <summary>
+		/// Instructs the telemetry provider to update its state and sends values to the service.
+		/// </summary>
+		public virtual void Initialize()
+		{
+			m_Telemetry.Initialize();
+
+			if (Telemetry.PropertyInfo != null)
+				SendValueToService(Telemetry.Value);
 		}
 
 		/// <summary>
@@ -42,7 +53,7 @@ namespace ICD.Connect.Telemetry.Bindings
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="eventArgs"></param>
-		private void UpdateableOnValueRaised(object sender, GenericEventArgs<object> eventArgs)
+		private void TelemetryOnValueRaised(object sender, GenericEventArgs<object> eventArgs)
 		{
 			SendValueToService(eventArgs.Data);
 		}

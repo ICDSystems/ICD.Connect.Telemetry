@@ -79,9 +79,6 @@ namespace ICD.Connect.Telemetry.Crestron
 					: Telemetry.PropertyInfo
 					           .GetCustomAttributes<RangeAttribute>()
 					           .FirstOrDefault();
-
-			if (telemetry.PropertyInfo != null)
-				SendValueToService(telemetry.Value);
 		}
 
 		/// <summary>

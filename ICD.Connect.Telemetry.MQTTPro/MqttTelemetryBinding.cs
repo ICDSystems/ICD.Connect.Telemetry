@@ -71,14 +71,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_ProgramToServiceTopic = programToServiceTopic;
 			m_ServiceToProgramTopic = serviceToProgramTopic;
 			m_TelemetryServiceProvider = telemetryServiceProvider;
-
-			if (telemetry.MethodInfo != null)
-				SubscribeToService();
-
-			PublishMetadata();
-
-			if (telemetry.PropertyInfo != null)
-				SendValueToService(telemetry.Value);
 		}
 
 		/// <summary>
@@ -90,6 +82,19 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				UnsubscribeFromService();
 
 			base.Dispose();
+		}
+
+		/// <summary>
+		/// Instructs the telemetry provider to update its state and sends values to the service.
+		/// </summary>
+		public override void Initialize()
+		{
+			if (Telemetry.MethodInfo != null)
+				SubscribeToService();
+
+			PublishMetadata();
+
+			base.Initialize();
 		}
 
 		#endregion

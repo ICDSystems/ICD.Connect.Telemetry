@@ -1,4 +1,6 @@
-﻿namespace ICD.Connect.Telemetry.Providers.External
+﻿using ICD.Common.Properties;
+
+namespace ICD.Connect.Telemetry.Providers.External
 {
 	public abstract class AbstractExternalTelemetryProvider<TParent> : AbstractTelemetryProvider, IExternalTelemetryProvider
 		where TParent : ITelemetryProvider
@@ -8,6 +10,7 @@
 		/// <summary>
 		/// Gets the parent telemetry provider.
 		/// </summary>
+		[CanBeNull]
 		protected TParent Parent { get { return m_Parent; } }
 
 		#region Methods
@@ -30,6 +33,8 @@
 			Unsubscribe(m_Parent);
 			m_Parent = parent;
 			Subscribe(m_Parent);
+
+			InitializeTelemetry();
 		}
 
 		#endregion

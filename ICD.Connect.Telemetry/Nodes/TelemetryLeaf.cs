@@ -204,6 +204,14 @@ namespace ICD.Connect.Telemetry.Nodes
 			}
 		}
 
+		/// <summary>
+		/// Instructs the telemetry provider to initialize its state.
+		/// </summary>
+		public void Initialize()
+		{
+			Provider.InitializeTelemetry();
+		}
+
 		#endregion
 
 		#region Provider Callbacks

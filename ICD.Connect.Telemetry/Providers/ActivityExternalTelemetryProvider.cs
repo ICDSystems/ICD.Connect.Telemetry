@@ -15,17 +15,16 @@ namespace ICD.Connect.Telemetry.Providers
 		public event EventHandler<GenericEventArgs<Activity>> OnActivity;
 
 		/// <summary>
-		/// Sets the parent telemetry provider that this instance extends.
+		/// Initializes the current telemetry state.
 		/// </summary>
-		/// <param name="parent"></param>
-		protected override void SetParent(IActivityTelemetryProvider parent)
+		public override void InitializeTelemetry()
 		{
-			base.SetParent(parent);
+			base.InitializeTelemetry();
 
-			if (parent == null)
+			if (Parent == null)
 				return;
 
-			foreach (Activity activity in parent.Activities)
+			foreach (Activity activity in Parent.Activities)
 				OnActivity.Raise(this, new GenericEventArgs<Activity>(activity));
 		}
 

@@ -438,6 +438,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			string programToService = BuildProgramToServiceTopic(path);
 			string serviceToProgram = BuildServiceToProgramTopic(path);
 
+			MqttTelemetryBinding binding;
+
 			m_BindingsSection.Enter();
 
 			try
@@ -454,7 +456,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 					return;
 				}
 
-				MqttTelemetryBinding binding = new MqttTelemetryBinding(telemetry, programToService, serviceToProgram, this);
+				binding = new MqttTelemetryBinding(telemetry, programToService, serviceToProgram, this);
 				m_Bindings.Add(programToService, binding);
 				m_Bindings.Add(serviceToProgram, binding);
 			}
@@ -462,6 +464,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			{
 				m_BindingsSection.Leave();
 			}
+
+			binding.Initialize();
 		}
 
 		#endregion

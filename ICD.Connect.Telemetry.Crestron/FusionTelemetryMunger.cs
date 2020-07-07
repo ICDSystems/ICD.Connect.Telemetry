@@ -7,7 +7,6 @@ using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Connect.Devices;
-using ICD.Connect.Misc.Occupancy;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
@@ -170,7 +169,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (binding == null)
 				return;
 
-			AddBindingsToCollection(occAssetInfo.Number, new[] {binding});
+			AddBindingsToCollection(occAssetInfo.Number, binding.Yield());
 		}
 
 		/// <summary>
@@ -184,8 +183,11 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			try
 			{
-				m_BindingsByAsset.GetOrAddNew(staticAssetId, () => new IcdHashSet<FusionTelemetryBinding>())
-				                 .AddRange(bindings);
+				IcdHashSet<FusionTelemetryBinding> collection =
+					m_BindingsByAsset.GetOrAddNew(staticAssetId, () => new IcdHashSet<FusionTelemetryBinding>());
+
+				foreach (FusionTelemetryBinding binding in bindings.Where(collection.Add))
+					binding.Initialize();
 			}
 			finally
 			{
