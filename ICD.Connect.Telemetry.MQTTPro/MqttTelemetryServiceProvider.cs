@@ -326,7 +326,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <returns></returns>
 		private string BuildServiceToProgramTopic([NotNull] Stack<string> path)
 		{
-			return BuildServiceToProgramTopic((IEnumerable<string>)path);
+			return BuildServiceToProgramTopic(path.Reverse());
 		}
 
 		/// <summary>
