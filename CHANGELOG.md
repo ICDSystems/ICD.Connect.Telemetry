@@ -6,8 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [6.1.0] - 2020-07-14
+### Added
+ - Added NodeTelemetryAttribute and telemetry generation for single nested children
+
 ### Changed
  - FusionBindings properly format TimeSpans to expected Fusion format
+ - Fixed a bug where MQTT was not building telemetry on start
+ - Improved stability of MQTT telemetry by generating bindings in a low priority thread
+ - Standardized Fusion DateTime to String formatting
+ - Fixed bug where the TelemetryLeaf event callback method was being obfuscated
+ - Telemetry providers are initialized once bound
+ - Fixed bug where MQTT service to program telemetry topics were backwards
 
 ## [6.0.0] - 2020-06-22
 ### Added
