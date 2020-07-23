@@ -561,6 +561,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			m_Client.Hostname = settings.Hostname;
 			m_Client.Port = settings.Port;
+			m_Client.ProxyHostname = settings.ProxyHostname;
+			m_Client.ProxyPort = settings.ProxyPort;
 			m_Client.Username = settings.Username;
 			m_Client.Password = settings.Password;
 			m_Client.Secure = settings.Secure;
@@ -592,6 +594,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			settings.PathPrefix = PathPrefix;
 			settings.Hostname = Port.Hostname;
 			settings.Port = Port.Port;
+			settings.ProxyHostname = Port.ProxyHostname;
+			settings.ProxyPort = Port.ProxyPort;
 			settings.Username = Port.Username;
 			settings.Password = Port.Password;
 			settings.Secure = Port.Secure;
