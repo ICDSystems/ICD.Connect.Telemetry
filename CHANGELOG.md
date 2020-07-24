@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Added MQTT Proxy configuration items to MQTT telemetry provider
+
 ## [6.1.0] - 2020-07-14
 ### Added
  - Added NodeTelemetryAttribute and telemetry generation for single nested children
