@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Extensions;
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Settings.Originators;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Nodes;
 
@@ -109,6 +113,52 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// Generates an RVI file for the fusion assets.
 		/// </summary>
 		void RebuildRvi();
+	}
+
+	public static class FusionRoomExtensions
+	{
+		/// <summary>
+		/// Returns the next unused asset id for the fusion room.
+		/// </summary>
+		/// <returns></returns>
+		public static uint GetNextAssetId([NotNull] this IFusionRoom extends)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			uint next = extends.GetAssetIds().MaxOrDefault() + 1;
+			return Math.Max(next, 4); // Start at 4
+		}
+
+		/// <summary>
+		/// Generates a deterministic asset instance id for the given device.
+		/// </summary>
+		/// <param name="extends"></param>
+		/// <param name="device"></param>
+		/// <param name="staticAsset"></param>
+		/// <returns></returns>
+		public static string GetInstanceId([NotNull] this IFusionRoom extends, [NotNull] IOriginator device, eAssetType staticAsset)
+		{
+			if (extends == null)
+				throw new ArgumentNullException("extends");
+
+			if (device == null)
+				throw new ArgumentNullException("device");
+
+			int stableHash;
+
+			unchecked
+			{
+				stableHash = 17;
+				stableHash = stableHash * 23 + device.Id;
+				stableHash = stableHash * 23 + device.GetType().Name.GetStableHashCode();
+				stableHash = stableHash * 23 + extends.RoomId.GetStableHashCode();
+				stableHash = stableHash * 23 + (int)staticAsset;
+			}
+
+			Guid seeded = GuidUtils.GenerateSeeded(stableHash);
+			return seeded.ToString();
+		}
 	}
 
 	public sealed class FusionAssetSigUpdatedArgs : EventArgs

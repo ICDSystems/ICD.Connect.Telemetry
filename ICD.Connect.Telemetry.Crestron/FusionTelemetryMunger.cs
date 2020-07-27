@@ -8,6 +8,7 @@ using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Connect.Devices;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
+using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
@@ -16,7 +17,7 @@ using ICD.Connect.Telemetry.Services;
 
 namespace ICD.Connect.Telemetry.Crestron
 {
-	public sealed class FusionTelemetryMunger
+	public sealed class FusionTelemetryMunger : IDisposable
 	{
 		private const int SIG_OFFSET = 49;
 
@@ -40,15 +41,26 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// Constructor.
 		/// </summary>
 		/// <param name="fusionRoom"></param>
-		public FusionTelemetryMunger(IFusionRoom fusionRoom)
+		public FusionTelemetryMunger([NotNull] IFusionRoom fusionRoom)
 		{
+			if (fusionRoom == null)
+				throw new ArgumentNullException("fusionRoom");
+
 			m_BindingsByAsset = new Dictionary<uint, IcdHashSet<FusionTelemetryBinding>>();
 			m_BindingsSection = new SafeCriticalSection();
 
 			m_FusionRoom = fusionRoom;
+			Subscribe(m_FusionRoom);
+		}
 
-			m_FusionRoom.OnFusionAssetSigUpdated += FusionRoomOnFusionAssetSigUpdated;
-			m_FusionRoom.OnFusionAssetPowerStateUpdated += FusionRoomOnFusionAssetPowerStateUpdated;
+		/// <summary>
+		/// Release resources.
+		/// </summary>
+		public void Dispose()
+		{
+			Unsubscribe(m_FusionRoom);
+
+			Clear();
 		}
 
 		#region Methods
@@ -74,23 +86,149 @@ namespace ICD.Connect.Telemetry.Crestron
 		}
 
 		/// <summary>
+		/// Builds the bindings for the given room.
+		/// </summary>
+		/// <param name="room"></param>
+		public void BuildRoom([NotNull] IRoom room)
+		{
+			throw new NotImplementedException();
+		}
+
+		/*
+		private static void AddSigsToFusionRoom(IFusionRoom fusionRoom)
+		{
+			fusionRoom.AddSig(eSigType.Serial, FUSION_SIG_ROOM_PREFIX, "Room Prefix", eTelemetryIoMask.ProgramToService);
+			fusionRoom.AddSig(eSigType.Serial, FUSION_SIG_ROOM_NUMBER, "Room Number", eTelemetryIoMask.ProgramToService);
+			fusionRoom.AddSig(eSigType.Serial, FUSION_SIG_ROOMOS_VERSION, "RoomOS Version", eTelemetryIoMask.ProgramToService);
+			fusionRoom.AddSig(eSigType.Serial, FUSION_SIG_ROOM_ATC_NUMBER, "Room ATC Number", eTelemetryIoMask.ProgramToService);
+		}
+
+		private void SendCurrentRoomValuesToFusion(IFusionRoom fusionRoom)
+		{
+			fusionRoom.SetSystemPower(m_Room != null && m_Room.SystemPower);
+			fusionRoom.SetDisplayPower(m_Room != null && m_Room.DisplayPower);
+			fusionRoom.UpdateSerialSig(FUSION_SIG_ROOM_PREFIX, m_Room != null ? m_Room.Prefix : string.Empty);
+			fusionRoom.UpdateSerialSig(FUSION_SIG_ROOM_NUMBER, m_Room != null ? m_Room.Number : string.Empty);
+			fusionRoom.UpdateSerialSig(FUSION_SIG_ROOMOS_VERSION, m_Room != null ? m_Room.InformationalVersion : string.Empty);
+			fusionRoom.UpdateSerialSig(FUSION_SIG_ROOM_ATC_NUMBER, m_Room != null ? m_Room.PhoneNumber : string.Empty);
+		}*/
+
+				/*
+		#region Room Callbacks
+
+		private void Subscribe(IMetlifeRoom room)
+		{
+			if (room == null)
+				return;
+
+			room.OnDeviceUsageChanged += RoomOnDeviceUsageChanged;
+			room.OnSystemPowerStateChanged += RoomOnSystemPowerStateChanged;
+			room.OnDisplaysPowerStateChanged += RoomOnDisplaysPowerStateChanged;
+			room.OnRoomPrefixChanged += RoomOnRoomPrefixChanged;
+		}
+
+		private void Unsubscribe(IMetlifeRoom room)
+		{
+			if (room == null)
+				return;
+
+			room.OnDeviceUsageChanged -= RoomOnDeviceUsageChanged;
+			room.OnSystemPowerStateChanged -= RoomOnSystemPowerStateChanged;
+			room.OnDisplaysPowerStateChanged -= RoomOnDisplaysPowerStateChanged;
+			room.OnRoomPrefixChanged -= RoomOnRoomPrefixChanged;
+		}
+
+		private void RoomOnDisplaysPowerStateChanged(object sender, BoolEventArgs args)
+		{
+			m_FusionRoom.SetDisplayPower(args.Data);
+		}
+
+		private void RoomOnSystemPowerStateChanged(object sender, BoolEventArgs args)
+		{
+			m_FusionRoom.SetSystemPower(args.Data);
+		}
+
+		private void RoomOnDeviceUsageChanged(object sender, StringEventArgs args)
+		{
+			m_FusionRoom.SendDeviceUsage(args.Data);
+		}
+
+		private void RoomOnRoomPrefixChanged(object sender, StringEventArgs args)
+		{
+			m_FusionRoom.UpdateSerialSig(FUSION_SIG_ROOM_PREFIX, args.Data);
+		}
+
+		#endregion
+
+		#region Fusion Room Callbacks
+
+		private void Subscribe(IFusionRoom fusionRoom)
+		{
+			if (fusionRoom == null)
+				return;
+
+			fusionRoom.OnFusionSystemPowerChangeEvent += FusionRoomOnFusionSystemPowerChangeEvent;
+			fusionRoom.OnFusionDisplayPowerChangeEvent += FusionRoomOnFusionDisplayPowerChangeEvent;
+		}
+
+		private void Unsubscribe(IFusionRoom fusionRoom)
+		{
+			if (fusionRoom == null)
+				return;
+
+			fusionRoom.OnFusionSystemPowerChangeEvent -= FusionRoomOnFusionSystemPowerChangeEvent;
+			fusionRoom.OnFusionDisplayPowerChangeEvent -= FusionRoomOnFusionDisplayPowerChangeEvent;
+		}
+
+		private void FusionRoomOnFusionSystemPowerChangeEvent(object sender, BoolEventArgs args)
+		{
+			if (m_Room == null)
+				return;
+
+			// No System Power On Action
+			if (!args.Data)
+				m_Room.Shutdown();
+		}
+
+		private void FusionRoomOnFusionDisplayPowerChangeEvent(object sender, BoolEventArgs args)
+		{
+			if (m_Room == null)
+				return;
+
+			//No Display Power On Action
+			if (!args.Data)
+				m_Room.PowerOffDisplays();
+		}
+
+		#endregion
+		 */
+
+		/// <summary>
 		/// Adds the devices as assets to fusion and builds the sigs from the telemetry.
 		/// </summary>
 		/// <param name="devices"></param>
 		/// <returns></returns>
-		public void BuildAssets(IEnumerable<IDevice> devices)
+		public void BuildAssets([NotNull] IEnumerable<IDevice> devices)
 		{
-			Clear();
-
 			foreach (IDevice device in devices)
 				BuildAssets(device);
 		}
 
-		public static void RegisterMappingSet(Type type, IEnumerable<IFusionSigMapping> mappings)
+		/// <summary>
+		/// Adds the given mappings to the mappings set.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="mappings"></param>
+		public static void RegisterMappingSet([NotNull] Type type, [NotNull] IEnumerable<IFusionSigMapping> mappings)
 		{
 			s_Mappings.AddRange(mappings);
 		}
 
+		/// <summary>
+		/// Gets the registered mappings.
+		/// </summary>
+		/// <returns></returns>
+		[NotNull]
 		public static IEnumerable<IFusionSigMapping> GetMappings()
 		{
 			return s_Mappings.ToList(s_Mappings.Count);
@@ -122,19 +260,19 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private void GenerateStaticAsset(IDeviceBase device, TelemetryCollection nodes)
 		{
-			uint staticAssetId = GetNextAssetId();
+			uint staticAssetId = m_FusionRoom.GetNextAssetId();
 			AssetInfo staticAssetInfo = new AssetInfo(eAssetType.StaticAsset,
 			                                          staticAssetId,
 			                                          device.Name,
 			                                          device.GetType().Name,
-			                                          AssembleInstanceId(device, eAssetType.StaticAsset));
+			                                          m_FusionRoom.GetInstanceId(device, eAssetType.StaticAsset));
 
 			m_FusionRoom.AddAsset(staticAssetInfo);
 
 			RangeMappingUsageTracker mappingUsage = new RangeMappingUsageTracker();
 			IEnumerable<FusionTelemetryBinding> bindings = BuildBindingsRecursive(nodes, staticAssetId, mappingUsage);
 
-			AddBindingsToCollection(staticAssetId, bindings);
+			AddAssetBindingsToCollection(staticAssetId, bindings);
 		}
 
 		/// <summary>
@@ -144,10 +282,10 @@ namespace ICD.Connect.Telemetry.Crestron
 		private void GenerateOccupancySensorAsset(IDevice device)
 		{
 			AssetInfo occAssetInfo = new AssetInfo(eAssetType.OccupancySensor,
-			                                       GetNextAssetId(),
+			                                       m_FusionRoom.GetNextAssetId(),
 			                                       device.Name,
 			                                       device.GetType().Name,
-			                                       AssembleInstanceId(device, eAssetType.OccupancySensor));
+			                                       m_FusionRoom.GetInstanceId(device, eAssetType.OccupancySensor));
 			m_FusionRoom.AddAsset(occAssetInfo);
 
 			IOccupancySensorControl control = device.Controls.GetControl<IOccupancySensorControl>();
@@ -169,7 +307,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (binding == null)
 				return;
 
-			AddBindingsToCollection(occAssetInfo.Number, binding.Yield());
+			AddAssetBindingsToCollection(occAssetInfo.Number, binding.Yield());
 		}
 
 		/// <summary>
@@ -177,7 +315,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// </summary>
 		/// <param name="staticAssetId"></param>
 		/// <param name="bindings"></param>
-		private void AddBindingsToCollection(uint staticAssetId, IEnumerable<FusionTelemetryBinding> bindings)
+		private void AddAssetBindingsToCollection(uint staticAssetId, IEnumerable<FusionTelemetryBinding> bindings)
 		{
 			m_BindingsSection.Enter();
 
@@ -193,35 +331,6 @@ namespace ICD.Connect.Telemetry.Crestron
 			{
 				m_BindingsSection.Leave();
 			}
-		}
-
-		/// <summary>
-		/// Returns the next unused asset id for the fusion room.
-		/// </summary>
-		/// <returns></returns>
-		private uint GetNextAssetId()
-		{
-			return m_FusionRoom.GetAssetIds().Any() ? m_FusionRoom.GetAssetIds().Max() + 1 : 4;
-		}
-
-		private string AssembleInstanceId(IDeviceBase device, eAssetType staticAsset)
-		{
-			if (device == null)
-				throw new ArgumentNullException("device");
-
-			int stableHash;
-
-			unchecked
-			{
-				stableHash = 17;
-				stableHash = stableHash * 23 + device.Id;
-				stableHash = stableHash * 23 + device.GetType().Name.GetStableHashCode();
-				stableHash = stableHash * 23 + m_FusionRoom.RoomId.GetStableHashCode();
-				stableHash = stableHash * 23 + (int)staticAsset;
-			}
-
-			Guid seeded = GuidUtils.GenerateSeeded(stableHash);
-			return seeded.ToString();
 		}
 
 		[CanBeNull]
@@ -259,6 +368,30 @@ namespace ICD.Connect.Telemetry.Crestron
 				if (output != null)
 					yield return output;
 			}
+		}
+
+		#endregion
+
+		#region FusionRoom Callbacks
+
+		/// <summary>
+		/// Subscribe to the fusion room events.
+		/// </summary>
+		/// <param name="fusionRoom"></param>
+		private void Subscribe(IFusionRoom fusionRoom)
+		{
+			fusionRoom.OnFusionAssetSigUpdated += FusionRoomOnFusionAssetSigUpdated;
+			fusionRoom.OnFusionAssetPowerStateUpdated += FusionRoomOnFusionAssetPowerStateUpdated;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the fusion room events.
+		/// </summary>
+		/// <param name="fusionRoom"></param>
+		private void Unsubscribe(IFusionRoom fusionRoom)
+		{
+			fusionRoom.OnFusionAssetSigUpdated -= FusionRoomOnFusionAssetSigUpdated;
+			fusionRoom.OnFusionAssetPowerStateUpdated -= FusionRoomOnFusionAssetPowerStateUpdated;
 		}
 
 		private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
