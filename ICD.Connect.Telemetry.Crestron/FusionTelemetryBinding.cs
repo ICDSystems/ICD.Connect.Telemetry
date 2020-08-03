@@ -244,6 +244,10 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <returns></returns>
 		private ushort GetValueAsAnalog(object value)
 		{
+			// Nullables
+			if (value == null)
+				return 0;
+
 			if (RangeAttribute != null)
 				return Convert.ToUInt16(RangeAttribute.ClampMinMaxThenRemap(value, typeof(ushort)));
 
