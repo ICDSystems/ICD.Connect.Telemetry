@@ -1,5 +1,6 @@
 ﻿using ICD.Connect.Telemetry.CrestronPro.Devices;
 using System.Collections.Generic;
+using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Telemetry.Crestron.Assets;
@@ -12,6 +13,11 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		private readonly Dictionary<uint, bool> m_DigitalCache;
 		private readonly Dictionary<uint, ushort> m_AnalogCache;
 		private readonly Dictionary<uint, string> m_SerialCache;
+
+		/// <summary>
+		/// Gets the asset type.
+		/// </summary>
+		public override eAssetType AssetType { get { return eAssetType.StaticAsset; } }
 
 		/// <summary>
 		/// Constructor.

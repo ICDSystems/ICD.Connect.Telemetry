@@ -21,5 +21,10 @@
 		/// Gets the user defined number of the asset type.
 		/// </summary>
 		uint Number { get; }
+
+		/// <summary>
+		/// Gets the asset type.
+		/// </summary>
+		eAssetType AssetType { get; }
 	}
 }

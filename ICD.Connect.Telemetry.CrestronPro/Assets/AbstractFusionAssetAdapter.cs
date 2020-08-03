@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
+#if SIMPLSHARP
 using ICD.Connect.Telemetry.Crestron.Assets;
 using Crestron.SimplSharpPro.Fusion;
 
@@ -33,6 +34,11 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		/// Gets the user defined number of the asset type.
 		/// </summary>
 		public uint Number { get { return m_FusionAsset.ParamAssetNumber; } }
+
+		/// <summary>
+		/// Gets the asset type.
+		/// </summary>
+		public abstract eAssetType AssetType { get; }
 
 		/// <summary>
 		/// Constructor.

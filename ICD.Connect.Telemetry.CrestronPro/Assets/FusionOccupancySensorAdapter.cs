@@ -1,4 +1,5 @@
-﻿#if SIMPLSHARP
+﻿using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
+#if SIMPLSHARP
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Telemetry.Crestron.Assets;
 
@@ -7,6 +8,11 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 	public sealed class FusionOccupancySensorAdapter : AbstractFusionAssetAdapter<FusionOccupancySensor>,
 	                                                   IFusionOccupancySensorAsset
 	{
+		/// <summary>
+		/// Gets the asset type.
+		/// </summary>
+		public override eAssetType AssetType { get { return eAssetType.OccupancySensor; } }
+
 		/// <summary>
 		/// Constructor.
 		/// </summary>
