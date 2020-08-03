@@ -7,12 +7,13 @@ using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Connect.Devices;
-using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Nodes;
+using ICD.Connect.Telemetry.Providers;
+using ICD.Connect.Telemetry.Providers.External;
 using ICD.Connect.Telemetry.Services;
 
 namespace ICD.Connect.Telemetry.Crestron
@@ -21,21 +22,32 @@ namespace ICD.Connect.Telemetry.Crestron
 	{
 		private const int SIG_OFFSET = 49;
 
-		private static readonly IcdHashSet<IFusionSigMapping> s_Mappings =
+		private static readonly IcdHashSet<IFusionSigMapping> s_AssetMappings =
 			IcdDisplayFusionSigs.Sigs
-			                    .Concat(IcdSwitcherFusionSigs.Sigs)
-			                    .Concat(IcdSwitcherFusionSigs.InputOutputSigs)
-			                    .Concat(IcdStandardFusionSigs.Sigs)
-			                    .Concat(IcdDialingDeviceFusionSigs.Sigs)
-			                    .Concat(IcdOccupancyFusionSigs.Sigs)
-			                    .Concat(IcdDspFusionSigs.Sigs)
-			                    .Concat(IcdControlSystemFusionSigs.Sigs)
-			                    .Concat(IcdVolumeDeviceControlFusionSigs.Sigs)
-			                    .ToIcdHashSet();
+			                    .Concat(IcdSwitcherFusionSigs.AssetMappings)
+			                    .Concat(IcdSwitcherFusionSigs.InputOutputAssetMappings)
+			                    .Concat(IcdStandardFusionSigs.AssetMappings)
+			                    .Concat(IcdDialingDeviceFusionSigs.AssetMappings)
+			                    .Concat(IcdOccupancyFusionSigs.AssetMappings)
+			                    .Concat(IcdDspFusionSigs.AssetMappings)
+			                    .Concat(IcdControlSystemFusionSigs.AssetMappings)
+			                    .Concat(IcdVolumeDeviceControlFusionSigs.AssetMappings)
+								.ToIcdHashSet();
 
+		private static ITelemetryService s_TelemetryService;
+
+		private readonly Dictionary<string, uint> m_InstanceIdToAsset;
 		private readonly Dictionary<uint, IcdHashSet<FusionTelemetryBinding>> m_BindingsByAsset;
 		private readonly SafeCriticalSection m_BindingsSection;
 		private readonly IFusionRoom m_FusionRoom;
+
+		/// <summary>
+		/// Gets the telemetry service.
+		/// </summary>
+		public static ITelemetryService TelemetryService
+		{
+			get { return s_TelemetryService ?? (s_TelemetryService = ServiceProvider.GetService<ITelemetryService>()); }
+		}
 
 		/// <summary>
 		/// Constructor.
@@ -46,6 +58,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (fusionRoom == null)
 				throw new ArgumentNullException("fusionRoom");
 
+			m_InstanceIdToAsset = new Dictionary<string, uint>();
 			m_BindingsByAsset = new Dictionary<uint, IcdHashSet<FusionTelemetryBinding>>();
 			m_BindingsSection = new SafeCriticalSection();
 
@@ -78,6 +91,7 @@ namespace ICD.Connect.Telemetry.Crestron
 					binding.Dispose();
 
 				m_BindingsByAsset.Clear();
+				m_InstanceIdToAsset.Clear();
 			}
 			finally
 			{
@@ -217,11 +231,13 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <summary>
 		/// Adds the given mappings to the mappings set.
 		/// </summary>
-		/// <param name="type"></param>
 		/// <param name="mappings"></param>
-		public static void RegisterMappingSet([NotNull] Type type, [NotNull] IEnumerable<IFusionSigMapping> mappings)
+		public static void RegisterMappingSet([NotNull] IEnumerable<IFusionSigMapping> mappings)
 		{
-			s_Mappings.AddRange(mappings);
+			if (mappings == null)
+				throw new ArgumentNullException("mappings");
+
+			s_AssetMappings.AddRange(mappings);
 		}
 
 		/// <summary>
@@ -231,7 +247,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		[NotNull]
 		public static IEnumerable<IFusionSigMapping> GetMappings()
 		{
-			return s_Mappings.ToList(s_Mappings.Count);
+			return s_AssetMappings.ToList(s_AssetMappings.Count);
 		}
 
 		#endregion
@@ -243,89 +259,142 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// </summary>
 		/// <param name="device"></param>
 		/// <returns></returns>
-		private void BuildAssets(IDevice device)
+		private void BuildAssets([NotNull] IDevice device)
 		{
+			if (device == null)
+				throw new ArgumentNullException("device");
+
 			// Ensure the Core telemetry has been built
-			ServiceProvider.GetService<ITelemetryService>().InitializeCoreTelemetry();
+			TelemetryService.InitializeCoreTelemetry();
 
-			// Create the sig bindings
-			TelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(device);
+			// Get the telemetry for this device
+			TelemetryCollection nodes = TelemetryService.GetTelemetryForProvider(device);
 
-			// Add the assets to fusion
-			if (device.Controls.GetControls<IOccupancySensorControl>().Any())
-				GenerateOccupancySensorAsset(device);
-
-			GenerateStaticAsset(device, nodes);
-		}
-
-		private void GenerateStaticAsset(IDeviceBase device, TelemetryCollection nodes)
-		{
-			uint staticAssetId = m_FusionRoom.GetNextAssetId();
-			AssetInfo staticAssetInfo = new AssetInfo(eAssetType.StaticAsset,
-			                                          staticAssetId,
-			                                          device.Name,
-			                                          device.GetType().Name,
-			                                          m_FusionRoom.GetInstanceId(device, eAssetType.StaticAsset));
-
-			m_FusionRoom.AddAsset(staticAssetInfo);
-
+			// Walk the telemetry nodes and generate bindings
 			RangeMappingUsageTracker mappingUsage = new RangeMappingUsageTracker();
-			IEnumerable<FusionTelemetryBinding> bindings = BuildBindingsRecursive(nodes, staticAssetId, mappingUsage);
-
-			AddAssetBindingsToCollection(staticAssetId, bindings);
+			BuildBindingsRecursive(device, nodes, mappingUsage);
 		}
 
 		/// <summary>
-		/// Adds a new occupancy sensor asset to the fusion room for the given device.
+		/// Builds the bindings recursively for the given telemetry collection.
 		/// </summary>
 		/// <param name="device"></param>
-		private void GenerateOccupancySensorAsset(IDevice device)
+		/// <param name="nodes"></param>
+		/// <param name="mappingUsage"></param>
+		private void BuildBindingsRecursive([NotNull] IDevice device,
+		                                    [NotNull] IEnumerable<ITelemetryNode> nodes,
+		                                    [NotNull] RangeMappingUsageTracker mappingUsage)
 		{
-			AssetInfo occAssetInfo = new AssetInfo(eAssetType.OccupancySensor,
-			                                       m_FusionRoom.GetNextAssetId(),
-			                                       device.Name,
-			                                       device.GetType().Name,
-			                                       m_FusionRoom.GetInstanceId(device, eAssetType.OccupancySensor));
-			m_FusionRoom.AddAsset(occAssetInfo);
+			if (device == null)
+				throw new ArgumentNullException("device");
 
-			IOccupancySensorControl control = device.Controls.GetControl<IOccupancySensorControl>();
-			if(control == null)
-				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, control not found.");
+			if (nodes == null)
+				throw new ArgumentNullException("nodes");
 
-			TelemetryCollection nodes = ServiceProvider.GetService<ITelemetryService>().GetTelemetryForProvider(control);
-			if (nodes == null || !nodes.Any())
-				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, nodes not found.");
+			if (mappingUsage == null)
+				throw new ArgumentNullException("mappingUsage");
 
-			TelemetryLeaf node =
-				nodes.OfType<TelemetryLeaf>()
-				     .FirstOrDefault(n => n.PropertyInfo.PropertyType == typeof(eOccupancyState));
-			if (node == null)
-				throw new InvalidOperationException("Cannot Generate Occupancy Sensor Asset, matching node not found.");
+			foreach (ITelemetryNode node in nodes)
+			{
+				TelemetryCollection collection = node as TelemetryCollection;
+				if (collection != null)
+					BuildBindingsRecursive(device, collection, mappingUsage);
 
-			IFusionSigMapping mapping = IcdOccupancyFusionSigs.OccupancyState;
-			FusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, node, occAssetInfo.Number, null);
-			if (binding == null)
+				TelemetryLeaf leaf = node as TelemetryLeaf;
+				if (leaf != null)
+					BuildBinding(device, leaf, mappingUsage);
+			}
+		}
+
+		/// <summary>
+		/// Builds the telemetry binding for the given telemetry leaf.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="leaf"></param>
+		/// <param name="mappingUsage"></param>
+		private void BuildBinding([NotNull] IDevice device, [NotNull] TelemetryLeaf leaf, [NotNull] RangeMappingUsageTracker mappingUsage)
+		{
+			if (device == null)
+				throw new ArgumentNullException("device");
+
+			if (leaf == null)
+				throw new ArgumentNullException("leaf");
+
+			if (mappingUsage == null)
+				throw new ArgumentNullException("mappingUsage");
+
+			IFusionSigMapping mapping = GetMapping(leaf);
+			if (mapping == null)
 				return;
 
-			AddAssetBindingsToCollection(occAssetInfo.Number, binding.Yield());
+			foreach (eAssetType assetType in mapping.FusionAssetTypes)
+			{
+				uint assetId = LazyLoadAsset(device, assetType);
+				FusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, leaf, assetId, mappingUsage);
+				AddAssetBindingToCollection(assetId, binding);
+
+				binding.Initialize();
+			}
+		}
+
+		/// <summary>
+		/// Gets the existing asset for the device or creates a new one.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="assetType"></param>
+		/// <returns></returns>
+		private uint LazyLoadAsset([NotNull] IDevice device, eAssetType assetType)
+		{
+			if (device == null)
+				throw new ArgumentNullException("device");
+
+			string instanceId = m_FusionRoom.GetInstanceId(device, assetType);
+
+			return m_InstanceIdToAsset.GetOrAddNew(instanceId, () => AddAsset(device, assetType));
+		}
+
+		/// <summary>
+		/// Adds an asset for the given device to the fusion room.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="assetType"></param>
+		/// <returns>Returns the asset id</returns>
+		private uint AddAsset([NotNull] IDevice device, eAssetType assetType)
+		{
+			if (device == null)
+				throw new ArgumentNullException("device");
+
+			uint assetId = m_FusionRoom.GetNextAssetId();
+			string instanceId = m_FusionRoom.GetInstanceId(device, assetType);
+
+			AssetInfo occAssetInfo =
+				new AssetInfo(assetType,
+				              assetId,
+				              device.Name,
+				              device.GetType().Name,
+				              instanceId);
+
+			m_FusionRoom.AddAsset(occAssetInfo);
+
+			return assetId;
 		}
 
 		/// <summary>
 		/// Adds the bindings to the cache for the given asset id.
 		/// </summary>
-		/// <param name="staticAssetId"></param>
-		/// <param name="bindings"></param>
-		private void AddAssetBindingsToCollection(uint staticAssetId, IEnumerable<FusionTelemetryBinding> bindings)
+		/// <param name="assetId"></param>
+		/// <param name="binding"></param>
+		private void AddAssetBindingToCollection(uint assetId, [NotNull] FusionTelemetryBinding binding)
 		{
+			if (binding == null)
+				throw new ArgumentNullException("binding");
+
 			m_BindingsSection.Enter();
 
 			try
 			{
-				IcdHashSet<FusionTelemetryBinding> collection =
-					m_BindingsByAsset.GetOrAddNew(staticAssetId, () => new IcdHashSet<FusionTelemetryBinding>());
-
-				foreach (FusionTelemetryBinding binding in bindings.Where(collection.Add))
-					binding.Initialize();
+				m_BindingsByAsset.GetOrAddNew(assetId, () => new IcdHashSet<FusionTelemetryBinding>())
+				                 .Add(binding);
 			}
 			finally
 			{
@@ -333,41 +402,25 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 		}
 
+		/// <summary>
+		/// Gets the mapping for the given telemetry leaf.
+		/// </summary>
+		/// <param name="leaf"></param>
+		/// <returns></returns>
 		[CanBeNull]
-		private static IFusionSigMapping GetMapping(ITelemetryNode node)
+		private static IFusionSigMapping GetMapping([NotNull] TelemetryLeaf leaf)
 		{
-			return s_Mappings/*.Where(kvp => node.Provider.GetType().IsAssignableTo(kvp.Key))*/
-				.FirstOrDefault(m => node.Name == m.TelemetryName &&
-				                     (m.TelemetryProviderTypes == null ||
-				                      node.Provider.GetType().GetAllTypes().Any(t => m.TelemetryProviderTypes.Contains(t))));
-		}
+			if (leaf == null)
+				throw new ArgumentNullException("leaf");
 
-		private IEnumerable<FusionTelemetryBinding> BuildBindingsRecursive(TelemetryCollection nodes,
-		                                                                   uint assetId, RangeMappingUsageTracker mappingUsage)
-		{
-			if (nodes == null)
-				throw new ArgumentNullException("nodes");
+			ITelemetryProvider provider = leaf.Provider;
 
-			if (mappingUsage == null)
-				throw new ArgumentNullException("mappingUsage");
+			// Instead of needing to add external providers to our mapping whitelists, lets just check by the external provider parent
+			IExternalTelemetryProvider externalProvider = provider as IExternalTelemetryProvider;
+			if (externalProvider != null)
+				provider = externalProvider.Parent;
 
-			IEnumerable<TelemetryCollection> childCollections = nodes.OfType<TelemetryCollection>();
-			foreach (TelemetryCollection collection in childCollections)
-			{
-				IEnumerable<FusionTelemetryBinding> children = BuildBindingsRecursive(collection, assetId, mappingUsage);
-				foreach (FusionTelemetryBinding child in children)
-					yield return child;
-			}
-
-			foreach (var nodeMappingPair in nodes.Where(n => !n.GetType().IsAssignableTo(typeof(TelemetryCollection)))
-												 .Select(n => new {Node = n, Mapping = GetMapping(n)})
-												 .Where(a => a.Mapping != null)
-												 .Distinct(a => a.Mapping))
-			{
-				FusionTelemetryBinding output = nodeMappingPair.Mapping.Bind(m_FusionRoom, nodeMappingPair.Node, assetId, mappingUsage);
-				if (output != null)
-					yield return output;
-			}
+			return s_AssetMappings.FirstOrDefault(m => leaf.Name == m.TelemetryName && m.ValidateProvider(provider));
 		}
 
 		#endregion
@@ -394,42 +447,42 @@ namespace ICD.Connect.Telemetry.Crestron
 			fusionRoom.OnFusionAssetPowerStateUpdated -= FusionRoomOnFusionAssetPowerStateUpdated;
 		}
 
+		/// <summary>
+		/// Called when a sig changes from the service.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
 		private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
 		{
 			IcdHashSet<FusionTelemetryBinding> bindingsForAsset;
-
 			if (!m_BindingsByAsset.TryGetValue(args.AssetId, out bindingsForAsset))
 				return;
 
-			foreach (
-				FusionTelemetryBinding bindingMatch in
-					bindingsForAsset.Where(b => b.Mapping.Sig == (args.Sig + SIG_OFFSET) && b.Mapping.SigType == args.SigType))
+			IEnumerable<FusionTelemetryBinding> matches =
+				bindingsForAsset.Where(b => b.Mapping.Sig == (args.Sig + SIG_OFFSET) &&
+				                            b.Mapping.SigType == args.SigType);
+
+			foreach (FusionTelemetryBinding bindingMatch in matches)
 				bindingMatch.UpdateLocalNodeValueFromService();
 		}
 
+		/// <summary>
+		/// Called when an assets power state changes from the service.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
 		private void FusionRoomOnFusionAssetPowerStateUpdated(object sender, FusionAssetPowerStateUpdatedArgs args)
 		{
 			IcdHashSet<FusionTelemetryBinding> bindingsForAsset;
-
 			if (!m_BindingsByAsset.TryGetValue(args.AssetId, out bindingsForAsset))
 				return;
 
-			if (args.Powered)
-			{
-				FusionTelemetryBinding binding =
-					bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetryName == DeviceTelemetryNames.POWER_ON);
+			string telemetryName = args.Powered ? DeviceTelemetryNames.POWER_ON : DeviceTelemetryNames.POWER_OFF;
+			FusionTelemetryBinding binding =
+				bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetryName == telemetryName);
 
-				if (binding != null)
-					binding.Telemetry.Invoke();
-			}
-			else
-			{
-				FusionTelemetryBinding binding =
-					bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetryName == DeviceTelemetryNames.POWER_OFF);
-
-				if (binding != null)
-					binding.Telemetry.Invoke();
-			}
+			if (binding != null)
+				binding.Telemetry.Invoke();
 		}
 
 		#endregion

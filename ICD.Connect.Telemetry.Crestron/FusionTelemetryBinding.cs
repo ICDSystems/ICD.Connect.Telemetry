@@ -15,7 +15,6 @@ using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Nodes;
-using ICD.Connect.Telemetry.Providers;
 using ICD.Connect.Telemetry.Services;
 
 namespace ICD.Connect.Telemetry.Crestron
@@ -82,21 +81,21 @@ namespace ICD.Connect.Telemetry.Crestron
 		}
 
 		/// <summary>
-		/// Creates the Fusion telemetry binding for the given mapping.
+		/// Creates the Fusion telemetry binding for the given leaf.
 		/// </summary>
 		/// <param name="fusionRoom"></param>
-		/// <param name="provider"></param>
+		/// <param name="leaf"></param>
 		/// <param name="mapping"></param>
 		/// <param name="assetId"></param>
 		/// <returns></returns>
-		[CanBeNull]
-		public static FusionTelemetryBinding Bind([NotNull] IFusionRoom fusionRoom, [NotNull] ITelemetryProvider provider,
+		[NotNull]
+		public static FusionTelemetryBinding Bind([NotNull] IFusionRoom fusionRoom, [NotNull] TelemetryLeaf leaf,
 		                                          [NotNull] FusionSigMapping mapping, uint assetId)
 		{
 			if (fusionRoom == null)
 				throw new ArgumentNullException("fusionRoom");
 
-			if (provider == null)
+			if (leaf == null)
 				throw new ArgumentException("provider");
 
 			if (mapping == null)
@@ -104,21 +103,17 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			// Check against the fusion asset whitelist for the mapping
 			IFusionAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset;
-			if (mapping.FusionAssetTypes != null && !asset.GetType().GetAllTypes().Any(t => mapping.FusionAssetTypes.Contains(t)))
-				return null;
+			if (!mapping.ValidateAsset(asset.AssetType))
+				throw new ArgumentException(string.Format("Mapping {0} does not support {1}", mapping.FusionSigName, asset.GetType()));
 
-			TelemetryLeaf telemetryLeaf =
-				(TelemetryLeaf)TelemetryService.GetTelemetryForProvider(provider)
-				                               .GetChildByName(mapping.TelemetryName);
-
-			if (telemetryLeaf.ParameterCount > 1)
+			if (leaf.ParameterCount > 1)
 				throw new NotSupportedException("Method telemetry with more than 1 parameter is not supported by Fusion");
 
 			// If the sig number is 0, that indicates that the sig is special-handling
 			if (mapping.Sig != 0)
-				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, telemetryLeaf.IoMask);
+				fusionRoom.AddSig(assetId, mapping.SigType, mapping.Sig, mapping.FusionSigName, leaf.IoMask);
 
-			return new FusionTelemetryBinding(fusionRoom, telemetryLeaf, asset, mapping);
+			return new FusionTelemetryBinding(fusionRoom, leaf, asset, mapping);
 		}
 
 		#endregion

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Protocol.Sigs;
@@ -16,16 +15,16 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				FusionSigName = "Occupied",
 				Sig = 0,
 				SigType = eSigType.Digital,
-				FusionAssetTypes = new IcdHashSet<Type> {typeof(IFusionOccupancySensorAsset)}
+				FusionAssetTypes = new IcdHashSet<eAssetType> {eAssetType.OccupancySensor}
 			};
 
-		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>
+		private static readonly IcdHashSet<IFusionSigMapping> s_AssetMappings = new IcdHashSet<IFusionSigMapping>
 		{
 			s_OccupancyState
 		};
 
 		public static FusionSigMapping OccupancyState { get { return s_OccupancyState; } }
 
-		public static IEnumerable<IFusionSigMapping> Sigs { get { return s_Sigs; } }
+		public static IEnumerable<IFusionSigMapping> AssetMappings { get { return s_AssetMappings; } }
 	}
 }

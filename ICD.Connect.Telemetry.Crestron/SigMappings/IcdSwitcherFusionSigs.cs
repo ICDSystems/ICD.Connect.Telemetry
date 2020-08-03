@@ -7,12 +7,12 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
 	public static class IcdSwitcherFusionSigs
 	{
-		public static IEnumerable<IFusionSigMapping> Sigs { get { return s_Sigs; } }
-		public static IEnumerable<IFusionSigMapping> InputOutputSigs { get { return s_InputOutputSigs; } } 
+		public static IEnumerable<IFusionSigMapping> AssetMappings { get { return s_AssetMappings; } }
+		public static IEnumerable<IFusionSigMapping> InputOutputAssetMappings { get { return s_InputOutputAssetMappings; } } 
 
-		private static readonly IcdHashSet<IFusionSigMapping> s_Sigs = new IcdHashSet<IFusionSigMapping>();
+		private static readonly IcdHashSet<IFusionSigMapping> s_AssetMappings = new IcdHashSet<IFusionSigMapping>();
 
-		private static readonly IcdHashSet<IFusionSigMapping> s_InputOutputSigs = new IcdHashSet<IFusionSigMapping>
+		private static readonly IcdHashSet<IFusionSigMapping> s_InputOutputAssetMappings = new IcdHashSet<IFusionSigMapping>
 		{
 			
 			new FusionSigMultiMapping

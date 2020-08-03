@@ -1,4 +1,5 @@
-﻿using ICD.Connect.Telemetry.Crestron.Devices;
+﻿using ICD.Common.Properties;
+using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
@@ -7,9 +8,19 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 	{
 		public uint Sig { get; set; }
 
-		public override FusionTelemetryBinding Bind(IFusionRoom fusionRoom, ITelemetryNode node, uint assetId, RangeMappingUsageTracker mappingUsage)
+		/// <summary>
+		/// Creates the telemetry binding for the given leaf.
+		/// </summary>
+		/// <param name="fusionRoom"></param>
+		/// <param name="leaf"></param>
+		/// <param name="assetId"></param>
+		/// <param name="mappingUsage"></param>
+		/// <returns></returns>
+		[NotNull]
+		public override FusionTelemetryBinding Bind([NotNull] IFusionRoom fusionRoom, [NotNull] TelemetryLeaf leaf,
+		                                            uint assetId, [NotNull] RangeMappingUsageTracker mappingUsage)
 		{
-			return FusionTelemetryBinding.Bind(fusionRoom, node.Provider, this, assetId);
+			return FusionTelemetryBinding.Bind(fusionRoom, leaf, this, assetId);
 		}
 	}
 }
