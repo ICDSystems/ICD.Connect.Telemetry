@@ -8,10 +8,16 @@ namespace ICD.Connect.Telemetry.Providers.External
 		private TParent m_Parent;
 
 		/// <summary>
-		/// Gets the parent telemetry provider.
+		/// Gets the parent telemetry provider that this provider extends.
 		/// </summary>
 		[CanBeNull]
 		protected TParent Parent { get { return m_Parent; } }
+
+		/// <summary>
+		/// Gets the parent telemetry provider that this provider extends.
+		/// </summary>
+		[CanBeNull]
+		ITelemetryProvider IExternalTelemetryProvider.Parent { get { return Parent; } }
 
 		#region Methods
 

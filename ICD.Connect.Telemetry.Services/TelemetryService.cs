@@ -52,7 +52,20 @@ namespace ICD.Connect.Telemetry.Services
 		[NotNull]
 		public TelemetryCollection GetTelemetryForProvider([NotNull] ITelemetryProvider provider)
 		{
-			return m_TelemetryProvidersSection.Execute(() => m_TelemetryProviders[provider]);
+			m_TelemetryProvidersSection.Enter();
+
+			try
+			{
+				TelemetryCollection collection;
+				if (m_TelemetryProviders.TryGetValue(provider, out collection))
+					return collection;
+
+				throw new ArgumentException("No telemetry initialized for provider " + provider, "provider");
+			}
+			finally
+			{
+				m_TelemetryProvidersSection.Leave();
+			}
 		}
 
 #endregion

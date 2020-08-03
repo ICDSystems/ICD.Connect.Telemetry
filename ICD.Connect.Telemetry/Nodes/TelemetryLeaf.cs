@@ -145,10 +145,10 @@ namespace ICD.Connect.Telemetry.Nodes
 				throw new ArgumentNullException("name");
 
 			if (provider == null)
-				throw new ArgumentNullException("Provider");
+				throw new ArgumentNullException("provider");
 
 			if (propertyInfo == null && methodInfo == null && eventInfo == null)
-				throw new ArgumentNullException("At least one member info must not be null");
+				throw new ArgumentException("At least one member info must not be null");
 
 			if (eventInfo != null && propertyInfo == null)
 			{
