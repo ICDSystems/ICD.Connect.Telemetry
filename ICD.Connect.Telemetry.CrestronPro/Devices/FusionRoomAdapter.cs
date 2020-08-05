@@ -552,72 +552,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
         }
 
 #if SIMPLSHARP
-        /// <summary>
-        /// Subscribes to the FusionRoom events.
-        /// </summary>
-        /// <param name="fusionRoom"></param>
-        private void Subscribe(FusionRoom fusionRoom)
-		{
-			if (fusionRoom == null)
-				return;
-
-			fusionRoom.FusionStateChange += FusionRoomOnFusionStateChange;
-			fusionRoom.FusionAssetStateChange += FusionAssetStateChange;
-			fusionRoom.OnlineStatusChange += FusionRoomOnlineStatusChange;
-		}
-
-		/// <summary>
-		/// Unsubscribes from the FusionRoom events.
-		/// </summary>
-		/// <param name="fusionRoom"></param>
-		private void Unsubscribe(FusionRoom fusionRoom)
-		{
-			if (fusionRoom == null)
-				return;
-
-			fusionRoom.FusionStateChange -= FusionRoomOnFusionStateChange;
-			fusionRoom.FusionAssetStateChange -= FusionAssetStateChange;
-			fusionRoom.OnlineStatusChange -= FusionRoomOnlineStatusChange;
-		}
-
-		/// <summary>
-		/// Called when a sig value changes.
-		/// </summary>
-		/// <param name="device"></param>
-		/// <param name="args"></param>
-		private void FusionRoomOnFusionStateChange(FusionBase device, FusionStateEventArgs args)
-		{
-			switch (args.EventId)
-			{
-				case FusionEventIds.UserConfiguredBoolSigChangeEventId:
-					BooleanSigData boolData = args.UserConfiguredSigDetail as BooleanSigData;
-					if (boolData != null)
-						RaiseOutputSigChangeCallback(boolData.Number, n => BooleanOutput[n]);
-					break;
-				case FusionEventIds.UserConfiguredUShortSigChangeEventId:
-					StringSigData stringData = args.UserConfiguredSigDetail as StringSigData;
-					if (stringData != null)
-						RaiseOutputSigChangeCallback(stringData.Number, n => StringOutput[n]);
-					break;
-				case FusionEventIds.UserConfiguredStringSigChangeEventId:
-					UShortSigData ushortData = args.UserConfiguredSigDetail as UShortSigData;
-					if (ushortData != null)
-						RaiseOutputSigChangeCallback(ushortData.Number, n => UShortOutput[n]);
-					break;
-				case FusionEventIds.SystemPowerOffReceivedEventId:
-					RaiseSystemPowerChange(false);
-					break;
-				case FusionEventIds.SystemPowerOnReceivedEventId:
-					RaiseSystemPowerChange(true);
-					break;
-				case FusionEventIds.DisplayPowerOffReceivedEventId:
-					RaiseDisplayPowerChange(false);
-					break;
-				case FusionEventIds.DisplayPowerOnReceivedEventId:
-					RaiseDisplayPowerChange(true);
-					break;
-			}
-		}
 
 		/// <summary>
 		/// Raises the OnFusionSystemPowerChangeEvent with the given system power state
@@ -636,7 +570,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		{
 			OnFusionDisplayPowerChangeEvent.Raise(this, new BoolEventArgs(state));
 		}
-
 
 		/// <summary>
 		/// Gets the ISig from the collection, passing to the base class to be raised via delegate.
@@ -658,25 +591,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			SigInfo sigInfo = new SigInfo(sig);
 
 			RaiseOutputSigChangeCallback(sigInfo);
-		}
-
-		private void FusionAssetStateChange(FusionBase device, FusionAssetStateEventArgs args)
-		{
-			switch (args.EventId)
-			{
-				case FusionAssetEventId.StaticAssetAssetBoolAssetSigEventReceivedEventId:
-					RaiseSigUpdatedForDigitalSig(args);
-					break;
-				case FusionAssetEventId.StaticAssetAssetUshortAssetSigEventReceivedEventId:
-					RaiseSigUpdatedForAnalogSig(args);
-					break;
-				case FusionAssetEventId.StaticAssetAssetStringAssetSigEventReceivedEventId:
-					RaiseSigUpdatedForSerialSig(args);
-					break;
-				default:
-					RaiseSigUpdatedForFixedNameSig(args);
-					break;
-			}
 		}
 
 		private void RaiseSigUpdatedForDigitalSig(FusionAssetStateEventArgs args)
@@ -726,19 +640,108 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			}
 		}
 
+#endif
+
+#endregion
+
+		#region FusionRoom Callbacks
+
+		/// <summary>
+		/// Subscribes to the FusionRoom events.
+		/// </summary>
+		/// <param name="fusionRoom"></param>
+		private void Subscribe(FusionRoom fusionRoom)
+		{
+			if (fusionRoom == null)
+				return;
+
+			fusionRoom.FusionStateChange += FusionRoomOnFusionStateChange;
+			fusionRoom.FusionAssetStateChange += FusionRoomOnFusionAssetStateChange;
+			fusionRoom.OnlineStatusChange += FusionRoomOnOnlineStatusChange;
+		}
+
+		/// <summary>
+		/// Unsubscribes from the FusionRoom events.
+		/// </summary>
+		/// <param name="fusionRoom"></param>
+		private void Unsubscribe(FusionRoom fusionRoom)
+		{
+			if (fusionRoom == null)
+				return;
+
+			fusionRoom.FusionStateChange -= FusionRoomOnFusionStateChange;
+			fusionRoom.FusionAssetStateChange -= FusionRoomOnFusionAssetStateChange;
+			fusionRoom.OnlineStatusChange -= FusionRoomOnOnlineStatusChange;
+		}
+
+		/// <summary>
+		/// Called when a sig value changes.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="args"></param>
+		private void FusionRoomOnFusionStateChange(FusionBase device, FusionStateEventArgs args)
+		{
+			switch (args.EventId)
+			{
+				case FusionEventIds.UserConfiguredBoolSigChangeEventId:
+					BooleanSigData boolData = args.UserConfiguredSigDetail as BooleanSigData;
+					if (boolData != null)
+						RaiseOutputSigChangeCallback(boolData.Number, n => BooleanOutput[n]);
+					break;
+				case FusionEventIds.UserConfiguredUShortSigChangeEventId:
+					StringSigData stringData = args.UserConfiguredSigDetail as StringSigData;
+					if (stringData != null)
+						RaiseOutputSigChangeCallback(stringData.Number, n => StringOutput[n]);
+					break;
+				case FusionEventIds.UserConfiguredStringSigChangeEventId:
+					UShortSigData ushortData = args.UserConfiguredSigDetail as UShortSigData;
+					if (ushortData != null)
+						RaiseOutputSigChangeCallback(ushortData.Number, n => UShortOutput[n]);
+					break;
+				case FusionEventIds.SystemPowerOffReceivedEventId:
+					RaiseSystemPowerChange(false);
+					break;
+				case FusionEventIds.SystemPowerOnReceivedEventId:
+					RaiseSystemPowerChange(true);
+					break;
+				case FusionEventIds.DisplayPowerOffReceivedEventId:
+					RaiseDisplayPowerChange(false);
+					break;
+				case FusionEventIds.DisplayPowerOnReceivedEventId:
+					RaiseDisplayPowerChange(true);
+					break;
+			}
+		}
+
+		private void FusionRoomOnFusionAssetStateChange(FusionBase device, FusionAssetStateEventArgs args)
+		{
+			switch (args.EventId)
+			{
+				case FusionAssetEventId.StaticAssetAssetBoolAssetSigEventReceivedEventId:
+					RaiseSigUpdatedForDigitalSig(args);
+					break;
+				case FusionAssetEventId.StaticAssetAssetUshortAssetSigEventReceivedEventId:
+					RaiseSigUpdatedForAnalogSig(args);
+					break;
+				case FusionAssetEventId.StaticAssetAssetStringAssetSigEventReceivedEventId:
+					RaiseSigUpdatedForSerialSig(args);
+					break;
+				default:
+					RaiseSigUpdatedForFixedNameSig(args);
+					break;
+			}
+		}
+
 		/// <summary>
 		/// Called when the fusion room changes online status.
 		/// </summary>
 		/// <param name="currentDevice"></param>
 		/// <param name="args"></param>
-		private void FusionRoomOnlineStatusChange(GenericBase currentDevice, OnlineOfflineEventArgs args)
+		private void FusionRoomOnOnlineStatusChange(GenericBase currentDevice, OnlineOfflineEventArgs args)
 		{
 			UpdateCachedOnlineStatus();
 		}
 
-
-#endif
-
-#endregion
+		#endregion
 	}
 }

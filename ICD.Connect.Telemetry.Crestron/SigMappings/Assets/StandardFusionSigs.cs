@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
+using ICD.Connect.Devices.Controls;
 using ICD.Connect.Devices.Telemetry;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Settings;
+using ICD.Connect.Telemetry.Crestron.Assets;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 {
@@ -32,21 +34,24 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 					TelemetryName = DeviceTelemetryNames.ONLINE_STATE,
 					FusionSigName = "Connected",
 					SigType = eSigType.Digital,
-					Sig = 0
+					FusionAssetTypes = new IcdHashSet<eAssetType>{eAssetType.StaticAsset},
+					SendReservedSig = (a, o) => ((IFusionStaticAsset)a).SetOnlineState((bool)o)
 				},
 				new AssetFusionSigMapping
 				{
 					TelemetryName = DeviceTelemetryNames.POWER_STATE,
 					FusionSigName = "PowerOn",
 					SigType = eSigType.Digital,
-					Sig = 0
+					FusionAssetTypes = new IcdHashSet<eAssetType>{eAssetType.StaticAsset},
+					SendReservedSig = (a, o) => ((IFusionStaticAsset)a).SetPoweredState(GetPoweredState(o))
 				},
 				new AssetFusionSigMapping
 				{
 					TelemetryName = DeviceTelemetryNames.POWER_OFF,
 					FusionSigName = "PowerOff",
 					SigType = eSigType.Digital,
-					Sig = 0
+					FusionAssetTypes = new IcdHashSet<eAssetType>{eAssetType.StaticAsset},
+					SendReservedSig = (a, o) => ((IFusionStaticAsset)a).SetPoweredState(GetPoweredState(o))
 				},
 				new AssetFusionSigMapping
 				{
@@ -168,5 +173,11 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 					Sig = 110
 				}
 			};
+
+		private static bool GetPoweredState(object value)
+		{
+			ePowerState state = (ePowerState)value;
+			return state == ePowerState.PowerOn || state == ePowerState.Warming;
+		}
 	}
 }

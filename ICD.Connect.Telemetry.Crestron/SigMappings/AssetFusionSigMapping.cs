@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Collections;
@@ -10,6 +11,11 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
 	public sealed class AssetFusionSigMapping : AbstractFusionSigMapping
 	{
+		/// <summary>
+		/// Action for sending a new value to a reserved sig on the asset.
+		/// </summary>
+		public Action<IFusionAsset, object> SendReservedSig { get; set; }
+
 		/// <summary>
 		/// Whitelist for the fusion asset types this mapping is valid for.
 		/// </summary>
@@ -40,16 +46,17 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			string name = string.Format(FusionSigName, mappingUsage.GetCurrentOffset(this) + 1);
 			ushort sig = mappingUsage.GetNextSig(this);
 
-			AssetFusionSigMapping tempMapping = new AssetFusionSigMapping
+			AssetFusionSigMapping offsetMapping = new AssetFusionSigMapping
 			{
-				FusionSigName = string.Format(FusionSigName, mappingUsage.GetCurrentOffset(this) + 1),
-				Sig = mappingUsage.GetNextSig(this),
+				FusionSigName = name,
+				Sig = sig,
 				SigType = SigType,
 				TelemetryName = TelemetryName,
-				TelemetryProviderTypes = TelemetryProviderTypes
+				TelemetryProviderTypes = TelemetryProviderTypes,
+				SendReservedSig = SendReservedSig
 			};
 
-			return FusionTelemetryBinding.Bind(fusionRoom, leaf, tempMapping, assetId);
+			return FusionTelemetryBinding.Bind(fusionRoom, leaf, offsetMapping, assetId);
 		}
 
 		/// <summary>

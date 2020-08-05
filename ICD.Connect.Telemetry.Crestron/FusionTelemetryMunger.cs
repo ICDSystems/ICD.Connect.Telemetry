@@ -477,17 +477,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (binding == null)
 				throw new ArgumentNullException("binding");
 
-			m_BindingsSection.Enter();
-
-			try
-			{
-				m_BindingsByAsset.GetOrAddNew(assetId, () => new IcdHashSet<FusionTelemetryBinding>())
-				                 .Add(binding);
-			}
-			finally
-			{
-				m_BindingsSection.Leave();
-			}
+			m_BindingsSection.Execute(() => m_BindingsByAsset.GetOrAddNew(assetId).Add(binding));
 		}
 
 		/// <summary>

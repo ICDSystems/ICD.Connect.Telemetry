@@ -17,10 +17,16 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 				{
 					TelemetryName = OccupancyTelemetryNames.OCCUPANCY_STATE,
 					FusionSigName = "Occupied",
-					Sig = 0,
 					SigType = eSigType.Digital,
-					FusionAssetTypes = new IcdHashSet<eAssetType> {eAssetType.OccupancySensor}
+					FusionAssetTypes = new IcdHashSet<eAssetType> {eAssetType.OccupancySensor},
+					SendReservedSig = (a, o) => ((IFusionOccupancySensorAsset)a).SetRoomOccupied(GetOccupied(o))
 				}
 			};
+
+		private static bool GetOccupied(object value)
+		{
+			eOccupancyState state = (eOccupancyState)value;
+			return state == eOccupancyState.Occupied;
+		}
 	}
 }
