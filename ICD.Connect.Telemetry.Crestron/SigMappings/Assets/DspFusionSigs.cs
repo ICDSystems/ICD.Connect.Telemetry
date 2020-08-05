@@ -8,7 +8,7 @@ using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 {
-	public static class IcdDspFusionSigs
+	public static class DspFusionSigs
 	{
 		public static IEnumerable<AssetFusionSigMapping> AssetMappings { get { return s_AssetMappings; } }
 
@@ -39,7 +39,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 			};
 	}
 
-	public static class IcdVolumeDeviceControlFusionSigs
+	public static class VolumeDeviceControlFusionSigs
 	{
 		public static IEnumerable<AssetFusionSigMapping> AssetMappings { get { return s_AssetMappings; } }
 

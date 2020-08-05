@@ -26,21 +26,21 @@ namespace ICD.Connect.Telemetry.Crestron
 		private const int SIG_OFFSET = 49;
 
 		private static readonly IcdHashSet<AssetFusionSigMapping> s_AssetMappings =
-			IcdDisplayFusionSigs.AssetMappings
-			                    .Concat(IcdSwitcherFusionSigs.AssetMappings)
-			                    .Concat(IcdSwitcherFusionSigs.InputOutputAssetMappings)
-			                    .Concat(IcdStandardFusionSigs.AssetMappings)
-			                    .Concat(IcdDialingDeviceFusionSigs.AssetMappings)
-			                    .Concat(IcdOccupancyFusionSigs.AssetMappings)
-			                    .Concat(IcdDspFusionSigs.AssetMappings)
-			                    .Concat(IcdControlSystemFusionSigs.AssetMappings)
-			                    .Concat(IcdVolumeDeviceControlFusionSigs.AssetMappings)
+			DisplayFusionSigs.AssetMappings
+			                    .Concat(SwitcherFusionSigs.AssetMappings)
+			                    .Concat(SwitcherFusionSigs.InputOutputAssetMappings)
+			                    .Concat(StandardFusionSigs.AssetMappings)
+			                    .Concat(DialingDeviceFusionSigs.AssetMappings)
+			                    .Concat(OccupancyFusionSigs.AssetMappings)
+			                    .Concat(DspFusionSigs.AssetMappings)
+			                    .Concat(ControlSystemFusionSigs.AssetMappings)
+			                    .Concat(VolumeDeviceControlFusionSigs.AssetMappings)
 								.ToIcdHashSet();
 
 		private static readonly IcdHashSet<RoomFusionSigMapping> s_RoomMappings =
-			IcdRoomFusionSigs.RoomMappings
-			                 .Concat(IcdCommercialRoomFusionSigs.RoomMappings)
-							 .ToIcdHashSet();
+			RoomFusionSigs.RoomMappings
+			              .Concat(CommercialRoomFusionSigs.RoomMappings)
+			              .ToIcdHashSet();
 
 		private static ITelemetryService s_TelemetryService;
 

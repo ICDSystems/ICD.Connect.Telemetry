@@ -5,7 +5,7 @@ using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings.Rooms
 {
-	public static class IcdCommercialRoomFusionSigs
+	public static class CommercialRoomFusionSigs
 	{
 		public static IEnumerable<RoomFusionSigMapping> RoomMappings { get { return s_RoomMappings; } }
 

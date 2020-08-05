@@ -5,7 +5,7 @@ using ICD.Connect.Protocol.Sigs;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 {
-	public static class IcdDialingDeviceFusionSigs
+	public static class DialingDeviceFusionSigs
 	{
 		public static IEnumerable<AssetFusionSigMapping> AssetMappings { get { return s_AssetMappings; } }
 

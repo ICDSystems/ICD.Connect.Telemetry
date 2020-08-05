@@ -6,7 +6,7 @@ using ICD.Connect.Settings;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 {
-	public static class IcdStandardFusionSigs
+	public static class StandardFusionSigs
 	{
 		public static IEnumerable<AssetFusionSigMapping> AssetMappings { get { return s_AssetMappings; } }
 

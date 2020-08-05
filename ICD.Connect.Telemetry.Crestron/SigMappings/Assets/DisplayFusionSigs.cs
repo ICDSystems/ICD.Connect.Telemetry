@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
-using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
+using ICD.Connect.Displays;
 using ICD.Connect.Protocol.Sigs;
-using ICD.Connect.Telemetry.Crestron.Assets;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 {
-	public static class IcdOccupancyFusionSigs
+	public static class DisplayFusionSigs
 	{
 		public static IEnumerable<AssetFusionSigMapping> AssetMappings { get { return s_AssetMappings; } }
 
@@ -15,11 +14,10 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 			{
 				new AssetFusionSigMapping
 				{
-					TelemetryName = OccupancyTelemetryNames.OCCUPANCY_STATE,
-					FusionSigName = "Occupied",
-					Sig = 0,
-					SigType = eSigType.Digital,
-					FusionAssetTypes = new IcdHashSet<eAssetType> {eAssetType.OccupancySensor}
+					TelemetryName = DisplayTelemetryNames.ACTIVE_INPUT_STATE,
+					FusionSigName = "Input Selection",
+					SigType = eSigType.Analog,
+					Sig = 1701
 				}
 			};
 	}

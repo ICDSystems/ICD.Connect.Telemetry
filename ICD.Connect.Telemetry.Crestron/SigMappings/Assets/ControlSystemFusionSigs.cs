@@ -5,7 +5,7 @@ using ICD.Connect.Routing.CrestronPro.ControlSystem;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 {
-	public static class IcdControlSystemFusionSigs
+	public static class ControlSystemFusionSigs
 	{
 		public static IEnumerable<AssetFusionSigMapping> AssetMappings { get { return s_AssetMappings; } }
 
