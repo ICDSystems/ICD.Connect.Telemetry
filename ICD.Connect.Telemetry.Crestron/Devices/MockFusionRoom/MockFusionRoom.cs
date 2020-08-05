@@ -388,7 +388,8 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 
 			yield return new ConsoleCommand("PrintSigs", "Print all the registered sigs and their values", () => PrintSigs());
 			yield return new ConsoleCommand("PrintAssets", "Prints assets", () => PrintAssets());
-			yield return new ConsoleCommand("PrintAllMappings", "Print all avaliable telemetry mappings", () => PrintAllMappings());
+			yield return new ConsoleCommand("PrintRoomMappings", "Print the room telemetry mappings", () => PrintRoomMappings());
+			yield return new ConsoleCommand("PrintAssetMappings", "Print the asset telemetry mappings", () => PrintAssetMappings());
 			yield return new GenericConsoleCommand<uint, bool>("SendOutputDigital",
 			                                                   "Sends Digital Sig From Mock Fusion <number> <value>",
 			                                                   (n, v) => SendOutputDigital(n, v));
@@ -476,28 +477,40 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 			m_SigCallbackManager.RaiseSigChangeCallback(sigInfo);
 		}
 
-		public void FusionActionSystemPower(bool state)
+		private void FusionActionSystemPower(bool state)
 		{
 			OnFusionSystemPowerChangeEvent.Raise(this, new BoolEventArgs(state));
 		}
 
-		public void FusionActionDisplayPower(bool state)
+		private void FusionActionDisplayPower(bool state)
 		{
 			OnFusionDisplayPowerChangeEvent.Raise(this, new BoolEventArgs(state) );
 		}
 
-		public static string PrintAllMappings()
+		private static string PrintRoomMappings()
 		{
-			var table = new TableBuilder("MappingType", "SigType", "Start Sig", "End Sig", "Mapping Name", "Telemetry Name");
-			foreach (var mapping in FusionTelemetryMunger.GetMappings())
-			{
-				var singleMapping = mapping as FusionSigMapping;
-				var multiMapping = mapping as FusionSigMultiMapping;
-				if (singleMapping != null)
-					table.AddRow("Single", mapping.SigType, singleMapping.Sig, "", mapping.FusionSigName, mapping.TelemetryName);
-				else if (multiMapping != null)
-					table.AddRow("Multi", mapping.SigType, multiMapping.FirstSig, multiMapping.LastSig, mapping.FusionSigName, mapping.TelemetryName);
-			}
+			TableBuilder table = new TableBuilder("SigType", "Start Sig", "End Sig", "Mapping Name", "Telemetry Name");
+
+			foreach (RoomFusionSigMapping mapping in FusionTelemetryMunger.GetRoomMappings())
+				table.AddRow(mapping.SigType,
+							 mapping.Sig,
+							 mapping.Sig + (mapping.Range - 1),
+							 mapping.FusionSigName,
+							 mapping.TelemetryName);
+
+			return table.ToString();
+		}
+
+		private static string PrintAssetMappings()
+		{
+			TableBuilder table = new TableBuilder("SigType", "Start Sig", "End Sig", "Mapping Name", "Telemetry Name");
+
+			foreach (AssetFusionSigMapping mapping in FusionTelemetryMunger.GetAssetMappings())
+				table.AddRow(mapping.SigType,
+				             mapping.Sig,
+				             mapping.Sig + (mapping.Range - 1),
+				             mapping.FusionSigName,
+				             mapping.TelemetryName);
 
 			return table.ToString();
 		}

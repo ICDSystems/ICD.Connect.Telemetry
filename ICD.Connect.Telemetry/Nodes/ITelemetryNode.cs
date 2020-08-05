@@ -1,4 +1,5 @@
-﻿using ICD.Connect.API.Nodes;
+﻿using ICD.Common.Properties;
+using ICD.Connect.API.Nodes;
 using ICD.Connect.Telemetry.Providers;
 
 namespace ICD.Connect.Telemetry.Nodes
@@ -13,6 +14,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <summary>
 		/// Gets the provider that this telemetry item is attached to.
 		/// </summary>
+		[NotNull]
 		ITelemetryProvider Provider { get; }
 	}
 }

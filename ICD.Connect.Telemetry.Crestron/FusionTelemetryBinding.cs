@@ -6,8 +6,8 @@ using ICD.Common.Utils.Attributes;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
-using ICD.Connect.Devices;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Telemetry;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;
 using ICD.Connect.Protocol.Sigs;
 using ICD.Connect.Telemetry.Bindings;
@@ -15,7 +15,6 @@ using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Nodes;
-using ICD.Connect.Telemetry.Services;
 
 namespace ICD.Connect.Telemetry.Crestron
 {
@@ -24,19 +23,13 @@ namespace ICD.Connect.Telemetry.Crestron
 		#region Properties
 
 		[NotNull]
-		public FusionSigMapping Mapping { get; private set; }
+		public AssetFusionSigMapping Mapping { get; private set; }
 
 		[NotNull]
 		public IFusionRoom FusionRoom { get; private set; }
 
 		[NotNull]
 		public IFusionAsset Asset { get; private set; }
-
-		/// <summary>
-		/// Gets the telemetry service.
-		/// </summary>
-		[NotNull]
-		private static ITelemetryService TelemetryService { get { return ServiceProvider.GetService<ITelemetryService>(); } }
 
 		[CanBeNull]
 		private RangeAttribute RangeAttribute { get; set; }
@@ -53,7 +46,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <param name="asset"></param>
 		/// <param name="mapping"></param>
 		private FusionTelemetryBinding([NotNull] IFusionRoom fusionRoom, [NotNull] TelemetryLeaf telemetry,
-		                               [NotNull] IFusionAsset asset, [NotNull] FusionSigMapping mapping) 
+		                               [NotNull] IFusionAsset asset, [NotNull] AssetFusionSigMapping mapping) 
 			: base(telemetry)
 		{
 			if (fusionRoom == null)
@@ -90,7 +83,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <returns></returns>
 		[NotNull]
 		public static FusionTelemetryBinding Bind([NotNull] IFusionRoom fusionRoom, [NotNull] TelemetryLeaf leaf,
-		                                          [NotNull] FusionSigMapping mapping, uint assetId)
+		                                          [NotNull] AssetFusionSigMapping mapping, uint assetId)
 		{
 			if (fusionRoom == null)
 				throw new ArgumentNullException("fusionRoom");

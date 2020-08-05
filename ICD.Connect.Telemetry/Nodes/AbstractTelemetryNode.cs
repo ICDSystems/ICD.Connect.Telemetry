@@ -18,6 +18,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <summary>
 		/// Gets the provider that this telemetry node is attached to.
 		/// </summary>
+		[NotNull]
 		public ITelemetryProvider Provider { get; private set; }
 
 		/// <summary>
