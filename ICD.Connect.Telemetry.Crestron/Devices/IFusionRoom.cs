@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
@@ -41,14 +40,17 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// <param name="assets"></param>
 		void AddAssets(IEnumerable<AssetInfo> assets);
 
-		[PublicAPI]
 		void UpdateDigitalSig(uint sig, bool newValue);
 
-		[PublicAPI]
+		bool ReadDigitalSig(uint sig);
+
 		void UpdateAnalogSig(uint sig, ushort newValue);
 
-		[PublicAPI]
+		ushort ReadAnalogSig(uint sig);
+
 		void UpdateSerialSig(uint sig, string newValue);
+
+		string ReadSerialSig(uint sig);
 
 		/// <summary>
 		/// Sets the fusion error message.

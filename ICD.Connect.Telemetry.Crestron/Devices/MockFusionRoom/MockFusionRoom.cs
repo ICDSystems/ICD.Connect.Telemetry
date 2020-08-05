@@ -225,14 +225,29 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 			SendInputDigital(sig, newValue);
 		}
 
+		public bool ReadDigitalSig(uint sig)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void UpdateAnalogSig(uint sig, ushort newValue)
 		{
 			SendInputAnalog(sig, newValue);
 		}
 
+		public ushort ReadAnalogSig(uint sig)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void UpdateSerialSig(uint sig, string newValue)
 		{
 			SendInputSerial(sig, newValue);
+		}
+
+		public string ReadSerialSig(uint sig)
+		{
+			throw new NotImplementedException();
 		}
 
 		/// <summary>

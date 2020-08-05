@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Logging.LoggingContexts;
+using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
@@ -21,7 +22,6 @@ using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
-using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 
 namespace ICD.Connect.Telemetry.CrestronPro.Devices
@@ -31,26 +31,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 	/// </summary>
 	public sealed class FusionRoomAdapter : AbstractSigDevice<FusionRoomAdapterSettings>, IFusionRoom
 	{
-		private static readonly Dictionary<eAssetType, string> s_AssetNameSuffixByType = new Dictionary<eAssetType, string>
-		{
-			{eAssetType.Na, ""},
-			{eAssetType.DemandResponse, ""},
-			{eAssetType.DynamicAsset, ""},
-			{eAssetType.EnergyLoad, ""},
-			{eAssetType.EnergySupply, ""},
-			{eAssetType.HvacZone, ""},
-			{eAssetType.LightingLoad, ""},
-			{eAssetType.LightingScenes, ""},
-			{eAssetType.Logging, ""},
-			{eAssetType.OccupancySensor, "(Occupancy Sensor)"},
-			{eAssetType.PhotocellSensor, ""},
-			{eAssetType.RemoteOccupancySensor, ""},
-			{eAssetType.RemoteRealTimePower, ""},
-			{eAssetType.ShadeLoad, ""},
-			{eAssetType.ShadePresets, ""},
-			{eAssetType.StaticAsset, ""},
-		};
-
 		public event EventHandler<FusionAssetSigUpdatedArgs> OnFusionAssetSigUpdated;
 		public event EventHandler<FusionAssetPowerStateUpdatedArgs> OnFusionAssetPowerStateUpdated;
 		public event EventHandler<BoolEventArgs> OnFusionSystemPowerChangeEvent;
@@ -69,10 +49,10 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		private IFusionAssetDataCollection m_FusionAssets;
 
 #if SIMPLSHARP
-        private FusionRoom m_FusionRoom;
+		private FusionRoom m_FusionRoom;
 #endif
 
-#region Properties
+		#region Properties
 
 		/// <summary>
 		/// Collection of Boolean Inputs sent to the device.
@@ -82,12 +62,12 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			get
 			{
 #if SIMPLSHARP
-                return m_BooleanInput ??
+				return m_BooleanInput ??
 				       (m_BooleanInput = new FusionBooleanInputCollectionAdapter(m_FusionRoom.UserDefinedBooleanSigDetails));
 #else
                 throw new NotSupportedException();
 #endif
-            }
+			}
 		}
 
 		/// <summary>
@@ -98,12 +78,12 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			get
 			{
 #if SIMPLSHARP
-                return m_BooleanOutput ??
+				return m_BooleanOutput ??
 				       (m_BooleanOutput = new FusionBooleanOutputCollectionAdapter(m_FusionRoom.UserDefinedBooleanSigDetails));
 #else
                 throw new NotSupportedException();
 #endif
-            }
+			}
 		}
 
 		/// <summary>
@@ -114,12 +94,12 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			get
 			{
 #if SIMPLSHARP
-                return m_UShortInput ??
+				return m_UShortInput ??
 				       (m_UShortInput = new FusionUShortInputCollectionAdapter(m_FusionRoom.UserDefinedUShortSigDetails));
 #else
                 throw new NotSupportedException();
 #endif
-            }
+			}
 		}
 
 		/// <summary>
@@ -130,12 +110,12 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			get
 			{
 #if SIMPLSHARP
-                return m_UShortOutput ??
+				return m_UShortOutput ??
 				       (m_UShortOutput = new FusionUShortOutputCollectionAdapter(m_FusionRoom.UserDefinedUShortSigDetails));
 #else
                 throw new NotSupportedException();
 #endif
-            }
+			}
 		}
 
 		/// <summary>
@@ -146,12 +126,12 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			get
 			{
 #if SIMPLSHARP
-                return m_StringInput ??
+				return m_StringInput ??
 				       (m_StringInput = new FusionStringInputCollectionAdapter(m_FusionRoom.UserDefinedStringSigDetails));
 #else
                 throw new NotSupportedException();
 #endif
-            }
+			}
 		}
 
 		/// <summary>
@@ -162,12 +142,12 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			get
 			{
 #if SIMPLSHARP
-                return m_StringOutput ??
+				return m_StringOutput ??
 				       (m_StringOutput = new FusionStringOutputCollectionAdapter(m_FusionRoom.UserDefinedStringSigDetails));
 #else
                 throw new NotSupportedException();
 #endif
-            }
+			}
 		}
 
 		/// <summary>
@@ -194,16 +174,16 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			{
 #if SIMPLSHARP
 				return m_FusionAssets ??
-					   (m_FusionAssets = new CustomFusionAssetDataCollectionAdapter(m_FusionRoom.UserConfigurableAssetDetails));
+				       (m_FusionAssets = new CustomFusionAssetDataCollectionAdapter(m_FusionRoom.UserConfigurableAssetDetails));
 #else
                 throw new NotSupportedException();
 #endif
 			}
 		}
 
-#endregion
+		#endregion
 
-#region Methods
+		#region Methods
 
 		/// <summary>
 		/// Release resources.
@@ -213,30 +193,30 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			base.DisposeFinal(disposing);
 
 #if SIMPLSHARP
-            SetFusionRoom(null);
+			SetFusionRoom(null);
 #endif
 		}
 
 #if SIMPLSHARP
-        /// <summary>
-        /// Sets the wrapped fusion room.
-        /// </summary>
-        /// <param name="fusionRoom"></param>
-        [PublicAPI]
+		/// <summary>
+		/// Sets the wrapped fusion room.
+		/// </summary>
+		/// <param name="fusionRoom"></param>
+		[PublicAPI]
 		public void SetFusionRoom(FusionRoom fusionRoom)
 		{
 			Unsubscribe(m_FusionRoom);
 
-	        if (m_FusionRoom != null)
-		        GenericBaseUtils.TearDown(m_FusionRoom);
+			if (m_FusionRoom != null)
+				GenericBaseUtils.TearDown(m_FusionRoom);
 
-	        m_BooleanInput = null;
-	        m_BooleanOutput = null;
-	        m_UShortInput = null;
-	        m_UShortOutput = null;
-	        m_StringInput = null;
-	        m_StringOutput = null;
-	        m_FusionAssets = null;
+			m_BooleanInput = null;
+			m_BooleanOutput = null;
+			m_UShortInput = null;
+			m_UShortOutput = null;
+			m_StringInput = null;
+			m_StringOutput = null;
+			m_FusionAssets = null;
 
 			m_FusionRoom = fusionRoom;
 
@@ -259,13 +239,16 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
 			try
 			{
+				string suffix = StringUtils.NiceName(asset.AssetType);
+				string name = string.Format("{0} ({1})", asset.Name, suffix);
+
 				m_FusionRoom.AddAsset(asset.AssetType.FromIcd(),
 				                      asset.Number,
-				                      string.Format("{0} {1}", asset.Name, s_AssetNameSuffixByType[asset.AssetType]),
+				                      name,
 				                      asset.Type,
 				                      asset.InstanceId);
 			}
-			//Throws an argument exception when a duplicate is added
+				//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
 				Logger.Log(eSeverity.Error, ex,
@@ -301,6 +284,20 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #endif
 		}
 
+		public bool ReadDigitalSig(uint sig)
+		{
+#if SIMPLSHARP
+			// todo: add cache
+			BooleanSigData data;
+			if (m_FusionRoom.UserDefinedBooleanSigDetails.TryGetValue(sig, out data))
+				return data.OutputSig.BoolValue;
+
+			throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined bool sigs", sig));
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
 		public void UpdateAnalogSig(uint sig, ushort newValue)
 		{
 #if SIMPLSHARP
@@ -310,6 +307,20 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 				data.InputSig.UShortValue = newValue;
 			else
 				throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined ushort sigs", sig));
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		public ushort ReadAnalogSig(uint sig)
+		{
+#if SIMPLSHARP
+			// todo: add cache
+			UShortSigData data;
+			if (m_FusionRoom.UserDefinedUShortSigDetails.TryGetValue(sig, out data))
+				return data.OutputSig.UShortValue;
+
+			throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined ushort sigs", sig));
 #else
 			throw new NotSupportedException();
 #endif
@@ -328,7 +339,20 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			throw new NotSupportedException();
 #endif
 		}
-		
+
+		public string ReadSerialSig(uint sig)
+		{
+#if SIMPLSHARP
+			// todo: add cache
+			StringSigData data;
+			if (m_FusionRoom.UserDefinedStringSigDetails.TryGetValue(sig, out data))
+				return data.OutputSig.StringValue;
+
+			throw new KeyNotFoundException(String.Format("Sig {0} not found in user defined string sigs", sig));
+#else
+			throw new NotSupportedException();
+#endif
+		}
 
 		/// <summary>
 		/// Sets the fusion error message.
@@ -337,7 +361,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		public void SetErrorMessage(string message)
 		{
 #if SIMPLSHARP
-            m_FusionRoom.ErrorMessage.InputSig.StringValue = message;
+			m_FusionRoom.ErrorMessage.InputSig.StringValue = message;
 #else
             throw new NotSupportedException();
 #endif
@@ -423,7 +447,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			{
 				m_FusionRoom.AddSig(sigType.FromIcd(), number, name, mask.FromIcd());
 			}
-			//Throws an argument exception when a duplicate is added
+				//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
 				Logger.Log(eSeverity.Error, ex,
@@ -451,7 +475,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			{
 				m_FusionRoom.AddSig(assetId, sigType.FromIcd(), number, name, mask.FromIcd());
 			}
-			//Throws an argument exception when a duplicate is added
+				//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
 				Logger.Log(eSeverity.Error, ex,
@@ -476,9 +500,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #endif
 		}
 
-#endregion
+		#endregion
 
-#region Settings
+		#region Settings
 
 		/// <summary>
 		/// Override to apply properties to the settings instance.
@@ -489,7 +513,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			base.CopySettingsFinal(settings);
 
 #if SIMPLSHARP
-            settings.Ipid = m_FusionRoom == null ? (byte)0 : (byte)m_FusionRoom.ID;
+			settings.Ipid = m_FusionRoom == null ? (byte)0 : (byte)m_FusionRoom.ID;
 			settings.RoomName = m_FusionRoom == null ? null : m_FusionRoom.ParameterRoomName;
 			settings.RoomId = m_FusionRoom == null ? null : m_FusionRoom.ParameterInstanceID;
 #else
@@ -507,7 +531,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			base.ClearSettingsFinal();
 
 #if SIMPLSHARP
-            SetFusionRoom(null);
+			SetFusionRoom(null);
 #endif
 		}
 
@@ -521,22 +545,22 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			base.ApplySettingsFinal(settings, factory);
 
 #if SIMPLSHARP
-            FusionRoom fusionRoom = settings.Ipid == null 
-									? null
-									: new FusionRoom(settings.Ipid.Value,
-													 ProgramInfo.ControlSystem,
-													 settings.RoomName,
-													 settings.RoomId);
-			
+			FusionRoom fusionRoom = settings.Ipid == null
+				                        ? null
+				                        : new FusionRoom(settings.Ipid.Value,
+				                                         ProgramInfo.ControlSystem,
+				                                         settings.RoomName,
+				                                         settings.RoomId);
+
 			SetFusionRoom(fusionRoom);
 #else
             throw new NotSupportedException();
 #endif
 		}
 
-#endregion
+		#endregion
 
-#region Private Methods
+		#region Private Methods
 
 		/// <summary>
 		/// Gets the current online status of the device.
@@ -545,11 +569,11 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		protected override bool GetIsOnlineStatus()
 		{
 #if SIMPLSHARP
-            return m_FusionRoom != null && m_FusionRoom.IsOnline;
+			return m_FusionRoom != null && m_FusionRoom.IsOnline;
 #else
             return false;
 #endif
-        }
+		}
 
 #if SIMPLSHARP
 
@@ -622,8 +646,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 				return;
 
 			OnFusionAssetSigUpdated.Raise(this, new FusionAssetSigUpdatedArgs(args.UserConfigurableAssetDetailIndex,
-																			  eSigType.Serial,
-																			  data.Number - SIG_OFFSET));
+			                                                                  eSigType.Serial,
+			                                                                  data.Number - SIG_OFFSET));
 		}
 
 		private void RaiseSigUpdatedForFixedNameSig(FusionAssetStateEventArgs args)
@@ -632,20 +656,25 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			switch (data)
 			{
 				case FusionAssetEventId.StaticAssetPowerOffReceivedEventId:
-					OnFusionAssetPowerStateUpdated.Raise(this, new FusionAssetPowerStateUpdatedArgs(args.UserConfigurableAssetDetailIndex, false));
+					OnFusionAssetPowerStateUpdated.Raise(this,
+					                                     new FusionAssetPowerStateUpdatedArgs(args.UserConfigurableAssetDetailIndex,
+					                                                                          false));
 					return;
 				case FusionAssetEventId.StaticAssetPowerOnReceivedEventId:
-					OnFusionAssetPowerStateUpdated.Raise(this, new FusionAssetPowerStateUpdatedArgs(args.UserConfigurableAssetDetailIndex, true));
+					OnFusionAssetPowerStateUpdated.Raise(this,
+					                                     new FusionAssetPowerStateUpdatedArgs(args.UserConfigurableAssetDetailIndex,
+					                                                                          true));
 					return;
 			}
 		}
 
 #endif
 
-#endregion
+		#endregion
 
 		#region FusionRoom Callbacks
 
+#if SIMPLSHARP
 		/// <summary>
 		/// Subscribes to the FusionRoom events.
 		/// </summary>
@@ -741,6 +770,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		{
 			UpdateCachedOnlineStatus();
 		}
+#endif
 
 		#endregion
 	}

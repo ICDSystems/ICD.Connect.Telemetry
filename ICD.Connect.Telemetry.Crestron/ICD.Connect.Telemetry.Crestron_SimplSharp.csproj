@@ -72,6 +72,8 @@
     <Compile Include="Assets\FusionAssetData.cs" />
     <Compile Include="Assets\IFusionAsset.cs" />
     <Compile Include="Assets\IFusionAssetDataCollection.cs" />
+    <Compile Include="Bindings\AbstractFusionTelemetryBinding.cs" />
+    <Compile Include="Bindings\RoomFusionTelemetryBinding.cs" />
     <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Assets\IFusionOccupancySensorAsset.cs" />
     <Compile Include="Assets\IFusionRemoteOccupancySensorAsset.cs" />
@@ -86,7 +88,7 @@
     <Compile Include="KrangPlugin.cs" />
     <Compile Include="SigMappings\AssetFusionSigMapping.cs" />
     <Compile Include="SigMappings\AbstractFusionSigMapping.cs" />
-    <Compile Include="FusionTelemetryBinding.cs" />
+    <Compile Include="Bindings\AssetFusionTelemetryBinding.cs" />
     <Compile Include="FusionTelemetryMunger.cs" />
     <Compile Include="Devices\IFusionRoom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

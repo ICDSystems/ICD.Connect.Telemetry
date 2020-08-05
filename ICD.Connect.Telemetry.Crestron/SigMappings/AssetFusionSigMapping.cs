@@ -4,6 +4,7 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Telemetry.Crestron.Bindings;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Nodes;
 
@@ -38,7 +39,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		/// <param name="mappingUsage"></param>
 		/// <returns></returns>
 		[NotNull]
-		public FusionTelemetryBinding Bind([NotNull] IFusionRoom fusionRoom,
+		public AssetFusionTelemetryBinding Bind([NotNull] IFusionRoom fusionRoom,
 		                                            [NotNull] TelemetryLeaf leaf,
 		                                            uint assetId,
 		                                            [NotNull] MappingUsageTracker mappingUsage)
@@ -56,7 +57,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				SendReservedSig = SendReservedSig
 			};
 
-			return FusionTelemetryBinding.Bind(fusionRoom, leaf, offsetMapping, assetId);
+			return AssetFusionTelemetryBinding.Bind(fusionRoom, leaf, offsetMapping, assetId);
 		}
 
 		/// <summary>

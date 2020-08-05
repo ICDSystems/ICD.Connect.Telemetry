@@ -10,6 +10,7 @@ using ICD.Connect.Devices;
 using ICD.Connect.Devices.Telemetry;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Telemetry.Crestron.Assets;
+using ICD.Connect.Telemetry.Crestron.Bindings;
 using ICD.Connect.Telemetry.Crestron.Devices;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
 using ICD.Connect.Telemetry.Crestron.SigMappings.Assets;
@@ -44,9 +45,9 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private static ITelemetryService s_TelemetryService;
 
-		private readonly IcdHashSet<FusionTelemetryBinding> m_RoomBindings; 
+		private readonly IcdHashSet<RoomFusionTelemetryBinding> m_RoomBindings; 
 		private readonly Dictionary<string, uint> m_InstanceIdToAsset;
-		private readonly Dictionary<uint, IcdHashSet<FusionTelemetryBinding>> m_BindingsByAsset;
+		private readonly Dictionary<uint, IcdHashSet<AssetFusionTelemetryBinding>> m_BindingsByAsset;
 		private readonly SafeCriticalSection m_BindingsSection;
 		private readonly IFusionRoom m_FusionRoom;
 
@@ -71,9 +72,9 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (fusionRoom == null)
 				throw new ArgumentNullException("fusionRoom");
 
-			m_RoomBindings = new IcdHashSet<FusionTelemetryBinding>();
+			m_RoomBindings = new IcdHashSet<RoomFusionTelemetryBinding>();
 			m_InstanceIdToAsset = new Dictionary<string, uint>();
-			m_BindingsByAsset = new Dictionary<uint, IcdHashSet<FusionTelemetryBinding>>();
+			m_BindingsByAsset = new Dictionary<uint, IcdHashSet<AssetFusionTelemetryBinding>>();
 			m_BindingsSection = new SafeCriticalSection();
 
 			m_FusionRoom = fusionRoom;
@@ -101,10 +102,10 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			try
 			{
-				foreach (FusionTelemetryBinding binding in m_RoomBindings)
+				foreach (RoomFusionTelemetryBinding binding in m_RoomBindings)
 					binding.Dispose();
 
-				foreach (FusionTelemetryBinding binding in m_BindingsByAsset.Values.SelectMany(v => v))
+				foreach (AssetFusionTelemetryBinding binding in m_BindingsByAsset.Values.SelectMany(v => v))
 					binding.Dispose();
 
 				m_RoomBindings.Clear();
@@ -418,7 +419,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			foreach (eAssetType assetType in mapping.FusionAssetTypes)
 			{
 				uint assetId = LazyLoadAsset(device, assetType);
-				FusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, leaf, assetId, mappingUsage);
+				AssetFusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, leaf, assetId, mappingUsage);
 				AddAssetBindingToCollection(assetId, binding);
 
 				binding.Initialize();
@@ -472,7 +473,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// </summary>
 		/// <param name="assetId"></param>
 		/// <param name="binding"></param>
-		private void AddAssetBindingToCollection(uint assetId, [NotNull] FusionTelemetryBinding binding)
+		private void AddAssetBindingToCollection(uint assetId, [NotNull] AssetFusionTelemetryBinding binding)
 		{
 			if (binding == null)
 				throw new ArgumentNullException("binding");
@@ -542,7 +543,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (mapping == null)
 				return;
 
-			FusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, leaf, mappingUsage);
+			RoomFusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, leaf, mappingUsage);
 			AddRoomBindingToCollection(binding);
 
 			binding.Initialize();
@@ -552,7 +553,7 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// Adds the bindings to the cache.
 		/// </summary>
 		/// <param name="binding"></param>
-		private void AddRoomBindingToCollection([NotNull] FusionTelemetryBinding binding)
+		private void AddRoomBindingToCollection([NotNull] RoomFusionTelemetryBinding binding)
 		{
 			if (binding == null)
 				throw new ArgumentNullException("binding");
@@ -605,15 +606,15 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <param name="args"></param>
 		private void FusionRoomOnFusionAssetSigUpdated(object sender, FusionAssetSigUpdatedArgs args)
 		{
-			IcdHashSet<FusionTelemetryBinding> bindingsForAsset;
+			IcdHashSet<AssetFusionTelemetryBinding> bindingsForAsset;
 			if (!m_BindingsByAsset.TryGetValue(args.AssetId, out bindingsForAsset))
 				return;
 
-			IEnumerable<FusionTelemetryBinding> matches =
+			IEnumerable<AssetFusionTelemetryBinding> matches =
 				bindingsForAsset.Where(b => b.Mapping.Sig == (args.Sig + SIG_OFFSET) &&
 				                            b.Mapping.SigType == args.SigType);
 
-			foreach (FusionTelemetryBinding bindingMatch in matches)
+			foreach (AssetFusionTelemetryBinding bindingMatch in matches)
 				bindingMatch.UpdateLocalNodeValueFromService();
 		}
 
@@ -624,12 +625,12 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <param name="args"></param>
 		private void FusionRoomOnFusionAssetPowerStateUpdated(object sender, FusionAssetPowerStateUpdatedArgs args)
 		{
-			IcdHashSet<FusionTelemetryBinding> bindingsForAsset;
+			IcdHashSet<AssetFusionTelemetryBinding> bindingsForAsset;
 			if (!m_BindingsByAsset.TryGetValue(args.AssetId, out bindingsForAsset))
 				return;
 
 			string telemetryName = args.Powered ? DeviceTelemetryNames.POWER_ON : DeviceTelemetryNames.POWER_OFF;
-			FusionTelemetryBinding binding =
+			AssetFusionTelemetryBinding binding =
 				bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetryName == telemetryName);
 
 			if (binding != null)
