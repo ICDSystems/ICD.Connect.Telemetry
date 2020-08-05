@@ -4,10 +4,12 @@ using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
+using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Telemetry;
+using ICD.Connect.Partitioning.Commercial.Rooms;
 using ICD.Connect.Partitioning.Rooms;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Bindings;
@@ -137,115 +139,6 @@ namespace ICD.Connect.Telemetry.Crestron
 			MappingUsageTracker mappingUsage = new MappingUsageTracker();
 			BuildRoomBindingsRecursive(nodes, mappingUsage);
 		}
-
-		/*
-		private static void AddSigsToFusionRoom(IFusionRoom fusionRoom)
-		{
-			fusionRoom.AddSig(eSigType.Serial, FUSION_SIG_ROOM_PREFIX, "Room Prefix", eTelemetryIoMask.ProgramToService);
-			fusionRoom.AddSig(eSigType.Serial, FUSION_SIG_ROOM_NUMBER, "Room Number", eTelemetryIoMask.ProgramToService);
-			fusionRoom.AddSig(eSigType.Serial, FUSION_SIG_ROOMOS_VERSION, "RoomOS Version", eTelemetryIoMask.ProgramToService);
-			fusionRoom.AddSig(eSigType.Serial, FUSION_SIG_ROOM_ATC_NUMBER, "Room ATC Number", eTelemetryIoMask.ProgramToService);
-		}
-
-		private void SendCurrentRoomValuesToFusion(IFusionRoom fusionRoom)
-		{
-			fusionRoom.SetSystemPower(m_Room != null && m_Room.SystemPower);
-			fusionRoom.SetDisplayPower(m_Room != null && m_Room.DisplayPower);
-			fusionRoom.UpdateSerialSig(FUSION_SIG_ROOM_PREFIX, m_Room != null ? m_Room.Prefix : string.Empty);
-			fusionRoom.UpdateSerialSig(FUSION_SIG_ROOM_NUMBER, m_Room != null ? m_Room.Number : string.Empty);
-			fusionRoom.UpdateSerialSig(FUSION_SIG_ROOMOS_VERSION, m_Room != null ? m_Room.InformationalVersion : string.Empty);
-			fusionRoom.UpdateSerialSig(FUSION_SIG_ROOM_ATC_NUMBER, m_Room != null ? m_Room.PhoneNumber : string.Empty);
-		}*/
-
-				/*
-		#region Room Callbacks
-
-		private void Subscribe(IMetlifeRoom room)
-		{
-			if (room == null)
-				return;
-
-			room.OnDeviceUsageChanged += RoomOnDeviceUsageChanged;
-			room.OnSystemPowerStateChanged += RoomOnSystemPowerStateChanged;
-			room.OnDisplaysPowerStateChanged += RoomOnDisplaysPowerStateChanged;
-			room.OnRoomPrefixChanged += RoomOnRoomPrefixChanged;
-		}
-
-		private void Unsubscribe(IMetlifeRoom room)
-		{
-			if (room == null)
-				return;
-
-			room.OnDeviceUsageChanged -= RoomOnDeviceUsageChanged;
-			room.OnSystemPowerStateChanged -= RoomOnSystemPowerStateChanged;
-			room.OnDisplaysPowerStateChanged -= RoomOnDisplaysPowerStateChanged;
-			room.OnRoomPrefixChanged -= RoomOnRoomPrefixChanged;
-		}
-
-		private void RoomOnDisplaysPowerStateChanged(object sender, BoolEventArgs args)
-		{
-			m_FusionRoom.SetDisplayPower(args.Data);
-		}
-
-		private void RoomOnSystemPowerStateChanged(object sender, BoolEventArgs args)
-		{
-			m_FusionRoom.SetSystemPower(args.Data);
-		}
-
-		private void RoomOnDeviceUsageChanged(object sender, StringEventArgs args)
-		{
-			m_FusionRoom.SendDeviceUsage(args.Data);
-		}
-
-		private void RoomOnRoomPrefixChanged(object sender, StringEventArgs args)
-		{
-			m_FusionRoom.UpdateSerialSig(FUSION_SIG_ROOM_PREFIX, args.Data);
-		}
-
-		#endregion
-
-		#region Fusion Room Callbacks
-
-		private void Subscribe(IFusionRoom fusionRoom)
-		{
-			if (fusionRoom == null)
-				return;
-
-			fusionRoom.OnFusionSystemPowerChangeEvent += FusionRoomOnFusionSystemPowerChangeEvent;
-			fusionRoom.OnFusionDisplayPowerChangeEvent += FusionRoomOnFusionDisplayPowerChangeEvent;
-		}
-
-		private void Unsubscribe(IFusionRoom fusionRoom)
-		{
-			if (fusionRoom == null)
-				return;
-
-			fusionRoom.OnFusionSystemPowerChangeEvent -= FusionRoomOnFusionSystemPowerChangeEvent;
-			fusionRoom.OnFusionDisplayPowerChangeEvent -= FusionRoomOnFusionDisplayPowerChangeEvent;
-		}
-
-		private void FusionRoomOnFusionSystemPowerChangeEvent(object sender, BoolEventArgs args)
-		{
-			if (m_Room == null)
-				return;
-
-			// No System Power On Action
-			if (!args.Data)
-				m_Room.Shutdown();
-		}
-
-		private void FusionRoomOnFusionDisplayPowerChangeEvent(object sender, BoolEventArgs args)
-		{
-			if (m_Room == null)
-				return;
-
-			//No Display Power On Action
-			if (!args.Data)
-				m_Room.PowerOffDisplays();
-		}
-
-		#endregion
-		 */
 
 		/// <summary>
 		/// Adds the devices as assets to fusion and builds the sigs from the telemetry.
@@ -587,6 +480,8 @@ namespace ICD.Connect.Telemetry.Crestron
 		{
 			fusionRoom.OnFusionAssetSigUpdated += FusionRoomOnFusionAssetSigUpdated;
 			fusionRoom.OnFusionAssetPowerStateUpdated += FusionRoomOnFusionAssetPowerStateUpdated;
+			fusionRoom.OnFusionSystemPowerChangeEvent += FusionRoomOnFusionSystemPowerChangeEvent;
+			fusionRoom.OnFusionDisplayPowerChangeEvent += FusionRoomOnFusionDisplayPowerChangeEvent;
 		}
 
 		/// <summary>
@@ -597,6 +492,8 @@ namespace ICD.Connect.Telemetry.Crestron
 		{
 			fusionRoom.OnFusionAssetSigUpdated -= FusionRoomOnFusionAssetSigUpdated;
 			fusionRoom.OnFusionAssetPowerStateUpdated -= FusionRoomOnFusionAssetPowerStateUpdated;
+			fusionRoom.OnFusionSystemPowerChangeEvent -= FusionRoomOnFusionSystemPowerChangeEvent;
+			fusionRoom.OnFusionDisplayPowerChangeEvent -= FusionRoomOnFusionDisplayPowerChangeEvent;
 		}
 
 		/// <summary>
@@ -634,6 +531,24 @@ namespace ICD.Connect.Telemetry.Crestron
 				bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetryName == telemetryName);
 
 			if (binding != null)
+				binding.Telemetry.Invoke();
+		}
+
+		private void FusionRoomOnFusionSystemPowerChangeEvent(object sender, BoolEventArgs args)
+		{
+			RoomFusionTelemetryBinding binding =
+				m_RoomBindings.FirstOrDefault(b => b.Mapping.TelemetryName == CommercialRoomTelemetryNames.SLEEP_COMMAND);
+
+			if (binding != null && !args.Data)
+				binding.Telemetry.Invoke();
+		}
+
+		private void FusionRoomOnFusionDisplayPowerChangeEvent(object sender, BoolEventArgs args)
+		{
+			RoomFusionTelemetryBinding binding =
+				m_RoomBindings.FirstOrDefault(b => b.Mapping.TelemetryName == "Displays Poweroff Command"); // TODO - Hack
+
+			if (binding != null && !args.Data)
 				binding.Telemetry.Invoke();
 		}
 
