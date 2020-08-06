@@ -1,8 +1,7 @@
-﻿using ICD.Connect.Devices;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Protocol.Sigs;
-using ICD.Connect.Routing.CrestronPro.ControlSystem;
+using ICD.Connect.Routing.Telemetry;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings
 {
