@@ -71,14 +71,16 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 					TelemetryName = DeviceTelemetryNames.DEVICE_FIRMWARE_VERSION,
 					FusionSigName = "Firmware",
 					SigType = eSigType.Serial,
-					Sig = 51
+					Sig = 51,
+					TelemetryProviderTypes = new IcdHashSet<Type> { typeof(MonitoredDeviceInfo) }
 				},
 				new AssetFusionSigMapping
 				{
 					TelemetryName = DeviceTelemetryNames.DEVICE_FIRMWARE_DATE,
 					FusionSigName = "Firmware Date",
 					SigType = eSigType.Serial,
-					Sig = 52
+					Sig = 52,
+					TelemetryProviderTypes = new IcdHashSet<Type> { typeof(MonitoredDeviceInfo) }
 				},
 				new AssetFusionSigMapping
 				{
@@ -93,7 +95,8 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 					TelemetryName = DeviceTelemetryNames.DEVICE_UPTIME,
 					FusionSigName = "Uptime",
 					SigType = eSigType.Serial,
-					Sig = 57
+					Sig = 57,
+					TelemetryProviderTypes = new IcdHashSet<Type> { typeof(MonitoredDeviceInfo) }
 				},
 				new AssetFusionSigMapping
 				{
