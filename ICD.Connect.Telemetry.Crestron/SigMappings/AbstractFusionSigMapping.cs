@@ -59,8 +59,8 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			if (provider == null)
 				throw new ArgumentNullException("provider");
 
-			if (TelemetryProviderTypes != null && !provider.GetType().GetAllTypes().Any(t => TelemetryProviderTypes.Contains(t)))
-				return false;
+			if (TelemetryProviderTypes != null)
+				return provider.GetType().GetAllTypes().Any(t => TelemetryProviderTypes.Contains(t));
 
 			return true;
 		}

@@ -67,8 +67,8 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		/// <returns></returns>
 		public bool ValidateAsset(eAssetType assetType)
 		{
-			if (FusionAssetTypes != null && !FusionAssetTypes.Contains(assetType))
-				return false;
+			if (FusionAssetTypes != null)
+				return FusionAssetTypes.Contains(assetType);
 
 			return assetType == eAssetType.StaticAsset;
 		}

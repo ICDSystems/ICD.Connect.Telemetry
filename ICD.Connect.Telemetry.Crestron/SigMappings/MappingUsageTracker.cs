@@ -15,6 +15,10 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 			if (mapping == null)
 				throw new ArgumentNullException("mapping");
 
+			// Special case
+			if (mapping.Sig == 0)
+				return 0;
+
 			ushort offset = GetCurrentOffset(mapping);
 			if (offset >= mapping.Range)
 			{
