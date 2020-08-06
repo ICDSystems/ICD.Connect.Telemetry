@@ -7,6 +7,7 @@ using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services;
+using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Devices;
 using ICD.Connect.Devices.Telemetry;
 using ICD.Connect.Partitioning.Commercial.Rooms;
@@ -46,6 +47,7 @@ namespace ICD.Connect.Telemetry.Crestron
 			              .ToIcdHashSet();
 
 		private static ITelemetryService s_TelemetryService;
+		private static ILoggerService s_LoggerService;
 
 		private readonly IcdHashSet<RoomFusionTelemetryBinding> m_RoomBindings; 
 		private readonly Dictionary<string, uint> m_InstanceIdToAsset;
@@ -61,6 +63,14 @@ namespace ICD.Connect.Telemetry.Crestron
 		private static ITelemetryService TelemetryService
 		{
 			get { return s_TelemetryService ?? (s_TelemetryService = ServiceProvider.GetService<ITelemetryService>()); }
+		}
+
+		/// <summary>
+		/// Gets the logger service.
+		/// </summary>
+		private static ILoggerService LoggerService
+		{
+			get { return s_LoggerService ?? (s_LoggerService = ServiceProvider.GetService<ILoggerService>()); }
 		}
 
 		#endregion
@@ -137,7 +147,7 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			// Walk the telemetry nodes and generate bindings
 			MappingUsageTracker mappingUsage = new MappingUsageTracker();
-			BuildRoomBindingsRecursive(nodes, mappingUsage);
+			BuildRoomBindingsRecursive(room, nodes, mappingUsage);
 		}
 
 		/// <summary>
@@ -311,11 +321,18 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			foreach (eAssetType assetType in mapping.FusionAssetTypes)
 			{
-				uint assetId = LazyLoadAsset(device, assetType);
-				AssetFusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, leaf, assetId, mappingUsage);
-				AddAssetBindingToCollection(assetId, binding);
+				try
+				{
+					uint assetId = LazyLoadAsset(device, assetType);
+					AssetFusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, leaf, assetId, mappingUsage);
+					AddAssetBindingToCollection(assetId, binding);
 
-				binding.Initialize();
+					binding.Initialize();
+				}
+				catch (Exception e)
+				{
+					LoggerService.AddEntry(eSeverity.Error, "Failed to build asset telemetry binding for {0} - {1}", device, e.Message);
+				}
 			}
 		}
 
@@ -395,11 +412,16 @@ namespace ICD.Connect.Telemetry.Crestron
 		/// <summary>
 		/// Builds the bindings recursively for the given telemetry collection.
 		/// </summary>
+		/// <param name="room"></param>
 		/// <param name="nodes"></param>
 		/// <param name="mappingUsage"></param>
-		private void BuildRoomBindingsRecursive([NotNull] IEnumerable<ITelemetryNode> nodes,
+		private void BuildRoomBindingsRecursive([NotNull] IRoom room,
+		                                        [NotNull] IEnumerable<ITelemetryNode> nodes,
 		                                        [NotNull] MappingUsageTracker mappingUsage)
 		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
 			if (nodes == null)
 				throw new ArgumentNullException("nodes");
 
@@ -410,22 +432,27 @@ namespace ICD.Connect.Telemetry.Crestron
 			{
 				TelemetryCollection collection = node as TelemetryCollection;
 				if (collection != null)
-					BuildRoomBindingsRecursive(collection, mappingUsage);
+					BuildRoomBindingsRecursive(room, collection, mappingUsage);
 
 				TelemetryLeaf leaf = node as TelemetryLeaf;
 				if (leaf != null)
-					BuildRoomBinding(leaf, mappingUsage);
+					BuildRoomBinding(room, leaf, mappingUsage);
 			}
 		}
 
 		/// <summary>
 		/// Builds the telemetry binding for the given telemetry leaf.
 		/// </summary>
+		/// <param name="room"></param>
 		/// <param name="leaf"></param>
 		/// <param name="mappingUsage"></param>
-		private void BuildRoomBinding([NotNull] TelemetryLeaf leaf,
+		private void BuildRoomBinding([NotNull] IRoom room,
+		                              [NotNull] TelemetryLeaf leaf,
 		                              [NotNull] MappingUsageTracker mappingUsage)
 		{
+			if (room == null)
+				throw new ArgumentNullException("room");
+
 			if (leaf == null)
 				throw new ArgumentNullException("leaf");
 
@@ -436,10 +463,17 @@ namespace ICD.Connect.Telemetry.Crestron
 			if (mapping == null)
 				return;
 
-			RoomFusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, leaf, mappingUsage);
-			AddRoomBindingToCollection(binding);
+			try
+			{
+				RoomFusionTelemetryBinding binding = mapping.Bind(m_FusionRoom, leaf, mappingUsage);
+				AddRoomBindingToCollection(binding);
 
-			binding.Initialize();
+				binding.Initialize();
+			}
+			catch (Exception e)
+			{
+				LoggerService.AddEntry(eSeverity.Error, "Failed to build room telemetry binding for {0} - {1}", room, e.Message);
+			}
 		}
 
 		/// <summary>

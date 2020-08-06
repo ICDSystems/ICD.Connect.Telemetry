@@ -55,7 +55,7 @@ namespace ICD.Connect.Telemetry.Crestron.Bindings
 			// Check against the fusion asset whitelist for the mapping
 			IFusionAsset asset = fusionRoom.UserConfigurableAssetDetails[assetId].Asset;
 			if (!mapping.ValidateAsset(asset.AssetType))
-				throw new ArgumentException(string.Format("Mapping {0} does not support {1}", mapping.FusionSigName, asset.GetType()));
+				throw new ArgumentException(string.Format("{0} does not support {1}", mapping, asset.AssetType));
 
 			if (leaf.ParameterCount > 1)
 				throw new NotSupportedException("Method telemetry with more than 1 parameter is not supported by Fusion");

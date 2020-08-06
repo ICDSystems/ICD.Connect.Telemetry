@@ -17,7 +17,10 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 
 			ushort offset = GetCurrentOffset(mapping);
 			if (offset >= mapping.Range)
-				throw new IndexOutOfRangeException("Sigs have exceeded maximum range allowed by mapping.");
+			{
+				string message = string.Format("Offset {0} exceeds maximum range allowed by {1}", offset, mapping);
+				throw new IndexOutOfRangeException(message);
+			}
 
 			m_Ranges[mapping] = (ushort)(offset + 1);
 			return (ushort)(mapping.Sig + offset);

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Protocol.Sigs;
-using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Mappings;
 using ICD.Connect.Telemetry.Providers;
 
@@ -31,6 +31,22 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		protected AbstractFusionSigMapping()
 		{
 			Range = 1;
+		}
+
+		public override string ToString()
+		{
+			ReprBuilder builder = new ReprBuilder(this)
+				.AppendProperty("TelemetryName", TelemetryName)
+				.AppendProperty("FusionSigName", FusionSigName);
+
+			if (Sig != 0)
+			{
+				builder.AppendProperty("SigType", SigType);
+				builder.AppendProperty("Sig", Sig);
+				builder.AppendProperty("Range", Range);
+			}
+
+			return builder.ToString();
 		}
 
 		/// <summary>
