@@ -42,7 +42,6 @@
     <ProjectReference Include="..\..\ICD.Connect.Panels\ICD.Connect.Panels\ICD.Connect.Panels_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Partitioning\ICD.Connect.Partitioning.Commercial\ICD.Connect.Partitioning.Commercial_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Protocol\ICD.Connect.Protocol\ICD.Connect.Protocol_NetStandard.csproj" />
-    <ProjectReference Include="..\..\ICD.Connect.Routing\ICD.Connect.Routing.CrestronPro\ICD.Connect.Routing.CrestronPro_NetStandard.csproj" />
     <ProjectReference Include="..\..\ICD.Connect.Settings\ICD.Connect.Settings\ICD.Connect.Settings_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Telemetry.Services\ICD.Connect.Telemetry.Services_NetStandard.csproj" />
     <ProjectReference Include="..\ICD.Connect.Telemetry\ICD.Connect.Telemetry_NetStandard.csproj" />

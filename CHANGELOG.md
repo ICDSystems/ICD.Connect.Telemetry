@@ -46,6 +46,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - Using new GenericBaseUtils to standardize crestron device setup and teardown
 
+## [5.2.6] - 2020-08-06
+### Changed
+ - Moved references to ControlSystemExternalTelemetryNames to Routing project
+ - Telemetry.Crestron - Removed references to Routing.CrestronPro and Misc.CrestronPro projects, to fix dependency issues with Pro in Non-Pro
+
 ## [5.2.5] - 2020-05-06
 ### Added
  - MockFusionRoom supports Fusion To Program telemetry from the console
