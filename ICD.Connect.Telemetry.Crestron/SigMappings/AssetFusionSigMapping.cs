@@ -40,10 +40,19 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		/// <returns></returns>
 		[NotNull]
 		public AssetFusionTelemetryBinding Bind([NotNull] IFusionRoom fusionRoom,
-		                                            [NotNull] TelemetryLeaf leaf,
-		                                            uint assetId,
-		                                            [NotNull] MappingUsageTracker mappingUsage)
+		                                        [NotNull] TelemetryLeaf leaf,
+		                                        uint assetId,
+		                                        [NotNull] MappingUsageTracker mappingUsage)
 		{
+			if (fusionRoom == null)
+				throw new ArgumentNullException("fusionRoom");
+
+			if (leaf == null)
+				throw new ArgumentNullException("leaf");
+
+			if (mappingUsage == null)
+				throw new ArgumentNullException("mappingUsage");
+
 			string name = string.Format(FusionSigName, mappingUsage.GetCurrentOffset(this) + 1);
 			ushort sig = mappingUsage.GetNextSig(this);
 
@@ -54,6 +63,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 				SigType = SigType,
 				TelemetryName = TelemetryName,
 				TelemetryProviderTypes = TelemetryProviderTypes,
+				FusionAssetTypes = FusionAssetTypes,
 				SendReservedSig = SendReservedSig
 			};
 

@@ -25,6 +25,15 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings
 		                                       [NotNull] TelemetryLeaf leaf,
 		                                       [NotNull] MappingUsageTracker mappingUsage)
 		{
+			if (fusionRoom == null)
+				throw new ArgumentNullException("fusionRoom");
+
+			if (leaf == null)
+				throw new ArgumentNullException("leaf");
+
+			if (mappingUsage == null)
+				throw new ArgumentNullException("mappingUsage");
+
 			string name = string.Format(FusionSigName, mappingUsage.GetCurrentOffset(this) + 1);
 			ushort sig = mappingUsage.GetNextSig(this);
 
