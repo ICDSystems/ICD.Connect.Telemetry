@@ -12,6 +12,7 @@ using ICD.Connect.Devices;
 using ICD.Connect.Devices.Telemetry;
 using ICD.Connect.Partitioning.Commercial.Rooms;
 using ICD.Connect.Partitioning.Rooms;
+using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Bindings;
 using ICD.Connect.Telemetry.Crestron.Devices;
@@ -239,6 +240,26 @@ namespace ICD.Connect.Telemetry.Crestron
 			}
 
 			return mappings.FirstOrDefault(m => leaf.Name == m.TelemetryName && m.ValidateProvider(provider));
+		}
+
+		/// <summary>
+		/// Invokes the telemetry method for the given binding.
+		/// </summary>
+		/// <param name="binding"></param>
+		/// <param name="parameters"></param>
+		private static void Invoke([NotNull] AbstractTelemetryBinding binding, params object[] parameters)
+		{
+			if (binding == null)
+				throw new ArgumentNullException("binding");
+
+			try
+			{
+				binding.Telemetry.Invoke(parameters);
+			}
+			catch (Exception e)
+			{
+				LoggerService.AddEntry(eSeverity.Error, e, "Failed to invoke binding {0}", binding);
+			}
 		}
 
 		#endregion
@@ -561,29 +582,33 @@ namespace ICD.Connect.Telemetry.Crestron
 				return;
 
 			string telemetryName = args.Powered ? DeviceTelemetryNames.POWER_ON : DeviceTelemetryNames.POWER_OFF;
+
 			AssetFusionTelemetryBinding binding =
 				bindingsForAsset.FirstOrDefault(b => b.Mapping.TelemetryName == telemetryName);
+			if (binding == null)
+				return;
 
-			if (binding != null)
-				binding.Telemetry.Invoke();
+			Invoke(binding);
 		}
 
 		private void FusionRoomOnFusionSystemPowerChangeEvent(object sender, BoolEventArgs args)
 		{
 			RoomFusionTelemetryBinding binding =
 				m_RoomBindings.FirstOrDefault(b => b.Mapping.TelemetryName == CommercialRoomTelemetryNames.SLEEP_COMMAND);
+			if (binding == null)
+				return;
 
-			if (binding != null && !args.Data)
-				binding.Telemetry.Invoke();
+			Invoke(binding);
 		}
 
 		private void FusionRoomOnFusionDisplayPowerChangeEvent(object sender, BoolEventArgs args)
 		{
 			RoomFusionTelemetryBinding binding =
 				m_RoomBindings.FirstOrDefault(b => b.Mapping.TelemetryName == "Displays Poweroff Command"); // TODO - Hack
+			if (binding == null)
+				return;
 
-			if (binding != null && !args.Data)
-				binding.Telemetry.Invoke();
+			Invoke(binding);
 		}
 
 		#endregion
