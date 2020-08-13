@@ -158,39 +158,39 @@ namespace ICD.Connect.Telemetry.Services
 				PropertyTelemetryAttribute.GetProperties(instance.GetType())
 				                          .ToDictionary(kvp => kvp.Value.Name);
 
-			Dictionary<string, MethodInfo> methods =
+			Dictionary<string, KeyValuePair<MethodInfo, MethodTelemetryAttribute>> methods =
 				MethodTelemetryAttribute.GetMethods(instance.GetType())
-				                        .ToDictionary(kvp => kvp.Value.Name, kvp => kvp.Key);
+				                        .ToDictionary(kvp => kvp.Value.Name);
 
-			Dictionary<string, EventInfo> events =
+			Dictionary<string, KeyValuePair<EventInfo, EventTelemetryAttribute>> events =
 				EventTelemetryAttribute.GetEvents(instance.GetType())
-				                       .ToDictionary(kvp => kvp.Value.Name, kvp => kvp.Key);
+				                       .ToDictionary(kvp => kvp.Value.Name);
 
 			// Property attributes point to events and methods, so start with those
 			foreach (KeyValuePair<PropertyInfo, PropertyTelemetryAttribute> kvp in properties.Values)
 			{
-				MethodInfo methodInfo = default(MethodInfo);
-				if (kvp.Value.MethodName != null && !methods.Remove(kvp.Value.MethodName, out methodInfo))
+				KeyValuePair<MethodInfo, MethodTelemetryAttribute> methodAttributePair = default(KeyValuePair<MethodInfo, MethodTelemetryAttribute>);
+				if (kvp.Value.MethodName != null && !methods.Remove(kvp.Value.MethodName, out methodAttributePair))
 					Logger.Log(eSeverity.Error,
 					           "Failed to find MethodInfo {0} for PropertyInfo {1} on TelemetryProvider {2}",
 					           kvp.Value.MethodName, kvp.Value.Name, instance);
 
-				EventInfo eventInfo = default(EventInfo);
-				if (kvp.Value.EventName != null && !events.Remove(kvp.Value.EventName, out eventInfo))
+				KeyValuePair<EventInfo, EventTelemetryAttribute> eventAttributePair = default(KeyValuePair<EventInfo, EventTelemetryAttribute>);
+				if (kvp.Value.EventName != null && !events.Remove(kvp.Value.EventName, out eventAttributePair))
 					Logger.Log(eSeverity.Error,
 					           "Failed to find EventInfo {0} for PropertyInfo {1} on TelemetryProvider {2}",
 					           kvp.Value.EventName, kvp.Value.Name, instance);
 
-				yield return new TelemetryLeaf(kvp.Value.Name, instance, kvp.Key, methodInfo, eventInfo);
+				yield return new TelemetryLeaf(kvp.Value.Name, instance, kvp.Key, methodAttributePair.Key, eventAttributePair.Key);
 			}
 
 			// Loose Methods
-			foreach (MethodInfo methodInfo in methods.Values)
-				yield return new TelemetryLeaf(methodInfo.Name, instance, null, methodInfo, null);
+			foreach (KeyValuePair<MethodInfo, MethodTelemetryAttribute> kvp in methods.Values)
+				yield return new TelemetryLeaf(kvp.Value.Name, instance, null, kvp.Key, null);
 
 			// Loose Events
-			foreach (EventInfo eventInfo in events.Values)
-				yield return new TelemetryLeaf(eventInfo.Name, instance, null, null, eventInfo);
+			foreach (KeyValuePair<EventInfo, EventTelemetryAttribute> kvp in events.Values)
+				yield return new TelemetryLeaf(kvp.Value.Name, instance, null, null, kvp.Key);
 		}
 
 		/// <summary>
