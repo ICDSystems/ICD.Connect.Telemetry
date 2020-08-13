@@ -6,11 +6,22 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [7.0.0] - 2020-08-13
 ### Added
  - Added MQTT Proxy configuration items to MQTT telemetry provider
+ - IExternalTelemetryProvider exposes the Parent ITelemetryProvider property
+ - IFusionAsset has a property for AssetType
+ - Added Room sig mappings for Fusion
 
 ### Changed
+ - Substantial rewrite of FusionTelemetryMunger, bindings and mappings
  - Fixed a bug where telemetry methods and events were not being correctly named
+ - Null analog values are treated as 0, fixes casting bugs
+ - Moved reserved fusion sig hangling into the individual mappings
+ - Fixed duplicate telemetry bugs in fusion bindings
+ - All sig mappings are now multi-mappings with a default range of 1
+ - Updated MQTT dependency libraries
+ - Catching and logging exceptions when invoking telemetry methods from fusion
 
 ## [6.1.0] - 2020-07-14
 ### Added
