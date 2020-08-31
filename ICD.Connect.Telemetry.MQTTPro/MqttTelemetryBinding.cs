@@ -110,6 +110,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			PublishMessage message =
 				new PublishMessage
 				{
+					Id = Guid.NewGuid(),
 					Date = IcdEnvironment.GetUtcTime(),
 					Data = value
 				};
@@ -125,6 +126,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			PublishMessage message =
 				new PublishMessage
 				{
+					Id = Guid.NewGuid(),
 					Date = IcdEnvironment.GetUtcTime(),
 					Data = TelemetryMetadata.FromTelemetry(Telemetry)
 				};

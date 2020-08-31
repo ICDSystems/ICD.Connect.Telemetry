@@ -1,4 +1,5 @@
 ﻿using System;
+using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Json;
 using Newtonsoft.Json;
@@ -8,12 +9,23 @@ namespace ICD.Connect.Telemetry.MQTTPro
 	[JsonConverter(typeof(PublishMessageJsonConverter))]
 	public sealed class PublishMessage
 	{
+		public Guid Id { get; set; }
 		public DateTime Date { get; set; }
 		public object Data { get; set; }
+
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public PublishMessage()
+		{
+			Id = Guid.NewGuid();
+			Date = IcdEnvironment.GetUtcTime();
+		}
 	}
 
 	public sealed class PublishMessageJsonConverter : AbstractGenericJsonConverter<PublishMessage>
 	{
+		private const string TOKEN_ID = "id";
 		private const string TOKEN_DATE = "date";
 		private const string TOKEN_DATA = "data";
 
@@ -26,6 +38,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		protected override void WriteProperties(JsonWriter writer, PublishMessage value, JsonSerializer serializer)
 		{
 			base.WriteProperties(writer, value, serializer);
+
+			writer.WriteProperty(TOKEN_ID, value.Id);
 
 			writer.WriteProperty(TOKEN_DATE, value.Date);
 
