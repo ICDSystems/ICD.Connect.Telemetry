@@ -31,13 +31,20 @@ namespace ICD.Connect.Telemetry.MQTTPro
 	{
 		public delegate void SubscriptionCallback(byte[] data);
 
+		// Should be plenty - As of writing we send about 3k messages on startup,
+		// just don't want to fill memory so long as we can't connect to the broker
+		private const int PUBLISH_BUFFER_MAX_COUNT = 100 * 1000;
+
 		private const string PROGRAM_TO_SERVICE_PREFIX = "ProgramToService";
 		private const string SERVICE_TO_PROGRAM_PREFIX = "ServiceToProgram";
 		private const string SYSTEMS_PREFIX = "Systems";
 
 		private readonly Dictionary<string, MqttTelemetryBinding> m_Bindings;
 		private readonly Dictionary<string, IcdHashSet<SubscriptionCallback>> m_SubscriptionCallbacks;
+		private readonly ScrollQueue<PublishMessageInfo> m_PublishBuffer;
 		private readonly SafeCriticalSection m_BindingsSection;
+		private readonly SafeCriticalSection m_BufferSection;
+		private readonly SafeCriticalSection m_ProcessSection;
 
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 		private readonly IcdMqttClient m_Client;
@@ -76,7 +83,10 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			m_Bindings = new Dictionary<string, MqttTelemetryBinding>();
 			m_SubscriptionCallbacks = new Dictionary<string, IcdHashSet<SubscriptionCallback>>();
+			m_PublishBuffer = new ScrollQueue<PublishMessageInfo>(PUBLISH_BUFFER_MAX_COUNT);
 			m_BindingsSection = new SafeCriticalSection();
+			m_BufferSection = new SafeCriticalSection();
+			m_ProcessSection = new SafeCriticalSection();
 
 			m_Client = new IcdMqttClient
 			{
@@ -174,7 +184,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			// Don't bother subscribing unless we're connected
 			if (Port.IsConnected)
-				m_Client.Subscribe(new[] {topic}, new[] {MqttUtils.QOS_LEVEL_EXACTLY_ONCE});
+				m_Client.Subscribe(topic, MqttUtils.QOS_LEVEL_EXACTLY_ONCE);
 		}
 
 		/// <summary>
@@ -209,7 +219,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				m_BindingsSection.Leave();
 			}
 
-			m_Client.Unsubscribe(new[] {topic});
+			// Don't bother unsubscribing unless we're connected
+			if (Port.IsConnected)
+				m_Client.Unsubscribe(new[] {topic});
 		}
 
 		/// <summary>
@@ -228,10 +240,50 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (message == null)
 				throw new ArgumentNullException("message");
 
-			string json = JsonConvert.SerializeObject(message, Formatting.None, JsonUtils.CommonSettings);
-			byte[] data = Encoding.UTF8.GetBytes(json);
+			// Enqueue the message onto the buffer
+			m_BufferSection.Enter();
 
-			m_Client.Publish(topic, data);
+			try
+			{
+				PublishMessageInfo item = new PublishMessageInfo(topic, message);
+
+				PublishMessageInfo overflow;
+				if (m_PublishBuffer.Enqueue(item, out overflow))
+					Logger.Log(eSeverity.Warning, "Publish buffer is full - dropped message {0}{1}{2}",
+					           overflow.Topic, JsonUtils.Format(overflow.PublishMessage));
+			}
+			finally
+			{
+				m_BufferSection.Leave();
+			}
+
+			// Create a worker thread
+			ThreadingUtils.SafeInvoke(ProcessPublishBuffer);
+		}
+
+		/// <summary>
+		/// Works through the publish buffer.
+		/// </summary>
+		private void ProcessPublishBuffer()
+		{
+			if (!m_ProcessSection.TryEnter())
+				return;
+
+			try
+			{
+				PublishMessageInfo item = default(PublishMessageInfo);
+				while (Port.IsConnected && m_BufferSection.Execute(() => m_PublishBuffer.Dequeue(out item)))
+				{
+					string json = JsonConvert.SerializeObject(item.PublishMessage, Formatting.None, JsonUtils.CommonSettings);
+					byte[] data = Encoding.UTF8.GetBytes(json);
+
+					m_Client.Publish(item.Topic, data);
+				}
+			}
+			finally
+			{
+				m_ProcessSection.Leave();
+			}
 		}
 
 		#endregion
@@ -532,14 +584,19 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <param name="eventArgs"></param>
 		private void ClientOnConnectedStateChanged(object sender, BoolEventArgs eventArgs)
 		{
-			// Resubscribe to everything on connection
-			if (eventArgs.Data)
-			{
-				string[] topics = m_BindingsSection.Execute(() => m_SubscriptionCallbacks.Keys.ToArray());
-				byte[] qosLevels = Enumerable.Repeat(MqttUtils.QOS_LEVEL_EXACTLY_ONCE, topics.Length).ToArray();
+			if (!eventArgs.Data)
+				return;
 
-				m_Client.Subscribe(topics, qosLevels);
-			}
+			// Resubscribe to everything on connection
+			Dictionary<string, byte> topics =
+				m_BindingsSection.Execute(() =>
+				                          m_SubscriptionCallbacks.ToDictionary(kvp => kvp.Key,
+				                                                               kvp => MqttUtils.QOS_LEVEL_EXACTLY_ONCE));
+
+			m_Client.Subscribe(topics);
+
+			// Begin working through the publish buffer
+			ThreadingUtils.SafeInvoke(ProcessPublishBuffer);
 		}
 
 		#endregion
