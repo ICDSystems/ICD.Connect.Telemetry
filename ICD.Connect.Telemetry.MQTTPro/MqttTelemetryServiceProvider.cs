@@ -104,6 +104,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			Stop();
 			Unsubscribe(m_Client);
+			m_Client.Dispose();
 
 			base.DisposeFinal(disposing);
 		}
@@ -142,6 +143,11 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				m_StartHandle.Abort();
 
 			m_ConnectionStateManager.Stop();
+
+			if (m_Client.IsConnected)
+				m_Client.Publish(m_Client.Will.Topic, m_Client.Will.MessageBytes, m_Client.Will.QosLevel, m_Client.Will.Retain);
+
+			m_Client.Disconnect();
 
 			UnsubscribeAll();
 			DisposeBindings();
