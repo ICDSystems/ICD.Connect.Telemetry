@@ -69,11 +69,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		public string PathPrefix { get; set; }
 
-		/// <summary>
-		/// Gets the MQTT client.
-		/// </summary>
-		public IMqttClient Port { get { return m_Client; } }
-
 		#endregion
 
 		/// <summary>
@@ -183,7 +178,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			}
 
 			// Don't bother subscribing unless we're connected
-			if (Port.IsConnected)
+			if (m_Client.IsConnected)
 				m_Client.Subscribe(topic, MqttUtils.QOS_LEVEL_EXACTLY_ONCE);
 		}
 
@@ -220,7 +215,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			}
 
 			// Don't bother unsubscribing unless we're connected
-			if (Port.IsConnected)
+			if (m_Client.IsConnected)
 				m_Client.Unsubscribe(new[] {topic});
 		}
 
@@ -272,7 +267,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			try
 			{
 				PublishMessageInfo item = default(PublishMessageInfo);
-				while (Port.IsConnected && m_BufferSection.Execute(() => m_PublishBuffer.Dequeue(out item)))
+				while (m_Client.IsConnected && m_BufferSection.Execute(() => m_PublishBuffer.Dequeue(out item)))
 				{
 					string json = JsonConvert.SerializeObject(item.PublishMessage, Formatting.None, JsonUtils.CommonSettings);
 					byte[] data = Encoding.UTF8.GetBytes(json);
@@ -649,14 +644,14 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			base.CopySettingsFinal(settings);
 
 			settings.PathPrefix = PathPrefix;
-			settings.Hostname = Port.Hostname;
-			settings.Port = Port.Port;
-			settings.ProxyHostname = Port.ProxyHostname;
-			settings.ProxyPort = Port.ProxyPort;
-			settings.Username = Port.Username;
-			settings.Password = Port.Password;
-			settings.Secure = Port.Secure;
-			settings.CaCertPath = Port.CaCertPath;
+			settings.Hostname = m_Client.Hostname;
+			settings.Port = m_Client.Port;
+			settings.ProxyHostname = m_Client.ProxyHostname;
+			settings.ProxyPort = m_Client.ProxyPort;
+			settings.Username = m_Client.Username;
+			settings.Password = m_Client.Password;
+			settings.Secure = m_Client.Secure;
+			settings.CaCertPath = m_Client.CaCertPath;
 		}
 
 		/// <summary>
@@ -716,7 +711,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			foreach (IConsoleNodeBase node in GetBaseConsoleNodes())
 				yield return node;
 
-			yield return Port;
+			yield return m_Client;
 		}
 
 		/// <summary>
