@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Devices.Controls;
+using ICD.Connect.Devices.Controls.Power;
 using ICD.Connect.Devices.Telemetry;
 using ICD.Connect.Devices.Telemetry.DeviceInfo.Monitored;
 using ICD.Connect.Protocol.Sigs;
