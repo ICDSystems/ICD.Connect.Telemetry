@@ -688,6 +688,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		private void StartConnectionStateManagerIfReady()
 		{
+			if (Disable)
+				return;
+
 			if (m_CoreSettingsApplied && IcdEnvironment.ProgramIsInitialized)
 				Start();
 		}

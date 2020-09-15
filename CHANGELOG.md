@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Added unique IDs to MQTT publish messages
 
+### Changed
+ - Don't start the MQTT telemetry provider if it is configured as disabled
+
 ## [7.0.0] - 2020-08-13
 ### Added
  - Added MQTT Proxy configuration items to MQTT telemetry provider
