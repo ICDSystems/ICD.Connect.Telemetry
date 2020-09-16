@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Collections;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
+using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Json;
 using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
@@ -49,6 +51,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 		private readonly IcdMqttClient m_Client;
 
+		// External config workaround until DAV can fully configure MQTT
+		private readonly MqttTelemetryOverrides m_Overrides;
+
 		private bool m_CoreSettingsApplied;
 		private Thread m_StartHandle;
 
@@ -69,6 +74,51 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		public string PathPrefix { get; set; }
 
+		/// <summary>
+		/// Gets/sets the hostname.
+		/// </summary>
+		public string Hostname { get; set; }
+
+		/// <summary>
+		/// Gets/sets the network port.
+		/// </summary>
+		public ushort Port { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy hostname.
+		/// </summary>
+		public string ProxyHostname { get; set; }
+
+		/// <summary>
+		/// Gets/sets the proxy port.
+		/// </summary>
+		public ushort ProxyPort { get; set; }
+
+		/// <summary>
+		/// Gets/sets the username.
+		/// </summary>
+		public string Username { get; set; }
+
+		/// <summary>
+		/// Gets/sets the password.
+		/// </summary>
+		public string Password { get; set; }
+
+		/// <summary>
+		/// Gets/sets the secure mode.
+		/// </summary>
+		public bool Secure { get; set; }
+
+		/// <summary>
+		/// Gets/sets the path to the certificate-authority certificate.
+		/// </summary>
+		public string CaCertPath { get; set; }
+
+		/// <summary>
+		/// Gets/sets the path to the overrides config.
+		/// </summary>
+		public string ConfigPath { get; set; }
+
 		#endregion
 
 		/// <summary>
@@ -82,6 +132,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_BindingsSection = new SafeCriticalSection();
 			m_BufferSection = new SafeCriticalSection();
 			m_ProcessSection = new SafeCriticalSection();
+			m_Overrides = new MqttTelemetryOverrides();
 
 			m_Client = new IcdMqttClient
 			{
@@ -117,6 +168,18 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		public void Start()
 		{
 			Stop();
+
+			m_Client.Hostname = m_Overrides.Hostname ?? Hostname;
+			m_Client.Port = m_Overrides.Port ?? Port;
+			m_Client.ProxyHostname = m_Overrides.ProxyHostname ?? ProxyHostname;
+			m_Client.ProxyPort = m_Overrides.ProxyPort ?? ProxyPort;
+			m_Client.Username = Username;
+			m_Client.Password = Password;
+			m_Client.Secure = Secure;
+			m_Client.CaCertPath = CaCertPath;
+
+			// Client ID is the System ID
+			m_Client.ClientId = Core.Uuid.ToString();
 
 			GenerateLastWillAndTestament();
 			m_ConnectionStateManager.Start();
@@ -611,23 +674,44 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <param name="factory"></param>
 		protected override void ApplySettingsFinal(MqttTelemetryServiceProviderSettings settings, IDeviceFactory factory)
 		{
-			base.ApplySettingsFinal(settings, factory);
-
 			m_CoreSettingsApplied = false;
 
+			base.ApplySettingsFinal(settings, factory);
+
 			PathPrefix = settings.PathPrefix;
+			Hostname = settings.Hostname;
+			Port = settings.Port;
+			ProxyHostname = settings.ProxyHostname;
+			ProxyPort = settings.ProxyPort;
+			Username = settings.Username;
+			Password = settings.Password;
+			Secure = settings.Secure;
+			CaCertPath = settings.CaCertPath;
 
-			m_Client.Hostname = settings.Hostname;
-			m_Client.Port = settings.Port;
-			m_Client.ProxyHostname = settings.ProxyHostname;
-			m_Client.ProxyPort = settings.ProxyPort;
-			m_Client.Username = settings.Username;
-			m_Client.Password = settings.Password;
-			m_Client.Secure = settings.Secure;
-			m_Client.CaCertPath = settings.CaCertPath;
+			ConfigPath =
+				string.IsNullOrEmpty(settings.ConfigPath)
+					? null
+					: PathUtils.GetDefaultConfigPath("Telemetry", settings.ConfigPath);
 
-			// Client ID is the System ID
-			m_Client.ClientId = Core.Uuid.ToString();
+			if (ConfigPath == null)
+			{
+				m_Overrides.Clear();
+				return;
+			}
+
+			try
+			{
+				string xml = IcdFile.ReadToEnd(ConfigPath, new UTF8Encoding(false));
+				xml = EncodingUtils.StripUtf8Bom(xml);
+
+				m_Overrides.ParseXml(xml);
+
+				Disable = m_Overrides.Disable ?? Disable;
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, e, "Failed to load MQTT telemetry overrides {0} - {1}", ConfigPath, e.Message);
+			}
 		}
 
 		/// <summary>
@@ -638,7 +722,20 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			base.ClearSettingsFinal();
 
 			PathPrefix = null;
-			m_Client.ClearSettings();
+			Hostname = null;
+			Port = MqttUtils.DEFAULT_PORT;
+			ProxyHostname = null;
+			ProxyPort = 0;
+			Username = null;
+			Password = null;
+			Secure = false;
+			CaCertPath = null;
+			ConfigPath = null;
+
+			// Hack - Assume DAV disabled this instance if we're using overrides
+			Disable = m_Overrides.Disable == null ? Disable : m_Overrides.Disable.Value;
+
+			m_Overrides.Clear();
 		}
 
 		/// <summary>
@@ -650,14 +747,18 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			base.CopySettingsFinal(settings);
 
 			settings.PathPrefix = PathPrefix;
-			settings.Hostname = m_Client.Hostname;
-			settings.Port = m_Client.Port;
-			settings.ProxyHostname = m_Client.ProxyHostname;
-			settings.ProxyPort = m_Client.ProxyPort;
-			settings.Username = m_Client.Username;
-			settings.Password = m_Client.Password;
-			settings.Secure = m_Client.Secure;
-			settings.CaCertPath = m_Client.CaCertPath;
+			settings.Hostname = Hostname;
+			settings.Port = Port;
+			settings.ProxyHostname = ProxyHostname;
+			settings.ProxyPort = ProxyPort;
+			settings.Username = Username;
+			settings.Password = Password;
+			settings.Secure = Secure;
+			settings.CaCertPath = CaCertPath;
+			settings.ConfigPath = ConfigPath;
+
+			// Hack - Assume DAV disabled this instance if we're using overrides
+			settings.Disable = m_Overrides.Disable == null ? Disable : m_Overrides.Disable.Value;
 		}
 
 		/// <summary>
@@ -709,6 +810,15 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			addRow("IsRunning", IsRunning);
 			addRow("PathPrefix", PathPrefix);
+			addRow("Hostname", Hostname);
+			addRow("Port", Port);
+			addRow("ProxyHostname", ProxyHostname);
+			addRow("ProxyPort", ProxyPort);
+			addRow("Username", Username);
+			addRow("Password", Password);
+			addRow("Secure", Secure);
+			addRow("CaCertPath", CaCertPath);
+			addRow("ConfigPath", ConfigPath);
 		}
 
 		/// <summary>

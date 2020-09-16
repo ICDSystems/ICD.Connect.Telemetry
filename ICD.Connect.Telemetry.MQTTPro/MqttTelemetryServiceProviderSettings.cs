@@ -16,6 +16,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private const string ELEMENT_PASSWORD = "Password";
 		private const string ELEMENT_SECURE = "Secure";
 		private const string ELEMENT_CA_CERT_PATH = "CaCertPath";
+		private const string ELEMENT_CONFIG_PATH = "ConfigPath";
 
 		/// <summary>
 		/// Gets/sets the path prefix for the core MQTT telemetry topics.
@@ -63,6 +64,11 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		public string CaCertPath { get; set; }
 
 		/// <summary>
+		/// Gets/sets the path to the overrides config.
+		/// </summary>
+		public string ConfigPath { get; set; }
+
+		/// <summary>
 		/// Constructor.
 		/// </summary>
 		public MqttTelemetryServiceProviderSettings()
@@ -87,6 +93,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			writer.WriteElementString(ELEMENT_PASSWORD, Password);
 			writer.WriteElementString(ELEMENT_SECURE, IcdXmlConvert.ToString(Secure));
 			writer.WriteElementString(ELEMENT_CA_CERT_PATH, CaCertPath);
+			writer.WriteElementString(ELEMENT_CONFIG_PATH, ConfigPath);
 		}
 
 		/// <summary>
@@ -106,6 +113,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			Password = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_PASSWORD);
 			Secure = XmlUtils.TryReadChildElementContentAsBoolean(xml, ELEMENT_SECURE) ?? false;
 			CaCertPath = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_CA_CERT_PATH);
+			ConfigPath = XmlUtils.TryReadChildElementContentAsString(xml, ELEMENT_CONFIG_PATH);
 		}
 	}
 }
