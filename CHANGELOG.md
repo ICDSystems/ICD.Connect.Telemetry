@@ -6,11 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [8.0.0] - 2020-09-24
 ### Added
  - Added unique IDs to MQTT publish messages
+ - Added secondary configuration for overriding default telemetry settings via DAV manage section
 
 ### Changed
  - Don't start the MQTT telemetry provider if it is configured as disabled
+ - MQTT messages are locally buffered while the client is disconnected - more reliable messaging
+ - Fixed a bug where the LWT system offline message was not always being published on disconnect
 
 ## [7.0.0] - 2020-08-13
 ### Added
