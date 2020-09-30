@@ -341,7 +341,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 					string json = JsonConvert.SerializeObject(item.PublishMessage, Formatting.None, JsonUtils.CommonSettings);
 					byte[] data = Encoding.UTF8.GetBytes(json);
 
-					m_Client.Publish(item.Topic, data);
+					m_Client.Publish(item.Topic, data, MqttUtils.QOS_LEVEL_EXACTLY_ONCE, true);
 				}
 			}
 			finally
@@ -476,6 +476,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_Client.Will.Topic = BuildProgramToServiceTopic("IsOnline");
 			m_Client.Will.Message = JsonConvert.SerializeObject(new PublishMessage {Data = false}, Formatting.None,
 			                                                    JsonUtils.CommonSettings);
+			m_Client.Will.Retain = true;
 			m_Client.Will.QosLevel = MqttUtils.QOS_LEVEL_EXACTLY_ONCE;
 			m_Client.Will.Flag = true;
 		}
