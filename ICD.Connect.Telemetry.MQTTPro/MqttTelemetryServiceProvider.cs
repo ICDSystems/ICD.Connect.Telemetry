@@ -474,8 +474,14 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private void GenerateLastWillAndTestament()
 		{
 			m_Client.Will.Topic = BuildProgramToServiceTopic("IsOnline");
-			m_Client.Will.Message = JsonConvert.SerializeObject(new PublishMessage {Data = false}, Formatting.None,
-			                                                    JsonUtils.CommonSettings);
+			m_Client.Will.Message =
+				JsonConvert.SerializeObject(new PublishMessage
+											{
+												Data = false,
+												Date = DateTime.MinValue
+											},
+				                            Formatting.None,
+				                            JsonUtils.CommonSettings);
 			m_Client.Will.Retain = true;
 			m_Client.Will.QosLevel = MqttUtils.QOS_LEVEL_EXACTLY_ONCE;
 			m_Client.Will.Flag = true;
