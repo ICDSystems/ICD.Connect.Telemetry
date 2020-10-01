@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.EventArguments;
+using ICD.Common.Utils.Timers;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
 #if SIMPLSHARP
+using Crestron.SimplSharp;
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
+using Crestron.SimplSharpPro.CrestronThread;
 using ICD.Connect.Misc.CrestronPro;
 using System.Linq;
-using ICD.Connect.Misc.CrestronPro.Extensions;
 using ICD.Connect.Telemetry.CrestronPro.Assets;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
@@ -69,6 +71,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 #if SIMPLSHARP
         private FusionRoom m_FusionRoom;
+		private Thread m_RviGenerationThread;
 #endif
 
 #region Properties
@@ -213,6 +216,10 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 #if SIMPLSHARP
             SetFusionRoom(null);
+
+			Thread thread = m_RviGenerationThread;
+			if (thread != null)
+				thread.Abort();
 #endif
 		}
 
@@ -468,14 +475,34 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		public void RebuildRvi()
 		{
 #if SIMPLSHARP
-			m_FusionRoom.ReRegister();
-			FusionRVI.GenerateFileForAllFusionDevices();
+			m_RviGenerationThread = new Thread(RviGenerationThreadCallback, null)
+			{
+				Name = "RviGenerationThread",
+				Priority = Thread.eThreadPriority.LowestPriority
+			};		
 #else
 			throw new NotSupportedException();
 #endif
 		}
 
-#endregion
+#if SIMPLSHARP
+		private object RviGenerationThreadCallback(object userspecific)
+		{
+			Log(eSeverity.Debug, "Starting RVI Generation");
+			IcdStopwatch stopwatch = new IcdStopwatch();
+			
+			stopwatch.Start();          
+			FusionRVI.GenerateFileForAllFusionDevices();
+			stopwatch.Stop();
+			Log(eSeverity.Debug, "RVI Generation took {0}ms", stopwatch.ElapsedMilliseconds);
+			
+			m_RviGenerationThread = null;
+			
+			return null;
+		}
+#endif
+
+		#endregion
 
 #region Settings
 
