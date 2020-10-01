@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [8.0.1] - 2020-09-30
+### Changed
+ - Published MQTT messages are retained
+ - Fixed bad MQTT LWT timestamps
+
 ## [8.0.0] - 2020-09-24
 ### Added
  - Added unique IDs to MQTT publish messages
