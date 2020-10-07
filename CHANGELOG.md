@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
  - Publishing system online message when the MQTT client reconnects
+ - Pushing all current activities to telemetry instead of just the most recent one
 
 ## [8.0.1] - 2020-09-30
 ### Changed
