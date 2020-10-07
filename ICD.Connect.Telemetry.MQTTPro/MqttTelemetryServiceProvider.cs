@@ -17,6 +17,7 @@ using ICD.Connect.Protocol;
 using ICD.Connect.Protocol.NetworkPro.EventArguments;
 using ICD.Connect.Protocol.NetworkPro.Ports.Mqtt;
 using ICD.Connect.Settings;
+using ICD.Connect.Settings.Originators;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Services;
 using Newtonsoft.Json;
@@ -144,7 +145,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_ConnectionStateManager.SetPort(m_Client, false);
 
 			IcdEnvironment.OnProgramInitializationComplete += IcdEnvironmentOnProgramInitializationComplete;
-			Core.OnSettingsApplied += CoreOnSettingsApplied;
+			Core.OnLifecycleStateChanged += CoreOnLifecycleStateChanged;
 		}
 
 		/// <summary>
@@ -769,15 +770,19 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		}
 
 		/// <summary>
-		/// Called when the Core finishes applying settings.
+		/// Called when the Core lifecycle state changes.
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="eventArgs"></param>
-		private void CoreOnSettingsApplied(object sender, EventArgs eventArgs)
+		private void CoreOnLifecycleStateChanged(object sender, LifecycleStateEventArgs eventArgs)
 		{
-			m_CoreSettingsApplied = true;
-
-			StartConnectionStateManagerIfReady();
+			switch (eventArgs.Data)
+			{
+				case eLifecycleState.Started:
+					m_CoreSettingsApplied = true;
+					StartConnectionStateManagerIfReady();
+					break;
+			}
 		}
 
 		/// <summary>
