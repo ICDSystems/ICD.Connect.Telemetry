@@ -63,6 +63,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Substantial simplification of telemetry attributes and nodes
  - Fixed a bug where originator telemetry was not being lazy-loaded correctly
 
+## [5.5.0] - 2020-10-06
+### Changed
+ - CrestronFusion - RVI generation now runs in it's own low-priority thread
+ 
 ## [5.4.0] - 2020-03-20
 ### Added
  - Added error catching around adding sigs and assets to fusion to better log what sigs are causing errors.
