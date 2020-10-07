@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Publishing system online message when the MQTT client reconnects
+
 ## [8.0.1] - 2020-09-30
 ### Changed
  - Published MQTT messages are retained

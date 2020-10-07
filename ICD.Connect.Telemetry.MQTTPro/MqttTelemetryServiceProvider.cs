@@ -120,6 +120,46 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		public string ConfigPath { get; set; }
 
+		/// <summary>
+		/// Gets the system online topic.
+		/// </summary>
+		private string SystemOnlineTopic
+		{
+			get { return BuildProgramToServiceTopic("IsOnline"); }
+		}
+
+		/// <summary>
+		/// Returns a new system online message.
+		/// </summary>
+		private PublishMessage SystemOnlineMessage
+		{
+			get
+			{
+				return
+					new PublishMessage
+					{
+						Data = true,
+						Date = DateTime.MinValue
+					};
+			}
+		}
+
+		/// <summary>
+		/// Returns a new system offline message.
+		/// </summary>
+		private PublishMessage SystemOfflineMessage
+		{
+			get
+			{
+				return
+					new PublishMessage
+					{
+						Data = false,
+						Date = DateTime.MinValue
+					};
+			}
+		}
+
 		#endregion
 
 		/// <summary>
@@ -342,7 +382,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 					string json = JsonConvert.SerializeObject(item.PublishMessage, Formatting.None, JsonUtils.CommonSettings);
 					byte[] data = Encoding.UTF8.GetBytes(json);
 
-					m_Client.Publish(item.Topic, data, MqttUtils.QOS_LEVEL_EXACTLY_ONCE, true);
+					m_Client.Publish(item.Topic, data, MqttUtils.QOS_LEVEL_AT_LEAST_ONCE, true);
 				}
 			}
 			finally
@@ -474,15 +514,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		private void GenerateLastWillAndTestament()
 		{
-			m_Client.Will.Topic = BuildProgramToServiceTopic("IsOnline");
-			m_Client.Will.Message =
-				JsonConvert.SerializeObject(new PublishMessage
-											{
-												Data = false,
-												Date = DateTime.MinValue
-											},
-				                            Formatting.None,
-				                            JsonUtils.CommonSettings);
+			m_Client.Will.Topic = SystemOnlineTopic;
+			m_Client.Will.Message = JsonConvert.SerializeObject(SystemOfflineMessage, Formatting.None, JsonUtils.CommonSettings);
 			m_Client.Will.Retain = true;
 			m_Client.Will.QosLevel = MqttUtils.QOS_LEVEL_EXACTLY_ONCE;
 			m_Client.Will.Flag = true;
@@ -658,6 +691,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			if (!eventArgs.Data)
 				return;
+
+			// Send the online message
+			Publish(SystemOnlineTopic, SystemOnlineMessage);
 
 			// Resubscribe to everything on connection
 			Dictionary<string, byte> topics =
