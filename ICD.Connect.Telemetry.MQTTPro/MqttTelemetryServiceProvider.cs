@@ -227,11 +227,14 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			// Build the telemetry asynchronously - it's heavy on startup
 #if SIMPLSHARP
-			m_StartHandle = new Thread(o =>
-			                           {
-				                           GenerateBindingsForSystem();
-				                           return null;
-			                           }, null) {Priority = Thread.eThreadPriority.LowestPriority};
+			m_StartHandle =
+				new Thread(o =>
+				           {
+					           GenerateBindingsForSystem();
+					           return null;
+				           }, null, Thread.eThreadStartOptions.CreateSuspended)
+				{Priority = Thread.eThreadPriority.LowestPriority};
+			m_StartHandle.Start();
 #else
 			m_StartHandle = new Thread(GenerateBindingsForSystem) { Priority = ThreadPriority.Lowest };
 			m_StartHandle.Start();
