@@ -475,11 +475,20 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		public void RebuildRvi()
 		{
 #if SIMPLSHARP
-			m_RviGenerationThread = new Thread(RviGenerationThreadCallback, null)
+
+			// If RVI generation is already running, Cancel
+			if (m_RviGenerationThread != null)
+			{
+				Log(eSeverity.Warning, "RVI Generation already running, aborting");
+				return;
+			}
+
+			m_RviGenerationThread = new Thread(RviGenerationThreadCallback, null, Thread.eThreadStartOptions.CreateSuspended)
 			{
 				Name = "RviGenerationThread",
 				Priority = Thread.eThreadPriority.LowestPriority
-			};		
+			};
+			m_RviGenerationThread.Start();
 #else
 			throw new NotSupportedException();
 #endif
@@ -490,14 +499,23 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		{
 			Log(eSeverity.Debug, "Starting RVI Generation");
 			IcdStopwatch stopwatch = new IcdStopwatch();
-			
-			stopwatch.Start();          
-			FusionRVI.GenerateFileForAllFusionDevices();
-			stopwatch.Stop();
-			Log(eSeverity.Debug, "RVI Generation took {0}ms", stopwatch.ElapsedMilliseconds);
-			
-			m_RviGenerationThread = null;
-			
+
+			try
+			{
+				stopwatch.Start();
+				FusionRVI.GenerateFileForAllFusionDevices();
+				stopwatch.Stop();
+				Log(eSeverity.Debug, "RVI Generation took {0}ms", stopwatch.ElapsedMilliseconds);
+			}
+			catch (Exception e)
+			{
+				Log(eSeverity.Error, e, "Exception Generating RVI");
+			}
+			finally
+			{
+				m_RviGenerationThread = null;
+			}
+
 			return null;
 		}
 #endif
