@@ -75,7 +75,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		/// <summary>
 		/// Collection of Boolean Outputs received from the device.
 		/// </summary>
-		private IDeviceBooleanOutputCollection BooleanOutput
+		public override IDeviceBooleanOutputCollection BooleanOutput
 		{
 			get
 			{
@@ -107,7 +107,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		/// <summary>
 		/// Collection of Integer Outputs received from the device.
 		/// </summary>
-		private IDeviceUShortOutputCollection UShortOutput
+		public override IDeviceUShortOutputCollection UShortOutput
 		{
 			get
 			{
@@ -139,7 +139,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		/// <summary>
 		/// Collection of String Outputs received from the device.
 		/// </summary>
-		private IDeviceStringOutputCollection StringOutput
+		public override IDeviceStringOutputCollection StringOutput
 		{
 			get
 			{

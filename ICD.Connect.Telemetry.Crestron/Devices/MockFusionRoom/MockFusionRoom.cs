@@ -99,6 +99,8 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 
 		}
 
+		#region Methods
+
 		/// <summary>
 		/// Gets the current online status of the device.
 		/// </summary>
@@ -106,6 +108,31 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 		protected override bool GetIsOnlineStatus()
 		{
 			return true;
+		}
+
+		/// <summary>
+		/// Gets the created input sigs.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<SigInfo> GetInputSigInfo()
+		{
+			foreach (var kvp in m_InputSigsDigital)
+				yield return new SigInfo(kvp.Key, 0, kvp.Value);
+
+			foreach (var kvp in m_InputSigsAnalog)
+				yield return new SigInfo(kvp.Key, 0, kvp.Value);
+
+			foreach (var kvp in m_InputSigsSerials)
+				yield return new SigInfo(kvp.Key, 0, kvp.Value);
+		}
+
+		/// <summary>
+		/// Gets the created output sigs.
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<SigInfo> GetOutputSigInfo()
+		{
+			return m_SigCallbackManager.GetOutputSigs();
 		}
 
 		/// <summary>
@@ -344,6 +371,10 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 			//No RVI for MockFusion
 		}
 
+		#endregion
+
+		#region Private Methods
+
 		private object GetSigValue(eSigType type, uint number)
 		{
 
@@ -365,6 +396,8 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 					throw new ArgumentOutOfRangeException("type");
 			}
 		}
+
+		#endregion
 
 		#region Asset Callbacks
 
