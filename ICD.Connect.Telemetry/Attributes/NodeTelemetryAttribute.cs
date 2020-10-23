@@ -51,10 +51,10 @@ namespace ICD.Connect.Telemetry.Attributes
 		/// <param name="propertyInfo"></param>
 		/// <param name="getTelemetryForProvider"></param>
 		/// <returns></returns>
-		public ITelemetryNode InstantiateTelemetryNode([NotNull] ITelemetryProvider instance,
-		                                                             [NotNull] PropertyInfo propertyInfo,
-		                                                             Func<string, ITelemetryProvider,
-			                                                             TelemetryCollection> getTelemetryForProvider)
+		public TelemetryProviderNode InstantiateTelemetryNode([NotNull] ITelemetryProvider instance,
+		                                                      [NotNull] PropertyInfo propertyInfo,
+		                                                      Func<string, ITelemetryProvider,
+			                                                      TelemetryProviderNode> getTelemetryForProvider)
 		{
 			if (instance == null)
 				throw new ArgumentNullException("instance");

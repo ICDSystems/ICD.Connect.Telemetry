@@ -21,7 +21,7 @@ namespace ICD.Connect.Telemetry.Services
 {
 	public sealed class TelemetryService : AbstractService<ITelemetryService, TelemetryServiceSettings>, ITelemetryService
 	{
-		private readonly WeakKeyDictionary<ITelemetryProvider, TelemetryCollection> m_TelemetryProviders;
+		private readonly BiDictionary<ITelemetryProvider, TelemetryProviderNode> m_TelemetryProviders;
 		private readonly SafeCriticalSection m_TelemetryProvidersSection;
 
 		/// <summary>
@@ -29,38 +29,57 @@ namespace ICD.Connect.Telemetry.Services
 		/// </summary>
 		public TelemetryService()
 		{
-			m_TelemetryProviders = new WeakKeyDictionary<ITelemetryProvider, TelemetryCollection>();
+			m_TelemetryProviders = new BiDictionary<ITelemetryProvider, TelemetryProviderNode>();
 			m_TelemetryProvidersSection = new SafeCriticalSection();
 		}
 
-#region Methods
+		#region Methods
+
+		/// <summary>
+		/// Override to release resources.
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected override void DisposeFinal(bool disposing)
+		{
+			base.DisposeFinal(disposing);
+
+			DeinitializeCoreTelemetry();
+		}
 
 		/// <summary>
 		/// Lazy-loads telemetry for the core and returns the root telemetry.
 		/// </summary>
 		/// <returns></returns>
-		public TelemetryCollection InitializeCoreTelemetry()
+		[NotNull]
+		public TelemetryProviderNode LazyLoadCoreTelemetry()
 		{
 			return LazyLoadTelemetry("Core", Core);
+		}
+
+		/// <summary>
+		/// Disposes the root telemetry and all child telemetry nodes recursively.
+		/// </summary>
+		public void DeinitializeCoreTelemetry()
+		{
+			TelemetryProviderNode root;
+			if (TryGetTelemetryForProvider(Core, out root))
+				DisposeTelemetry(root);
 		}
 
 		/// <summary>
 		/// Returns previously loaded telemetry for the given provider.
 		/// </summary>
 		/// <param name="provider"></param>
+		/// <param name="telemetryCollection"></param>
 		/// <returns></returns>
-		[NotNull]
-		public TelemetryCollection GetTelemetryForProvider([NotNull] ITelemetryProvider provider)
+		public bool TryGetTelemetryForProvider([NotNull] ITelemetryProvider provider, out TelemetryProviderNode telemetryCollection)
 		{
 			m_TelemetryProvidersSection.Enter();
 
 			try
 			{
-				TelemetryCollection collection;
-				if (m_TelemetryProviders.TryGetValue(provider, out collection))
-					return collection;
-
-				throw new ArgumentException("No telemetry initialized for provider " + provider, "provider");
+				
+				return m_TelemetryProviders.TryGetValue(provider, out telemetryCollection);
 			}
 			finally
 			{
@@ -68,9 +87,125 @@ namespace ICD.Connect.Telemetry.Services
 			}
 		}
 
-#endregion
+		#endregion
 
-#region Private Methods
+		#region Private Methods
+
+		/// <summary>
+		/// Lazy-loads telemetry nodes for the current collection contents.
+		/// Disposes telemetry nodes that are no longer present in the collection.
+		/// </summary>
+		/// <param name="collection"></param>
+		private IEnumerable<ITelemetryNode> UpdateCollectionTelemetry([NotNull] TelemetryCollection collection)
+		{
+			if (collection == null)
+				throw new ArgumentNullException("collection");
+
+			// Determine the actual telemetry providers the collection needs to contain
+			ITelemetryProvider[] actual = collection.Value.Cast<ITelemetryProvider>().ToArray();
+			IcdHashSet<ITelemetryProvider> actualSet = actual.ToIcdHashSet();
+
+			// Determine which telemetry providers were removed from the collection
+			IEnumerable<ITelemetryProvider> removed =
+				collection.Select(n => n.Provider)
+				          .Where(e => !actualSet.Contains(e));
+
+			// Determine the telemetry nodes that remain after removing providers
+			Dictionary<string, TelemetryProviderNode> remaining =
+				collection.Where(n => !actualSet.Contains(n.Provider))
+				          .Cast<TelemetryProviderNode>()
+				          .ToDictionary(n => n.Name);
+
+			// Dispose the telemetry for removed providers
+			foreach (ITelemetryProvider provider in removed)
+				DisposeTelemetry(provider);
+
+			// Lazy-load the remaining items     
+			int index = 0;
+			foreach (ITelemetryProvider provider in actual)
+			{
+				// Get the name for the node
+				PropertyInfo idProperty = TelemetryCollectionIdentityAttribute.GetProperty(provider);
+				string name =
+					idProperty == null
+						? string.Format("{0}{1}", collection.Name, index)
+						: idProperty.GetValue(provider, null).ToString();
+				index++;
+
+				// Is there already a node for this?
+				TelemetryProviderNode existingNode;
+				if (remaining.TryGetValue(name, out existingNode))
+				{
+					if (provider == existingNode.Provider)
+					{
+						yield return existingNode;
+						continue;
+					}
+					
+					DisposeTelemetry(existingNode);
+				}
+
+				yield return LazyLoadTelemetry(name, provider);
+			}
+		}
+
+		#endregion
+
+		#region Disposal
+
+		/// <summary>
+		/// Disposes the telemetry nodes for the given provider recursively.
+		/// </summary>
+		/// <param name="provider"></param>
+		private void DisposeTelemetry([NotNull] ITelemetryProvider provider)
+		{
+			if (provider == null)
+				throw new ArgumentNullException("provider");
+
+			TelemetryProviderNode collection;
+			if (!TryGetTelemetryForProvider(provider, out collection))
+				return;
+
+			DisposeTelemetry(collection);
+		}
+
+		/// <summary>
+		/// Disposes the given telemetry node recursively.
+		/// </summary>
+		/// <param name="node"></param>
+		private void DisposeTelemetry([NotNull] ITelemetryNode node)
+		{
+			if (node == null)
+				throw new ArgumentNullException("node");
+
+			m_TelemetryProvidersSection.Enter();
+
+			try
+			{
+				// Remove from the cache
+				TelemetryProviderNode telemetryProviderNode = node as TelemetryProviderNode;
+				if (telemetryProviderNode != null)
+					m_TelemetryProviders.RemoveValue(telemetryProviderNode);
+
+				// Copy the children
+				ITelemetryNode[] children = node.GetChildren().ToArray();
+
+				// Dispose the node
+				node.Dispose();
+
+				// Dispose the children
+				foreach (ITelemetryNode child in children)
+					DisposeTelemetry(child);
+			}
+			finally
+			{
+				m_TelemetryProvidersSection.Leave();
+			}
+		}
+
+		#endregion
+
+		#region Instantiation
 
 		/// <summary>
 		/// Lazy-loads telemetry recursively for a given provider. 
@@ -79,7 +214,7 @@ namespace ICD.Connect.Telemetry.Services
 		/// <param name="provider"></param>
 		/// <returns></returns>
 		[NotNull]
-		private TelemetryCollection LazyLoadTelemetry([NotNull] string name, [NotNull] ITelemetryProvider provider)
+		private TelemetryProviderNode LazyLoadTelemetry([NotNull] string name, [NotNull] ITelemetryProvider provider)
 		{
 			if (provider == null)
 				throw new ArgumentNullException("provider");
@@ -103,13 +238,13 @@ namespace ICD.Connect.Telemetry.Services
 		/// <param name="instance"></param>
 		/// <returns></returns>
 		[NotNull]
-		private TelemetryCollection InstantiateTelemetry([NotNull] string name, [NotNull] ITelemetryProvider instance)
+		private TelemetryProviderNode InstantiateTelemetry([NotNull] string name, [NotNull] ITelemetryProvider instance)
 		{
 			if (instance == null)
 				throw new ArgumentNullException("instance");
 
 			IEnumerable<ITelemetryNode> children = InstantiateTelemetryNodes(instance);
-			return new TelemetryCollection(name, instance, children);
+			return new TelemetryProviderNode(name, instance, children);
 		}
 
 		/// <summary>
@@ -126,7 +261,7 @@ namespace ICD.Connect.Telemetry.Services
 			foreach (TelemetryLeaf leaf in InstantiateLeafTelemetry(instance))
 				yield return leaf;
 
-			foreach (ITelemetryNode node in InstantiateNodeTelemetry(instance))
+			foreach (TelemetryProviderNode node in InstantiateNodeTelemetry(instance))
 				yield return node;
 
 			foreach (TelemetryCollection collection in InstantiateCollectionTelemetry(instance))
@@ -198,7 +333,7 @@ namespace ICD.Connect.Telemetry.Services
 		/// </summary>
 		/// <param name="instance"></param>
 		[NotNull]
-		private IEnumerable<ITelemetryNode> InstantiateNodeTelemetry([NotNull] ITelemetryProvider instance)
+		private IEnumerable<TelemetryProviderNode> InstantiateNodeTelemetry([NotNull] ITelemetryProvider instance)
 		{
 			if (instance == null)
 				throw new ArgumentNullException("instance");
@@ -236,20 +371,23 @@ namespace ICD.Connect.Telemetry.Services
 				CollectionTelemetryAttribute
 					.GetProperties(instance.GetType())
 					.Select(kvp =>
-					{
-						try
-						{
-							IEnumerable<ITelemetryNode> children =
-								kvp.Value.InstantiateTelemetryNodes(instance, kvp.Key, LazyLoadTelemetry);
-							return new TelemetryCollection(kvp.Value.Name, instance, children);
-						}
-						catch (Exception e)
-						{
-							Logger.Log(eSeverity.Error, e.GetBaseException(), "Failed to instantiate collection telemetry - {0} - {1}",
-							           instance, kvp.Value.Name);
-							return null;
-						}
-					})
+					        {
+						        try
+						        {
+							        return
+								        new TelemetryCollection(kvp.Value.Name,
+								                                instance,
+								                                kvp.Key,
+								                                UpdateCollectionTelemetry);
+						        }
+						        catch (Exception e)
+						        {
+							        Logger.Log(eSeverity.Error, e.GetBaseException(),
+							                   "Failed to instantiate collection telemetry - {0} - {1}",
+							                   instance, kvp.Value.Name);
+							        return null;
+						        }
+					        })
 					.Where(n => n != null);
 		}
 
@@ -268,6 +406,6 @@ namespace ICD.Connect.Telemetry.Services
 					.SelectMany(e => InstantiateTelemetryNodes(e));
 		}
 
-#endregion
+		#endregion
 	}
 }

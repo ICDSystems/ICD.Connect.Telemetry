@@ -8,8 +8,10 @@ using ICD.Connect.Telemetry.Providers;
 
 namespace ICD.Connect.Telemetry.Nodes
 {
-	public abstract class AbstractTelemetryNode : ITelemetryNode, IDisposable
+	public abstract class AbstractTelemetryNode : ITelemetryNode
 	{
+		#region Properties
+
 		/// <summary>
 		/// Gets the name of the telemetry node.
 		/// </summary>
@@ -20,6 +22,8 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// </summary>
 		[NotNull]
 		public ITelemetryProvider Provider { get; private set; }
+
+		#endregion
 
 		/// <summary>
 		/// Constructor.
@@ -38,12 +42,20 @@ namespace ICD.Connect.Telemetry.Nodes
 			Provider = provider;
 		}
 
+		#region Methods
+
 		/// <summary>
 		/// Release resources.
 		/// </summary>
 		public virtual void Dispose()
 		{
 		}
+
+		/// <summary>
+		/// Gets the child telemetry nodes.
+		/// </summary>
+		/// <returns></returns>
+		public abstract IEnumerable<ITelemetryNode> GetChildren();
 
 		/// <summary>
 		/// Gets the string representation for this instance.
@@ -56,6 +68,8 @@ namespace ICD.Connect.Telemetry.Nodes
 				.AppendProperty("Provider", Provider)
 				.ToString();
 		}
+
+		#endregion
 
 		#region Console
 

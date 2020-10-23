@@ -170,6 +170,8 @@ namespace ICD.Connect.Telemetry.Nodes
 				Update(Value);
 		}
 
+		#region Methods
+
 		/// <summary>
 		/// Release resources.
 		/// </summary>
@@ -179,10 +181,18 @@ namespace ICD.Connect.Telemetry.Nodes
 
 			base.Dispose();
 
-			ReflectionUtils.UnsubscribeEvent(Provider, m_EventInfo, m_Delegate);
+			if (m_EventInfo != null && m_Delegate != null)
+				ReflectionUtils.UnsubscribeEvent(Provider, m_EventInfo, m_Delegate);
 		}
 
-		#region Methods
+		/// <summary>
+		/// Gets the child telemetry nodes.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<ITelemetryNode> GetChildren()
+		{
+			yield break;
+		}
 
 		/// <summary>
 		/// Invokes the telemetry method passing the given parameters.

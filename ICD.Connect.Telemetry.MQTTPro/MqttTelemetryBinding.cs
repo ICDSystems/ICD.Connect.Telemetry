@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text;
 using ICD.Common.Properties;
-using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Json;
@@ -107,13 +106,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <param name="value"></param>
 		protected override void SendValueToService(object value)
 		{
-			PublishMessage message =
-				new PublishMessage
-				{
-					Id = Guid.NewGuid(),
-					Date = IcdEnvironment.GetUtcTime(),
-					Data = value
-				};
+			PublishMessage message = new PublishMessage {Data = value};
 
 			m_TelemetryServiceProvider.Publish(ProgramToServiceTopic, message);
 		}
@@ -126,8 +119,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			PublishMessage message =
 				new PublishMessage
 				{
-					Id = Guid.NewGuid(),
-					Date = IcdEnvironment.GetUtcTime(),
 					Data = TelemetryMetadata.FromTelemetry(Telemetry)
 				};
 

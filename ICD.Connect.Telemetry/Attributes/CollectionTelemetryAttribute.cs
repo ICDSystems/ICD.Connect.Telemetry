@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Comparers;
-using ICD.Connect.Telemetry.Providers;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
 using System.Reflection;
 #endif
-using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Attributes
 {
@@ -43,46 +40,6 @@ namespace ICD.Connect.Telemetry.Attributes
 		public CollectionTelemetryAttribute(string name)
 			: base(name)
 		{
-		}
-
-		/// <summary>
-		/// Returns the child telemetry nodes for the given instance and collection property.
-		/// </summary>
-		/// <param name="instance"></param>
-		/// <param name="propertyInfo"></param>
-		/// <param name="getTelemetryForProvider"></param>
-		/// <returns></returns>
-		public IEnumerable<ITelemetryNode> InstantiateTelemetryNodes([NotNull] ITelemetryProvider instance,
-		                                                             [NotNull] PropertyInfo propertyInfo,
-		                                                             Func<string, ITelemetryProvider,
-			                                                             TelemetryCollection> getTelemetryForProvider)
-		{
-			if (instance == null)
-				throw new ArgumentNullException("instance");
-
-			if (propertyInfo == null)
-				throw new ArgumentNullException("propertyInfo");
-
-			IEnumerable childInstances =
-				typeof(IEnumerable).IsAssignableFrom(propertyInfo.PropertyType)
-					? (IEnumerable)propertyInfo.GetValue(instance, null)
-					: propertyInfo.GetValue(instance, null).Yield();
-
-			IEnumerable<ITelemetryProvider> childrenProviders = childInstances.OfType<ITelemetryProvider>();
-
-			int index = 0;
-			foreach (ITelemetryProvider provider in childrenProviders)
-			{
-				PropertyInfo idProperty = TelemetryCollectionIdentityAttribute.GetProperty(provider);
-
-				string name =
-					idProperty == null
-						? string.Format("{0}{1}", Name, index)
-						: idProperty.GetValue(provider, null).ToString();
-
-				yield return getTelemetryForProvider(name, provider);
-				index++;
-			}
 		}
 
 		/// <summary>

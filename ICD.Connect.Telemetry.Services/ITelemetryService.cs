@@ -12,14 +12,19 @@ namespace ICD.Connect.Telemetry.Services
 		/// </summary>
 		/// <returns></returns>
 		[NotNull]
-		TelemetryCollection InitializeCoreTelemetry();
+		TelemetryProviderNode LazyLoadCoreTelemetry();
 
 		/// <summary>
-		/// Lazy-loads telemetry for the core and returns telemetry for the given provider.
+		/// Disposes the root telemetry and all child telemetry nodes recursively.
+		/// </summary>
+		void DeinitializeCoreTelemetry();
+
+		/// <summary>
+		/// Returns previously loaded telemetry for the given provider.
 		/// </summary>
 		/// <param name="provider"></param>
+		/// <param name="telemetryCollection"></param>
 		/// <returns></returns>
-		[NotNull]
-		TelemetryCollection GetTelemetryForProvider([NotNull] ITelemetryProvider provider);
+		bool TryGetTelemetryForProvider([NotNull] ITelemetryProvider provider, out TelemetryProviderNode telemetryCollection);
 	}
 }

@@ -141,10 +141,12 @@ namespace ICD.Connect.Telemetry.Crestron
 				throw new ArgumentNullException("room");
 
 			// Ensure the Core telemetry has been built
-			TelemetryService.InitializeCoreTelemetry();
+			TelemetryService.LazyLoadCoreTelemetry();
 
 			// Get the telemetry for this room
-			TelemetryCollection nodes = TelemetryService.GetTelemetryForProvider(room);
+			TelemetryProviderNode nodes;
+			if (!TelemetryService.TryGetTelemetryForProvider(room, out nodes))
+				throw new InvalidOperationException("Room telemetry has not been generated");
 
 			// Walk the telemetry nodes and generate bindings
 			MappingUsageTracker mappingUsage = new MappingUsageTracker();
@@ -277,10 +279,12 @@ namespace ICD.Connect.Telemetry.Crestron
 				throw new ArgumentNullException("device");
 
 			// Ensure the Core telemetry has been built
-			TelemetryService.InitializeCoreTelemetry();
+			TelemetryService.LazyLoadCoreTelemetry();
 
 			// Get the telemetry for this device
-			TelemetryCollection nodes = TelemetryService.GetTelemetryForProvider(device);
+			TelemetryProviderNode nodes;
+			if (!TelemetryService.TryGetTelemetryForProvider(device, out nodes))
+				throw new InvalidOperationException("Device telemetry has not been generated");
 
 			// Walk the telemetry nodes and generate bindings
 			MappingUsageTracker mappingUsage = new MappingUsageTracker();
@@ -308,9 +312,7 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			foreach (ITelemetryNode node in nodes)
 			{
-				TelemetryCollection collection = node as TelemetryCollection;
-				if (collection != null)
-					BuildAssetBindingsRecursive(device, collection, mappingUsage);
+				BuildAssetBindingsRecursive(device, node.GetChildren(), mappingUsage);
 
 				TelemetryLeaf leaf = node as TelemetryLeaf;
 				if (leaf != null)
@@ -451,9 +453,7 @@ namespace ICD.Connect.Telemetry.Crestron
 
 			foreach (ITelemetryNode node in nodes)
 			{
-				TelemetryCollection collection = node as TelemetryCollection;
-				if (collection != null)
-					BuildRoomBindingsRecursive(room, collection, mappingUsage);
+				BuildRoomBindingsRecursive(room, node.GetChildren(), mappingUsage);
 
 				TelemetryLeaf leaf = node as TelemetryLeaf;
 				if (leaf != null)

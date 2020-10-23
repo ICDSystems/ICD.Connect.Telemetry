@@ -14,7 +14,8 @@ using ICD.Common.Utils.Services;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Protocol;
-using ICD.Connect.Protocol.NetworkPro.EventArguments;
+using ICD.Connect.Protocol.Network.EventArguments;
+using ICD.Connect.Protocol.Network.Ports.Mqtt;
 using ICD.Connect.Protocol.NetworkPro.Ports.Mqtt;
 using ICD.Connect.Settings;
 using ICD.Connect.Settings.Originators;
@@ -37,10 +38,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		// Should be plenty - As of writing we send about 3k messages on startup,
 		// just don't want to fill memory so long as we can't connect to the broker
 		private const int PUBLISH_BUFFER_MAX_COUNT = 100 * 1000;
-
-		private const string PROGRAM_TO_SERVICE_PREFIX = "ProgramToService";
-		private const string SERVICE_TO_PROGRAM_PREFIX = "ServiceToProgram";
-		private const string SYSTEMS_PREFIX = "Systems";
 
 		private readonly Dictionary<string, MqttTelemetryBinding> m_Bindings;
 		private readonly Dictionary<string, IcdHashSet<SubscriptionCallback>> m_SubscriptionCallbacks;
@@ -125,7 +122,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		private string SystemOnlineTopic
 		{
-			get { return BuildProgramToServiceTopic("IsOnline"); }
+			get { return TopicUtils.GetProgramToServiceTopic(ClientId, PathPrefix, "IsOnline"); }
 		}
 
 		/// <summary>
@@ -159,6 +156,11 @@ namespace ICD.Connect.Telemetry.MQTTPro
 					};
 			}
 		}
+
+		/// <summary>
+		/// Gets the client ID.
+		/// </summary>
+		public string ClientId { get { return Core.Uuid.ToString(); } }
 
 		#endregion
 
@@ -270,8 +272,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (string.IsNullOrEmpty(topic))
 				throw new ArgumentException("Topic must not be null or empty");
 
-			if (!topic.StartsWith(SERVICE_TO_PROGRAM_PREFIX))
-				throw new ArgumentException("Subscribe topics must start with " + SERVICE_TO_PROGRAM_PREFIX);
+			if (!topic.StartsWith(TopicUtils.SERVICE_TO_PROGRAM_PREFIX))
+				throw new ArgumentException("Subscribe topics must start with " + TopicUtils.SERVICE_TO_PROGRAM_PREFIX);
 
 			if (callback == null)
 				throw new ArgumentNullException("callback");
@@ -305,8 +307,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (string.IsNullOrEmpty(topic))
 				throw new ArgumentException("Topic must not be null or empty");
 
-			if (!topic.StartsWith(SERVICE_TO_PROGRAM_PREFIX))
-				throw new ArgumentException("Subscribe topics must start with " + SERVICE_TO_PROGRAM_PREFIX);
+			if (!topic.StartsWith(TopicUtils.SERVICE_TO_PROGRAM_PREFIX))
+				throw new ArgumentException("Subscribe topics must start with " + TopicUtils.SERVICE_TO_PROGRAM_PREFIX);
 
 			if (callback == null)
 				throw new ArgumentNullException("callback");
@@ -342,8 +344,8 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (string.IsNullOrEmpty(topic))
 				throw new ArgumentException("Topic must not be null or empty");
 
-			if (!topic.StartsWith(PROGRAM_TO_SERVICE_PREFIX))
-				throw new ArgumentException("Publish topics must start with " + PROGRAM_TO_SERVICE_PREFIX);
+			if (!topic.StartsWith(TopicUtils.PROGRAM_TO_SERVICE_PREFIX))
+				throw new ArgumentException("Publish topics must start with " + TopicUtils.PROGRAM_TO_SERVICE_PREFIX);
 
 			if (message == null)
 				throw new ArgumentNullException("message");
@@ -440,74 +442,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			}
 		}
 
-		/// <summary>
-		/// Returns an absolute topic for the given system telemetry path.
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		private string BuildProgramToServiceTopic([NotNull] Stack<string> path)
-		{
-			return BuildProgramToServiceTopic(path.Reverse());
-		}
-
-		/// <summary>
-		/// Returns an absolute topic for the given system telemetry path.
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		private string BuildProgramToServiceTopic([NotNull] params string[] path)
-		{
-			return BuildProgramToServiceTopic((IEnumerable<string>)path);
-		}
-
-		/// <summary>
-		/// Returns an absolute topic for the given system telemetry path.
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		private string BuildProgramToServiceTopic([NotNull] IEnumerable<string> path)
-		{
-			IEnumerable<string> pathEnumerable =
-				PROGRAM_TO_SERVICE_PREFIX.Yield()
-				                         .Append(SYSTEMS_PREFIX)
-				                         .Append(Core.Uuid.ToString())
-				                         .Concat(path);
-
-			if (!string.IsNullOrEmpty(PathPrefix))
-				pathEnumerable = pathEnumerable.Prepend(PathPrefix);
-
-			return MqttUtils.Join(pathEnumerable);
-		}
-
-		/// <summary>
-		/// Returns an absolute topic for the given system telemetry path.
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		private string BuildServiceToProgramTopic([NotNull] Stack<string> path)
-		{
-			return BuildServiceToProgramTopic(path.Reverse());
-		}
-
-		/// <summary>
-		/// Returns an absolute topic for the given system telemetry path.
-		/// </summary>
-		/// <param name="path"></param>
-		/// <returns></returns>
-		private string BuildServiceToProgramTopic([NotNull] IEnumerable<string> path)
-		{
-			IEnumerable<string> pathEnumerable =
-				SERVICE_TO_PROGRAM_PREFIX.Yield()
-				                         .Append(SYSTEMS_PREFIX)
-				                         .Append(Core.Uuid.ToString())
-				                         .Concat(path);
-
-			if (!string.IsNullOrEmpty(PathPrefix))
-				pathEnumerable = pathEnumerable.Prepend(PathPrefix);
-
-			return MqttUtils.Join(pathEnumerable);
-		}
-
 		#endregion
 
 		#region Binding
@@ -529,57 +463,10 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		private void GenerateBindingsForSystem()
 		{
-			TelemetryCollection systemTelemetry = TelemetryService.InitializeCoreTelemetry();
-			GenerateTelemetryRecursive(systemTelemetry, new Stack<string>());
-		}
+			TelemetryProviderNode systemTelemetry = TelemetryService.LazyLoadCoreTelemetry();
 
-		/// <summary>
-		/// Creates the bindings for the given telemetry collection recursively.
-		/// </summary>
-		/// <param name="telemetryCollection"></param>
-		/// <param name="path"></param>
-		private void GenerateTelemetryRecursive([NotNull] TelemetryCollection telemetryCollection,
-		                                        [NotNull] Stack<string> path)
-		{
-			if (telemetryCollection == null)
-				throw new ArgumentNullException("telemetryCollection");
-
-			if (path == null)
-				throw new ArgumentNullException("path");
-
-			foreach (ITelemetryNode item in telemetryCollection)
-				GenerateTelemetryRecursive(item, path);
-		}
-
-		/// <summary>
-		/// Creates the bindings for the given telemetry node recursively.
-		/// </summary>
-		/// <param name="telemetryNode"></param>
-		/// <param name="path"></param>
-		private void GenerateTelemetryRecursive([NotNull] ITelemetryNode telemetryNode, [NotNull] Stack<string> path)
-		{
-			if (telemetryNode == null)
-				throw new ArgumentNullException("telemetryNode");
-
-			if (path == null)
-				throw new ArgumentNullException("path");
-
-			path.Push(telemetryNode.Name);
-
-			try
-			{
-				TelemetryCollection collection = telemetryNode as TelemetryCollection;
-				if (collection != null)
-					GenerateTelemetryRecursive(collection, path);
-
-				TelemetryLeaf feedback = telemetryNode as TelemetryLeaf;
-				if (feedback != null)
-					CreateBinding(feedback, path);
-			}
-			finally
-			{
-				path.Pop();
-			}
+			RecursionUtils.BreadthFirstSearchPaths<ITelemetryNode>(systemTelemetry, n => n.GetChildren())
+			              .ForEach(kvp => CreateBinding(kvp.Key, kvp.Value));
 		}
 
 		/// <summary>
@@ -587,7 +474,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		/// <param name="telemetry"></param>
 		/// <param name="path"></param>
-		private void CreateBinding([NotNull] TelemetryLeaf telemetry, [NotNull] Stack<string> path)
+		private void CreateBinding([NotNull] ITelemetryNode telemetry, [NotNull] IEnumerable<ITelemetryNode> path)
 		{
 			if (telemetry == null)
 				throw new ArgumentNullException("telemetry");
@@ -595,8 +482,30 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (path == null)
 				throw new ArgumentNullException("path");
 
-			string programToService = BuildProgramToServiceTopic(path);
-			string serviceToProgram = BuildServiceToProgramTopic(path);
+
+			TelemetryLeaf leaf = telemetry as TelemetryLeaf;
+			if (leaf != null)
+				CreateBinding(leaf, path);
+		}
+
+		/// <summary>
+		/// Creates the binding and adds to the cache.
+		/// </summary>
+		/// <param name="telemetry"></param>
+		/// <param name="path"></param>
+		private void CreateBinding([NotNull] TelemetryLeaf telemetry, [NotNull] IEnumerable<ITelemetryNode> path)
+		{
+			if (telemetry == null)
+				throw new ArgumentNullException("telemetry");
+
+			if (path == null)
+				throw new ArgumentNullException("path");
+
+			// Skip the root node
+			ITelemetryNode[] pathArray = path.Skip(1).ToArray();
+
+			string programToService = TopicUtils.GetProgramToServiceTopic(ClientId, PathPrefix, pathArray);
+			string serviceToProgram = TopicUtils.GetServiceToProgramTopic(ClientId, PathPrefix, pathArray);
 
 			MqttTelemetryBinding binding;
 
