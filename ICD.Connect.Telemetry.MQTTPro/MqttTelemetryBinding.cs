@@ -80,6 +80,10 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (Telemetry.MethodInfo != null)
 				UnsubscribeFromService();
 
+			// Clear the retained messages
+			m_TelemetryServiceProvider.Publish(ProgramToServiceTopic, null);
+			m_TelemetryServiceProvider.Publish(MqttUtils.Join(ProgramToServiceTopic, METADATA), null);
+
 			base.Dispose();
 		}
 

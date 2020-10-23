@@ -42,6 +42,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private readonly Dictionary<string, MqttTelemetryBinding> m_Bindings;
 		private readonly Dictionary<string, IcdHashSet<SubscriptionCallback>> m_SubscriptionCallbacks;
 		private readonly ScrollQueue<PublishMessageInfo> m_PublishBuffer;
+		private readonly TelemetryNodeTracker m_NodeTracker;
 		private readonly SafeCriticalSection m_BindingsSection;
 		private readonly SafeCriticalSection m_BufferSection;
 		private readonly SafeCriticalSection m_ProcessSection;
@@ -183,6 +184,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			};
 			Subscribe(m_Client);
 
+			m_NodeTracker = new TelemetryNodeTracker();
+			Subscribe(m_NodeTracker);
+
 			m_ConnectionStateManager = new ConnectionStateManager(this);
 			m_ConnectionStateManager.SetPort(m_Client, false);
 
@@ -197,8 +201,12 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		protected override void DisposeFinal(bool disposing)
 		{
 			Stop();
+
 			Unsubscribe(m_Client);
+			Unsubscribe(m_NodeTracker);
+
 			m_Client.Dispose();
+			m_NodeTracker.Clear();
 
 			base.DisposeFinal(disposing);
 		}
@@ -347,17 +355,14 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// Publishes telemetry data to the given topic.
 		/// </summary>
 		/// <param name="topic"></param>
-		/// <param name="message"></param>
-		public void Publish([NotNull] string topic, [NotNull] PublishMessage message)
+		/// <param name="message">Clears the retained message if null</param>
+		public void Publish([NotNull] string topic, [CanBeNull] PublishMessage message)
 		{
 			if (string.IsNullOrEmpty(topic))
 				throw new ArgumentException("Topic must not be null or empty");
 
 			if (!topic.StartsWith(TopicUtils.PROGRAM_TO_SERVICE_PREFIX))
 				throw new ArgumentException("Publish topics must start with " + TopicUtils.PROGRAM_TO_SERVICE_PREFIX);
-
-			if (message == null)
-				throw new ArgumentNullException("message");
 
 			// Enqueue the message onto the buffer
 			m_BufferSection.Enter();
@@ -393,10 +398,14 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				PublishMessageInfo item = default(PublishMessageInfo);
 				while (m_Client.IsConnected && m_BufferSection.Execute(() => m_PublishBuffer.Dequeue(out item)))
 				{
-					string json = JsonConvert.SerializeObject(item.PublishMessage, Formatting.None, JsonUtils.CommonSettings);
-					byte[] data = Encoding.UTF8.GetBytes(json);
-
-					m_Client.Publish(item.Topic, data, MqttUtils.QOS_LEVEL_AT_LEAST_ONCE, true);
+					if (item.PublishMessage == null)
+						m_Client.Clear(item.Topic);
+					else
+					{
+						string json = JsonConvert.SerializeObject(item.PublishMessage, Formatting.None, JsonUtils.CommonSettings);
+						byte[] data = Encoding.UTF8.GetBytes(json);
+						m_Client.Publish(item.Topic, data, MqttUtils.QOS_LEVEL_AT_LEAST_ONCE, true);
+					}
 				}
 			}
 			finally
@@ -451,10 +460,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			}
 		}
 
-		#endregion
-
-		#region Binding
-
 		/// <summary>
 		/// Sets the LWT properties on the MQTT client.
 		/// </summary>
@@ -473,28 +478,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private void GenerateBindingsForSystem()
 		{
 			TelemetryProviderNode systemTelemetry = TelemetryService.LazyLoadCoreTelemetry();
-
-			RecursionUtils.BreadthFirstSearchPaths<ITelemetryNode>(systemTelemetry, n => n.GetChildren())
-			              .ForEach(kvp => CreateBinding(kvp.Key, kvp.Value));
-		}
-
-		/// <summary>
-		/// Creates the binding and adds to the cache.
-		/// </summary>
-		/// <param name="telemetry"></param>
-		/// <param name="path"></param>
-		private void CreateBinding([NotNull] ITelemetryNode telemetry, [NotNull] IEnumerable<ITelemetryNode> path)
-		{
-			if (telemetry == null)
-				throw new ArgumentNullException("telemetry");
-
-			if (path == null)
-				throw new ArgumentNullException("path");
-
-
-			TelemetryLeaf leaf = telemetry as TelemetryLeaf;
-			if (leaf != null)
-				CreateBinding(leaf, path);
+			m_NodeTracker.SetRootNode(systemTelemetry);
 		}
 
 		/// <summary>
@@ -544,6 +528,86 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			}
 
 			binding.Initialize();
+		}
+
+		/// <summary>
+		/// Destroys the binding and removes from the cache.
+		/// </summary>
+		/// <param name="telemetry"></param>
+		/// <param name="path"></param>
+		private void DestroyBinding([NotNull] TelemetryLeaf telemetry, [NotNull] IEnumerable<ITelemetryNode> path)
+		{
+			if (telemetry == null)
+				throw new ArgumentNullException("telemetry");
+
+			if (path == null)
+				throw new ArgumentNullException("path");
+
+			// Skip the root node
+			ITelemetryNode[] pathArray = path.Skip(1).ToArray();
+
+			string programToService = TopicUtils.GetProgramToServiceTopic(ClientId, PathPrefix, pathArray);
+
+			m_BindingsSection.Enter();
+
+			try
+			{
+				MqttTelemetryBinding binding;
+				if (m_Bindings.TryGetValue(programToService, out binding))
+					binding.Dispose();
+			}
+			finally
+			{
+				m_BindingsSection.Leave();
+			}
+		}
+
+		#endregion
+
+		#region Node Tracker Callbacks
+
+		/// <summary>
+		/// Subscribe to the node tracker events.
+		/// </summary>
+		/// <param name="tracker"></param>
+		private void Subscribe(TelemetryNodeTracker tracker)
+		{
+			tracker.OnNodeAdded += TrackerOnNodeAdded;
+			tracker.OnNodeRemoved += TrackerOnNodeRemoved;
+		}
+
+		/// <summary>
+		/// Unsubscribe from the node tracker events.
+		/// </summary>
+		/// <param name="tracker"></param>
+		private void Unsubscribe(TelemetryNodeTracker tracker)
+		{
+			tracker.OnNodeAdded -= TrackerOnNodeAdded;
+			tracker.OnNodeRemoved -= TrackerOnNodeRemoved;
+		}
+
+		/// <summary>
+		/// Called when a node is added to the telemetry tree.
+		/// </summary>
+		/// <param name="node"></param>
+		/// <param name="path"></param>
+		private void TrackerOnNodeAdded(ITelemetryNode node, IEnumerable<ITelemetryNode> path)
+		{
+			TelemetryLeaf leaf = node as TelemetryLeaf;
+			if (leaf != null)
+				CreateBinding(leaf, path);
+		}
+
+		/// <summary>
+		/// Called when a node is removed from the telemetry tree.
+		/// </summary>
+		/// <param name="node"></param>
+		/// <param name="path"></param>
+		private void TrackerOnNodeRemoved(ITelemetryNode node, IEnumerable<ITelemetryNode> path)
+		{
+			TelemetryLeaf leaf = node as TelemetryLeaf;
+			if (leaf != null)
+				DestroyBinding(leaf, path);
 		}
 
 		#endregion
