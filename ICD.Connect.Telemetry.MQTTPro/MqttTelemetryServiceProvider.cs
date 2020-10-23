@@ -127,6 +127,14 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		}
 
 		/// <summary>
+		/// Gets the system online metadata topic.
+		/// </summary>
+		private string SystemOnlineMetadataTopic
+		{
+			get { return TopicUtils.GetProgramToServiceTopic(ClientId, PathPrefix, "IsOnline", "Metadata"); }
+		}
+
+		/// <summary>
 		/// Returns a new system online message.
 		/// </summary>
 		private PublishMessage SystemOnlineMessage
@@ -153,6 +161,32 @@ namespace ICD.Connect.Telemetry.MQTTPro
 					new PublishMessage
 					{
 						Data = false,
+						Date = DateTime.MinValue
+					};
+			}
+		}
+
+		/// <summary>
+		/// Returns the metadata message for the system online topic.
+		/// </summary>
+		private PublishMessage SystemOnlineMetadataMessage
+		{
+			get
+			{
+				return
+					new PublishMessage
+					{
+						Data = new TelemetryMetadata
+						{
+							IoMask = eTelemetryIoMask.ProgramToService,
+							PublishMetadata = new TelemetryPublishMetadata
+							{
+								Property = new TelemetryMemberMetadata
+								{
+									Type = typeof(bool).GetMinimalName()
+								}
+							}
+						},
 						Date = DateTime.MinValue
 					};
 			}
@@ -679,6 +713,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			// Send the online message
 			Publish(SystemOnlineTopic, SystemOnlineMessage);
+			Publish(SystemOnlineMetadataTopic, SystemOnlineMetadataMessage);
 
 			// Resubscribe to everything on connection
 			Dictionary<string, byte> topics =
