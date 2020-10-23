@@ -233,12 +233,19 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				new Thread(o =>
 				           {
 					           GenerateBindingsForSystem();
+					           m_StartHandle = null;
 					           return null;
 				           }, null, Thread.eThreadStartOptions.CreateSuspended)
 				{Priority = Thread.eThreadPriority.LowestPriority};
 			m_StartHandle.Start();
 #else
-			m_StartHandle = new Thread(GenerateBindingsForSystem) { Priority = ThreadPriority.Lowest };
+			m_StartHandle =
+				new Thread(o =>
+					{
+						GenerateBindingsForSystem();
+						m_StartHandle = null;
+					})
+					{Priority = ThreadPriority.Lowest};
 			m_StartHandle.Start();
 #endif
 		}
@@ -248,8 +255,10 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		public void Stop()
 		{
+#if SIMPLSHARP
 			if (m_StartHandle != null)
 				m_StartHandle.Abort();
+#endif
 
 			m_ConnectionStateManager.Stop();
 
