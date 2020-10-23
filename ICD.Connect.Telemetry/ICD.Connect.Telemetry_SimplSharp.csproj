@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\NodeTelemetryAttribute.cs" />
+    <Compile Include="Nodes\TelemetryNodeTracker.cs" />
     <Compile Include="Nodes\TelemetryProviderNode.cs" />
     <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Providers\ActivityExternalTelemetryProvider.cs" />
