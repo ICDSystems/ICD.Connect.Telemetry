@@ -325,9 +325,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			if (string.IsNullOrEmpty(topic))
 				throw new ArgumentException("Topic must not be null or empty");
 
-			if (!topic.StartsWith(TopicUtils.SERVICE_TO_PROGRAM_PREFIX))
-				throw new ArgumentException("Subscribe topics must start with " + TopicUtils.SERVICE_TO_PROGRAM_PREFIX);
-
 			if (callback == null)
 				throw new ArgumentNullException("callback");
 
@@ -352,7 +349,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			// Don't bother subscribing unless we're connected
 			if (m_Client.IsConnected)
-				m_Client.Subscribe(topic, MqttUtils.QOS_LEVEL_EXACTLY_ONCE);
+				m_Client.Subscribe(topic, MqttUtils.QOS_LEVEL_AT_MOST_ONCE);
 		}
 
 		/// <summary>
@@ -518,6 +515,11 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		private void GenerateBindingsForSystem()
 		{
+			// Subscribe to ProgramToService topics for cleanup
+			string topic = TopicUtils.GetProgramToServiceTopic(ClientId, PathPrefix, "#");
+			Subscribe(topic, DiscoveredProgramToServiceTopic);
+
+			// Start building telemetry bindings
 			TelemetryProviderNode systemTelemetry = TelemetryService.LazyLoadCoreTelemetry();
 			m_NodeTracker.SetRootNode(systemTelemetry);
 		}
@@ -608,6 +610,31 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			{
 				m_BindingsSection.Leave();
 			}
+		}
+
+		/// <summary>
+		/// Called when we discover a ProgramToService topic on the broker.
+		/// This allows us to clean up any old retained telemetry.
+		/// </summary>
+		/// <param name="topic"></param>
+		/// <param name="data"></param>
+		private void DiscoveredProgramToServiceTopic(string topic, byte[] data)
+		{
+			if (topic == null)
+				throw new ArgumentNullException("topic");
+
+			// Already cleared - Trying to clear again makes a feedback loop!
+			if (data.Length == 0)
+				return;
+
+			// We're tracking this binding so don't clear it
+			if (m_BindingsSection.Execute(() => m_Bindings.ContainsKey(topic)) ||
+			    topic == SystemOnlineTopic ||
+			    topic == SystemOnlineMetadataTopic)
+				return;
+
+			// Clear the retained message
+			Publish(topic, null);
 		}
 
 		#endregion

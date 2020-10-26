@@ -158,11 +158,18 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <summary>
 		/// Called when the binding gets a message from the MQTT broker.
 		/// </summary>
+		/// <param name="topic"></param>
 		/// <param name="data"></param>
-		private void HandleTopicMessage(byte[] data)
+		private void HandleTopicMessage(string topic, byte[] data)
 		{
+			if (topic == null)
+				throw new ArgumentNullException("topic");
+
+			if (topic != ServiceToProgramTopic)
+				throw new InvalidOperationException("Unexpected topic");
+
 			if (Telemetry.MethodInfo == null)
-				throw new InvalidOperationException();
+				throw new InvalidOperationException("Binding does not support feedback");
 
 			string json = Encoding.UTF8.GetString(data, 0, data.Length);
 
