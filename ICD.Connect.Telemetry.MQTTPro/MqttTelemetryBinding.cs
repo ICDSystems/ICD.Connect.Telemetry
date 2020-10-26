@@ -38,6 +38,12 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		[NotNull]
 		public string ServiceToProgramTopic { get { return m_ServiceToProgramTopic; } }
 
+		/// <summary>
+		/// Gets the program to service topic for the metadata.
+		/// </summary>
+		[NotNull]
+		public string ProgramToServiceMetadataTopic { get { return MqttUtils.Join(ProgramToServiceTopic, METADATA); } }
+
 		#endregion
 
 		#region Constructors
@@ -126,9 +132,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 					Data = TelemetryMetadata.FromTelemetry(Telemetry)
 				};
 
-			string topic = MqttUtils.Join(ProgramToServiceTopic, METADATA);
-
-			m_TelemetryServiceProvider.Publish(topic, message);
+			m_TelemetryServiceProvider.Publish(ProgramToServiceMetadataTopic, message);
 		}
 
 		#endregion

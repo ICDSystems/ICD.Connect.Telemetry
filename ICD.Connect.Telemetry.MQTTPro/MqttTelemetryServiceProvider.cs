@@ -555,6 +555,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				binding = new MqttTelemetryBinding(telemetry, programToService, serviceToProgram, this);
 				m_Bindings.Add(programToService, binding);
 				m_Bindings.Add(serviceToProgram, binding);
+				m_Bindings.Add(binding.ProgramToServiceMetadataTopic, binding);
 			}
 			finally
 			{
@@ -588,7 +589,13 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			{
 				MqttTelemetryBinding binding;
 				if (m_Bindings.TryGetValue(programToService, out binding))
+				{
+					m_Bindings.Remove(binding.ProgramToServiceTopic);
+					m_Bindings.Remove(binding.ServiceToProgramTopic);
+					m_Bindings.Remove(binding.ProgramToServiceMetadataTopic);
+
 					binding.Dispose();
+				}
 			}
 			finally
 			{
