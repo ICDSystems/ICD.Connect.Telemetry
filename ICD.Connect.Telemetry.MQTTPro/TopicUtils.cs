@@ -119,5 +119,26 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			return MqttUtils.Join(pathEnumerable);
 		}
+
+		/// <summary>
+		/// Returns true if the given topic starts with the wildcard topic.
+		/// </summary>
+		/// <param name="wildcardTopic"></param>
+		/// <param name="topic"></param>
+		/// <returns></returns>
+		public static bool MatchesWildcard([NotNull] string wildcardTopic, [NotNull] string topic)
+		{
+			if (wildcardTopic == null)
+				throw new ArgumentNullException("wildcardTopic");
+
+			if (topic == null)
+				throw new ArgumentNullException("topic");
+
+			if (!wildcardTopic.EndsWith("/#"))
+				throw new FormatException("Not a wildcard topic");
+
+			wildcardTopic = wildcardTopic.Substring(0, wildcardTopic.Length - 1);
+			return topic.StartsWith(wildcardTopic);
+		}
 	}
 }

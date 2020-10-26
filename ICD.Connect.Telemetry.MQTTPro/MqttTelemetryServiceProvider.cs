@@ -33,7 +33,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 	public sealed class MqttTelemetryServiceProvider :
 		AbstractTelemetryServiceProvider<MqttTelemetryServiceProviderSettings>
 	{
-		public delegate void SubscriptionCallback(byte[] data);
+		public delegate void SubscriptionCallback(string topic, byte[] data);
 
 		// Should be plenty - As of writing we send about 3k messages on startup,
 		// just don't want to fill memory so long as we can't connect to the broker
@@ -41,6 +41,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 		private readonly Dictionary<string, MqttTelemetryBinding> m_Bindings;
 		private readonly Dictionary<string, IcdHashSet<SubscriptionCallback>> m_SubscriptionCallbacks;
+		private readonly Dictionary<string, IcdHashSet<SubscriptionCallback>> m_WildcardSubscriptionCallbacks;
 		private readonly ScrollQueue<PublishMessageInfo> m_PublishBuffer;
 		private readonly TelemetryNodeTracker m_NodeTracker;
 		private readonly SafeCriticalSection m_BindingsSection;
@@ -206,6 +207,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			m_Bindings = new Dictionary<string, MqttTelemetryBinding>();
 			m_SubscriptionCallbacks = new Dictionary<string, IcdHashSet<SubscriptionCallback>>();
+			m_WildcardSubscriptionCallbacks = new Dictionary<string, IcdHashSet<SubscriptionCallback>>();
 			m_PublishBuffer = new ScrollQueue<PublishMessageInfo>(PUBLISH_BUFFER_MAX_COUNT);
 			m_BindingsSection = new SafeCriticalSection();
 			m_BufferSection = new SafeCriticalSection();
@@ -333,9 +335,14 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 			try
 			{
+				IDictionary<string, IcdHashSet<SubscriptionCallback>> map =
+					topic.EndsWith("/#")
+						? m_WildcardSubscriptionCallbacks
+						: m_SubscriptionCallbacks;
+
 				// Add the callback to the cache - only subscribe to the topic if this is the first callback
-				if (m_SubscriptionCallbacks.GetOrAddNew(topic).Add(callback) &&
-				    m_SubscriptionCallbacks[topic].Count != 1)
+				if (map.GetOrAddNew(topic).Add(callback) &&
+				    map[topic].Count != 1)
 					return;
 			}
 			finally
@@ -682,29 +689,38 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <param name="args"></param>
 		private void ClientOnMessageReceived(object sender, MqttMessageEventArgs args)
 		{
+			IcdHashSet<SubscriptionCallback> callbacks = new IcdHashSet<SubscriptionCallback>();
+
 			m_BindingsSection.Enter();
 
 			try
 			{
-				IcdHashSet<SubscriptionCallback> callbacks;
-				if (!m_SubscriptionCallbacks.TryGetValue(args.Topic, out callbacks))
-					return;
+				// Get the exact matches
+				IcdHashSet<SubscriptionCallback> subscriptionCallbacks;
+				if (m_SubscriptionCallbacks.TryGetValue(args.Topic, out subscriptionCallbacks))
+					callbacks.AddRange(subscriptionCallbacks);
 
-				foreach (SubscriptionCallback callback in callbacks)
-				{
-					try
-					{
-						callback(args.Message);
-					}
-					catch (Exception e)
-					{
-						Logger.Log(eSeverity.Error, "Failed to handle MQTT message - {0}", e.Message);
-					}
-				}
+				// Get wildcard matches
+				IEnumerable<SubscriptionCallback> wildcardCallbacks =
+					m_WildcardSubscriptionCallbacks.Where(kvp => TopicUtils.MatchesWildcard(kvp.Key, args.Topic))
+					                               .SelectMany(kvp => kvp.Value);
+				callbacks.AddRange(wildcardCallbacks);
 			}
 			finally
 			{
 				m_BindingsSection.Leave();
+			}
+
+			foreach (SubscriptionCallback callback in callbacks)
+			{
+				try
+				{
+					callback(args.Topic, args.Message);
+				}
+				catch (Exception e)
+				{
+					Logger.Log(eSeverity.Error, "Failed to handle MQTT message - {0}", e.Message);
+				}
 			}
 		}
 
@@ -723,10 +739,21 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			Publish(SystemOnlineMetadataTopic, SystemOnlineMetadataMessage);
 
 			// Resubscribe to everything on connection
-			Dictionary<string, byte> topics =
-				m_BindingsSection.Execute(() =>
-				                          m_SubscriptionCallbacks.ToDictionary(kvp => kvp.Key,
-				                                                               kvp => MqttUtils.QOS_LEVEL_EXACTLY_ONCE));
+			Dictionary<string, byte> topics;
+
+			m_BindingsSection.Enter();
+
+			try
+			{
+				topics =
+					m_SubscriptionCallbacks.Concat(m_WildcardSubscriptionCallbacks)
+					                       .ToDictionary(kvp => kvp.Key,
+					                                     kvp => MqttUtils.QOS_LEVEL_AT_MOST_ONCE);
+			}
+			finally
+			{
+				m_BindingsSection.Leave();
+			}
 
 			m_Client.Subscribe(topics);
 
