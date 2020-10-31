@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Telemetry.Nodes;
+
 namespace ICD.Connect.Telemetry.Crestron.Assets
 {
 	public interface IFusionStaticAsset : IFusionAsset
@@ -17,5 +21,11 @@ namespace ICD.Connect.Telemetry.Crestron.Assets
 		void UpdateSerialSig(uint sig, string newValue);
 
 		string ReadSerialSig(uint sig);
+
+		IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedBooleanSigs();
+
+		IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedUShortSigs();
+		
+		IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedSerialSigs();
 	}
 }

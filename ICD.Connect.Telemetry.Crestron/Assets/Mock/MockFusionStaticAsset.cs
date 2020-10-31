@@ -272,5 +272,47 @@ namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 				return value;
 			return string.Empty;
 		}
+
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedBooleanSigs()
+		{
+			return GetUserefineSigs(eSigType.Digital);
+		}
+
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedUShortSigs()
+		{
+			return GetUserefineSigs(eSigType.Analog);
+		}
+
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedSerialSigs()
+		{
+			return GetUserefineSigs(eSigType.Serial);
+		}
+
+		private IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserefineSigs(eSigType sigType)
+		{
+			Dictionary<uint, string> sigNameDictionary;
+			
+			if (!m_SigNames.TryGetValue(sigType, out sigNameDictionary))
+				yield break;
+
+			foreach (var sigKvp in sigNameDictionary)
+			{
+				SigInfo sigInfo = new SigInfo(sigType, sigKvp.Key, sigKvp.Value, 0);
+				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(sigInfo, GetSigIoMask(sigType, sigKvp.Key));
+			}
+		}
+
+		private eTelemetryIoMask GetSigIoMask(eSigType sigType, uint sigNumber)
+		{
+			Dictionary<uint, eTelemetryIoMask> sigMaskDictionary;
+			if (!m_SigIoMasks.TryGetValue(sigType, out sigMaskDictionary))
+				return eTelemetryIoMask.Na;
+
+			eTelemetryIoMask ioMask;
+			if (!sigMaskDictionary.TryGetValue(sigNumber, out ioMask))
+				return eTelemetryIoMask.Na;
+
+			return ioMask;
+		}
 	}
 }

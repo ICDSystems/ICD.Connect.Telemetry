@@ -25,6 +25,16 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		string RoomId { get; }
 
 		/// <summary>
+		/// Gets the room name for the Fusion Room
+		/// </summary>
+		string RoomName { get; }
+
+		/// <summary>
+		/// IPID of the fusion instance
+		/// </summary>
+		byte IpId { get; }
+
+		/// <summary>
 		/// Gets the user configurable assets.
 		/// </summary>
 		IFusionAssetDataCollection UserConfigurableAssetDetails { get; }
@@ -110,6 +120,12 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// <param name="name"></param>
 		/// <param name="mask"></param>
 		void AddSig(uint assetId, eSigType sigType, uint number, string name, eTelemetryIoMask mask);
+
+		IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedBoolSigs();
+
+		IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedUShortSigs();
+              
+		IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedStringSigs();
 
 		/// <summary>
 		/// Generates an RVI file for the fusion assets.

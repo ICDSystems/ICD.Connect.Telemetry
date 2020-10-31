@@ -105,6 +105,7 @@
     <Compile Include="SigMappings\IFusionSigMapping.cs" />
     <Compile Include="SigMappings\MappingUsageTracker.cs" />
     <Compile Include="Utils\FusionUtils.cs" />
+    <Compile Include="Utils\RviUtils.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <ItemGroup>

@@ -5,15 +5,18 @@ using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
+using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
 using ICD.Connect.Devices;
 using ICD.Connect.Panels;
 using ICD.Connect.Panels.EventArguments;
 using ICD.Connect.Protocol.Sigs;
+using ICD.Connect.Settings;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Assets.Mock;
 using ICD.Connect.Telemetry.Crestron.SigMappings;
+using ICD.Connect.Telemetry.Crestron.Utils;
 using ICD.Connect.Telemetry.Nodes;
 
 namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
@@ -35,8 +38,6 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 		private readonly SigCallbackManager m_SigCallbackManager;
 
 		private readonly Dictionary<uint, IMockFusionAsset> m_Assets;
-
-		private readonly MockFusionAssetDataCollection m_AssetDataCollection;
 
 		private string m_ErrorMessage;
 
@@ -75,9 +76,21 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 		public string RoomId { get; private set; }
 
 		/// <summary>
+		/// Gets the room name for the Fusion Room
+		/// </summary>
+		public string RoomName { get; private set; }
+
+		/// <summary>
+		/// IPID of the fusion instance
+		/// This isn't a thing for Mock Fusion, but is required for RVI Generation
+		/// So use a dummy value
+		/// </summary>
+		public byte IpId { get; private set; }
+
+		/// <summary>
 		/// Gets the user configurable assets.
 		/// </summary>
-		public IFusionAssetDataCollection UserConfigurableAssetDetails { get { return m_AssetDataCollection; } }
+		public IFusionAssetDataCollection UserConfigurableAssetDetails { get { return new MockFusionAssetDataCollection(m_Assets); } }
 
 		#endregion
 
@@ -91,11 +104,10 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 
 			m_SigNames = new Dictionary<eSigType, Dictionary<uint, string>>();
 			m_SigIoMasks = new Dictionary<eSigType, Dictionary<uint, eTelemetryIoMask>>();
-			m_Assets = new Dictionary<uint, IMockFusionAsset>();
 
 			m_SigCallbackManager = new SigCallbackManager();
 
-			m_AssetDataCollection = new MockFusionAssetDataCollection(m_Assets);
+			m_Assets = new Dictionary<uint, IMockFusionAsset>();
 
 		}
 
@@ -363,17 +375,71 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 				staticAsset.AddSig(sigType,number,name,mask);
 		}
 
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedBoolSigs()
+		{
+			return GetUserDefinedSigs(eSigType.Digital);
+		}
+
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedUShortSigs()
+		{
+			return GetUserDefinedSigs(eSigType.Analog);
+		}
+
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedStringSigs()
+		{
+			return GetUserDefinedSigs(eSigType.Serial);
+		}
+
 		/// <summary>
 		/// Generates an RVI file for the fusion assets.
 		/// </summary>
 		public void RebuildRvi()
 		{
-			//No RVI for MockFusion
+			Logger.Log(eSeverity.Debug, "RVI Generation Starting");
+			IcdStopwatch stopwatch = new IcdStopwatch();
+
+			try
+			{
+				stopwatch.Start();
+				RviUtils.GenerateFileForAllFusionDevices();
+				stopwatch.Stop();
+				Logger.Log(eSeverity.Debug, "RVI Generation took {0}ms", stopwatch.ElapsedMilliseconds);
+			}
+			catch (Exception e)
+			{
+				Logger.Log(eSeverity.Error, "RVI Generation Exception {0}", e.Message);
+			}
 		}
 
 		#endregion
 
 		#region Private Methods
+
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedSigs(eSigType sigType)
+		{
+			Dictionary<uint, string> sigNameDictionary;
+			if (!m_SigNames.TryGetValue(sigType, out sigNameDictionary))
+				yield break;
+
+			foreach (KeyValuePair<uint, string> sig in sigNameDictionary)
+			{
+				SigInfo sigInfo = new SigInfo(sigType, sig.Key, sig.Value, 0);
+				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(sigInfo, GetSigMask(sigType, sig.Key));
+			}
+		}
+
+		private eTelemetryIoMask GetSigMask(eSigType type, uint number)
+		{
+			Dictionary<uint, eTelemetryIoMask> sigMaskDictionary;
+			if (!m_SigIoMasks.TryGetValue(type, out sigMaskDictionary))
+				return eTelemetryIoMask.Na;
+
+			eTelemetryIoMask telemetryIoMask;
+			if (!sigMaskDictionary.TryGetValue(number, out telemetryIoMask))
+				return eTelemetryIoMask.Na;
+
+			return telemetryIoMask;
+		}
 
 		private object GetSigValue(eSigType type, uint number)
 		{
@@ -419,6 +485,36 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 		private void StaticAssetOnOnFusionAssetPowerStateUpdated(object sender, FusionAssetPowerStateUpdatedArgs args)
 		{
 			OnFusionAssetPowerStateUpdated.Raise(this, args);
+		}
+
+		#endregion
+
+		#region Settings
+
+		/// <summary>
+		/// Override to apply settings to the instance.
+		/// </summary>
+		/// <param name="settings"></param>
+		/// <param name="factory"></param>
+		protected override void ApplySettingsFinal(MockFusionRoomSettings settings, IDeviceFactory factory)
+		{
+			base.ApplySettingsFinal(settings, factory);
+
+			RoomName = settings.RoomName;
+			IpId = settings.Ipid ?? 0xF0;
+			RoomId = settings.RoomId;
+
+			RviUtils.RegisterFusionRoom(this);
+		}
+
+		/// <summary>
+		/// Override to clear the instance settings.
+		/// </summary>
+		protected override void ClearSettingsFinal()
+		{
+			base.ClearSettingsFinal();
+
+			RviUtils.UnregisterFusionRoom(this);
 		}
 
 		#endregion

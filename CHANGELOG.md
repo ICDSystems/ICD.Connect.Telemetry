@@ -8,9 +8,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
  - Added Fusion sig mapping for call rating average
+ - Added Fusion RVI generation utility to use instead of Crestron's - 1-2 order of magnitude perf improvement
+ - Added RVI generation for MockFusionRoom using ICD RVI Utils
 
 ### Removed
  - Removed Fusion static bindings for second network adapter
+ 
+### Changed
+ - Change FusionRoomAdapter to use ICD RVI Utils generation
 
 ## [8.1.0] - 2020-11-16
 ### Added

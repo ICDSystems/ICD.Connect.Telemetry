@@ -7,19 +7,20 @@ using ICD.Common.Utils.Timers;
 using ICD.Connect.API.Commands;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
+using ICD.Connect.Telemetry.Crestron.Utils;
 using ICD.Connect.Telemetry.Nodes;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using Crestron.SimplSharpPro.CrestronThread;
+using ICD.Connect.Telemetry.CrestronPro.Assets;
+#endif
 using ICD.Connect.Misc.CrestronPro;
 using System.Linq;
-using ICD.Connect.Telemetry.CrestronPro.Assets;
 using ICD.Common.Properties;
 using ICD.Common.Utils.Extensions;
 using ICD.Common.Utils.Services.Logging;
 using ICD.Connect.Protocol.Sigs;
-#endif
 using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Telemetry.Crestron.Assets;
@@ -168,6 +169,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			}
 		}
 
+		public string RoomName { get; private set; }
+
 		/// <summary>
 		/// Collection of user configured assets received from the device.
 		/// </summary>
@@ -184,9 +187,64 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			}
 		}
 
+
+		/// <summary>
+		/// Gets the IPID for the Fusion Room.
+		/// </summary>
+		public byte IpId
+		{
+			get
+			{
+#if SIMPLSHARP
+				return m_FusionRoom == null ? (byte)0 : (byte)m_FusionRoom.ID;
+#else
+				return 0;
+#endif
+			}
+		}
+
 		#endregion
 
 		#region Methods
+
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedBoolSigs()
+		{
+#if SIMPLSHARP
+			foreach (BooleanSigData sig in m_FusionRoom.UserDefinedBooleanSigDetails)
+			{
+				var info = new SigInfo(eSigType.Digital, sig.Number, sig.Name, 0);
+				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(info, sig.SigIoMask.ToIcd());
+			}
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedUShortSigs()
+		{
+#if SIMPLSHARP
+			foreach (UShortSigData sig in m_FusionRoom.UserDefinedUShortSigDetails)
+			{
+				var info = new SigInfo(eSigType.Analog, sig.Number, sig.Name, 0);
+				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(info, sig.SigIoMask.ToIcd());
+			}
+#else
+			throw new NotSupportedException();
+#endif
+		}
+
+		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedStringSigs()
+		{
+#if SIMPLSHARP
+			foreach (StringSigData sig in m_FusionRoom.UserDefinedStringSigDetails)
+			{
+				var info = new SigInfo(eSigType.Serial, sig.Number, sig.Name, 0);
+				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(info, sig.SigIoMask.ToIcd());
+			}
+#else
+			throw new NotSupportedException();
+#endif
+		}
 
 		/// <summary>
 		/// Release resources.
@@ -212,6 +270,8 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		[PublicAPI]
 		public void SetFusionRoom(FusionRoom fusionRoom)
 		{
+			RviUtils.UnregisterFusionRoom(this);
+
 			Unsubscribe(m_FusionRoom);
 
 			if (m_FusionRoom != null)
@@ -232,6 +292,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 				Logger.Log(eSeverity.Error, "Unable to register {0} - {1}", m_FusionRoom.GetType().Name, result);
 
 			Subscribe(m_FusionRoom);
+
+			if (m_FusionRoom != null)
+				RviUtils.RegisterFusionRoom(this);
 
 			UpdateCachedOnlineStatus();
 		}
@@ -495,7 +558,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		}
 
 		/// <summary>
-		/// 
+		/// Generates an RVI file for the fusion assets.
 		/// </summary>
 		public void RebuildRvi()
 		{
@@ -528,7 +591,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			try
 			{
 				stopwatch.Start();
-				FusionRVI.GenerateFileForAllFusionDevices();
+				RviUtils.GenerateFileForAllFusionDevices();
 				stopwatch.Stop();
 				Logger.Log(eSeverity.Debug, "RVI Generation took {0}ms", stopwatch.ElapsedMilliseconds);
 			}
@@ -545,9 +608,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		}
 #endif
 
-		#endregion
+#endregion
 
-		#region Settings
+#region Settings
 
 		/// <summary>
 		/// Override to apply properties to the settings instance.
@@ -590,6 +653,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			base.ApplySettingsFinal(settings, factory);
 
 #if SIMPLSHARP
+
+			RoomName = settings.RoomName;
+
 			FusionRoom fusionRoom = settings.Ipid == null
 				                        ? null
 				                        : new FusionRoom(settings.Ipid.Value,
@@ -605,7 +671,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 		#endregion
 
-		#region Private Methods
+#region Private Methods
 
 		/// <summary>
 		/// Gets the current online status of the device.
@@ -715,9 +781,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 
 #endif
 
-		#endregion
+#endregion
 
-		#region FusionRoom Callbacks
+#region FusionRoom Callbacks
 
 #if SIMPLSHARP
 		/// <summary>
@@ -817,9 +883,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		}
 #endif
 
-		#endregion
+#endregion
 
-		#region Console
+#region Console
 
 		/// <summary>
 		/// Gets the child console commands.
@@ -838,6 +904,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			return base.GetConsoleCommands();
 		}
 
-		#endregion
+#endregion
 	}
 }

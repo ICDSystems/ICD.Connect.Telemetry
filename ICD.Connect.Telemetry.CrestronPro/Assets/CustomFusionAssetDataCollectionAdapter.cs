@@ -1,4 +1,7 @@
-﻿#if SIMPLSHARP
+﻿using System.Collections;
+using System.Linq;
+using ICD.Common.Utils.Collections;
+#if SIMPLSHARP
 using System;
 using System.Collections.Generic;
 using Crestron.SimplSharpPro;
@@ -12,7 +15,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 	public sealed class CustomFusionAssetDataCollectionAdapter : IFusionAssetDataCollection
 	{
 		private readonly CrestronCollection<CustomFusionAssetData> m_Collection;
-		private readonly Dictionary<uint, FusionAssetData> m_AdapterCache;
+		private readonly IcdOrderedDictionary<uint, FusionAssetData> m_AdapterCache;
 		private readonly Dictionary<eAssetType, List<uint>> m_TypeToAdapters; 
 		private readonly SafeCriticalSection m_Section;
 
@@ -30,7 +33,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		public CustomFusionAssetDataCollectionAdapter(CrestronCollection<CustomFusionAssetData> collection)
 		{
 			m_Collection = collection;
-			m_AdapterCache = new Dictionary<uint, FusionAssetData>();
+			m_AdapterCache = new IcdOrderedDictionary<uint, FusionAssetData>();
 			m_TypeToAdapters = new Dictionary<eAssetType, List<uint>>();
 			m_Section = new SafeCriticalSection();
 		}
@@ -109,6 +112,16 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
+		}
+
+		public IEnumerator<FusionAssetData> GetEnumerator()
+		{
+			return m_Section.Execute(() => m_AdapterCache.Values.ToList().GetEnumerator());
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 	}
 }
