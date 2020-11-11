@@ -516,8 +516,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private void GenerateBindingsForSystem()
 		{
 			// Subscribe to ProgramToService topics for cleanup
-			string topic = TopicUtils.GetProgramToServiceTopic(ClientId, PathPrefix, "#");
-			Subscribe(topic, DiscoveredProgramToServiceTopic);
+			// TODO - Crashes CP3
+			//string topic = TopicUtils.GetProgramToServiceTopic(ClientId, PathPrefix, "#");
+			//Subscribe(topic, DiscoveredProgramToServiceTopic);
 
 			// Start building telemetry bindings
 			TelemetryProviderNode systemTelemetry = TelemetryService.LazyLoadCoreTelemetry();
