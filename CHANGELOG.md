@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [8.1.0] - 2020-11-16
 ### Added
  - Publishing system online message when the MQTT client reconnects
  - Pushing all current activities to telemetry instead of just the most recent one
@@ -66,6 +67,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Using new logging context
  - Substantial simplification of telemetry attributes and nodes
  - Fixed a bug where originator telemetry was not being lazy-loaded correctly
+
+## [5.5.2] - 2020-11-16
+### Changed
+ - CrestronFusion - Added RebuildRVI Console Command
+ - CrestronFusion - Cleaned up RVI generation logging, set finished generating log as a notice
 
 ## [5.5.1] - 2020-10-12
 ### Changed

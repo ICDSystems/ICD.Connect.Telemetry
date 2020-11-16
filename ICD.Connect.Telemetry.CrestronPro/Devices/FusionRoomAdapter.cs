@@ -4,6 +4,7 @@ using ICD.Common.Logging.LoggingContexts;
 using ICD.Common.Utils;
 using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Timers;
+using ICD.Connect.API.Commands;
 using ICD.Connect.Misc.CrestronPro.Utils;
 using ICD.Connect.Settings;
 using ICD.Connect.Telemetry.Nodes;
@@ -521,7 +522,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
 		private object RviGenerationThreadCallback(object userspecific)
 		{
-			Logger.Log(eSeverity.Debug, "Starting RVI Generation");
+			Logger.Log(eSeverity.Debug, "RVI Generation Starting");
 			IcdStopwatch stopwatch = new IcdStopwatch();
 
 			try
@@ -533,7 +534,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			}
 			catch (Exception e)
 			{
-				Logger.Log(eSeverity.Error, e, "Exception Generating RVI");
+				Logger.Log(eSeverity.Error, e, "RVI Generation Exception");
 			}
 			finally
 			{
@@ -815,6 +816,27 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			UpdateCachedOnlineStatus();
 		}
 #endif
+
+		#endregion
+
+		#region Console
+
+		/// <summary>
+		/// Gets the child console commands.
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<IConsoleCommand> GetConsoleCommands()
+		{
+			foreach (IConsoleCommand command in GetBaseConsoleCommands())
+				yield return command;
+
+			yield return new ConsoleCommand("GenerateRVI", "Starts generation of the RVI", () => RebuildRvi());
+		}
+
+		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()
+		{
+			return base.GetConsoleCommands();
+		}
 
 		#endregion
 	}
