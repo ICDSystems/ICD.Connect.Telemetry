@@ -67,6 +67,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
  - Substantial simplification of telemetry attributes and nodes
  - Fixed a bug where originator telemetry was not being lazy-loaded correctly
 
+## [5.5.2] - 2020-11-16
+### Changed
+ - CrestronFusion - Added RebuildRVI Console Command
+ - CrestronFusion - Cleaned up RVI generation logging, set finished generating log as a notice
+
 ## [5.5.1] - 2020-10-12
 ### Changed
  - CrestronFusion - Prevent running RVI generation if it's already running
