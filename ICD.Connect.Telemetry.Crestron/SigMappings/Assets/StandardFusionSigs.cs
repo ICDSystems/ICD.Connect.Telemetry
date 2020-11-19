@@ -145,48 +145,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 					SigType = eSigType.Digital,
 					Sig = 100,
 					TelemetryProviderTypes = new IcdHashSet<Type> { typeof(MonitoredAdapterNetworkDeviceInfo) }
-				},
-				new AssetFusionSigMapping
-				{
-					TelemetryName = DeviceTelemetryNames.DEVICE_MAC_ADDRESS_SECONDARY,
-					FusionSigName = "MAC Address 2",
-					SigType = eSigType.Serial,
-					Sig = 110
-				},
-				new AssetFusionSigMapping
-				{
-					TelemetryName = DeviceTelemetryNames.DEVICE_HOSTNAME_SECONDARY,
-					FusionSigName = "Hostname 2",
-					SigType = eSigType.Serial,
-					Sig = 111
-				},
-				new AssetFusionSigMapping
-				{
-					TelemetryName = DeviceTelemetryNames.DEVICE_IP_ADDRESS_SECONDARY,
-					FusionSigName = "IP Address 2",
-					SigType = eSigType.Serial,
-					Sig = 112
-				},
-				new AssetFusionSigMapping
-				{
-					TelemetryName = DeviceTelemetryNames.DEVICE_IP_SUBNET_SECONDARY,
-					FusionSigName = "IP Subnet 2",
-					SigType = eSigType.Serial,
-					Sig = 113
-				},
-				new AssetFusionSigMapping
-				{
-					TelemetryName = DeviceTelemetryNames.DEVICE_IP_GATEWAY_SECONDARY,
-					FusionSigName = "IP Gateway 2",
-					SigType = eSigType.Serial,
-					Sig = 114
-				},
-				new AssetFusionSigMapping
-				{
-					TelemetryName = DeviceTelemetryNames.DEVICE_DHCP_STATUS_SECONDARY,
-					FusionSigName = "IP DHCP Enabled 2",
-					SigType = eSigType.Digital,
-					Sig = 110
 				}
 			};
 
