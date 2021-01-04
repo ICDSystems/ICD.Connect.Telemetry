@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
+using ICD.Connect.Partitioning.Commercial.CallRatings;
 using ICD.Connect.Partitioning.Commercial.Rooms;
 using ICD.Connect.Protocol.Sigs;
 
@@ -34,6 +35,13 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Rooms
 					FusionSigName = "Mute Mics",
 					SigType = eSigType.Digital,
 					Sig = 56
+				},
+				new RoomFusionSigMapping
+				{
+					TelemetryName = CallRatingTelemetryNames.CALL_RATING_AVERAGE_STRING,
+					FusionSigName = "Call Rating Average",
+					SigType = eSigType.Serial,
+					Sig = 200
 				}
 			};
 	}
