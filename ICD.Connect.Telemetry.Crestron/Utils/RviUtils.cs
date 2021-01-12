@@ -66,7 +66,7 @@ namespace ICD.Connect.Telemetry.Crestron.Utils
 		{
 			get
 			{
-				if (IcdEnvironment.RuntimeEnvironment == IcdEnvironment.eRuntimeEnvironment.Standard)
+				if (IcdEnvironment.Framework == IcdEnvironment.eFramework.Standard)
 					return PathUtils.Join(PathUtils.ProgramConfigPath, "ICD.Connect.Core.rvi");
 
 				if (PathUtils.ProgramFilePath != null)
