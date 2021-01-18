@@ -475,7 +475,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				m_BindingsSection.Leave();
 			}
 
-			if (topics.Length > 0)
+			if (topics.Length > 0 && m_Client.IsConnected)
 				m_Client.Unsubscribe(topics);
 		}
 
