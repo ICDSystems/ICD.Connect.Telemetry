@@ -411,7 +411,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 
 				PublishMessageInfo overflow;
 				if (m_PublishBuffer.Enqueue(item, out overflow))
-					Logger.Log(eSeverity.Warning, "Publish buffer is full - dropped message {0}{1}{2}",
+					Logger.Log(eSeverity.Warning, "Publish buffer is full - dropped message {0}:{1}",
 					           overflow.Topic, JsonUtils.Format(overflow.PublishMessage));
 			}
 			finally
