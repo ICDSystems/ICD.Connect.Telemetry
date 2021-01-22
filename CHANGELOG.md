@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### [8.2.1] - 2021-01-22
 ### Changed
  - Fixed a bug where the MQTT telemetry provider would sometimes attempt to send unsubscribe messages while disconnected
  - Fixed logging error when MQTT queue was full
