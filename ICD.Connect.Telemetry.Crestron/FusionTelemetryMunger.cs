@@ -352,6 +352,10 @@ namespace ICD.Connect.Telemetry.Crestron
 
 					binding.Initialize();
 				}
+				catch (IndexOutOfRangeException e)
+				{
+					LoggerService.AddEntry(eSeverity.Warning, "Could not build asset telemetry binding for {0} - {1}", device, e.Message);
+				}
 				catch (Exception e)
 				{
 					LoggerService.AddEntry(eSeverity.Error, "Failed to build asset telemetry binding for {0} - {1}", device, e.Message);
@@ -490,6 +494,10 @@ namespace ICD.Connect.Telemetry.Crestron
 				AddRoomBindingToCollection(binding);
 
 				binding.Initialize();
+			}
+			catch (IndexOutOfRangeException e)
+			{
+				LoggerService.AddEntry(eSeverity.Warning, "Could not build room telemetry binding for {0} - {1}", room, e.Message);
 			}
 			catch (Exception e)
 			{
