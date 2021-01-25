@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.2.2] - 2021-01-25
 ### Added
  - Added custom error handling for when Fusion asset/room telemetry bindings fail to build due to insufficient binding range
 
