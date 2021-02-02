@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\NodeTelemetryAttribute.cs" />
+    <Compile Include="Debounce\Debouncer.cs" />
+    <Compile Include="Debounce\eDebounceMode.cs" />
     <Compile Include="Nodes\TelemetryNodeTracker.cs" />
     <Compile Include="Nodes\TelemetryProviderNode.cs" />
     <Compile Include="ObfuscationSettings.cs" />

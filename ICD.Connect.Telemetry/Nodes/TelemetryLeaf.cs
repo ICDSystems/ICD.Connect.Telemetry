@@ -7,6 +7,7 @@ using ICD.Common.Utils.EventArguments;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.API.Commands;
 using ICD.Connect.API.Nodes;
+using ICD.Connect.Telemetry.Debounce;
 using ICD.Connect.Telemetry.Providers;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
@@ -27,6 +28,9 @@ namespace ICD.Connect.Telemetry.Nodes
 		[CanBeNull] private readonly MethodInfo m_MethodInfo;
 		[CanBeNull] private readonly EventInfo m_EventInfo;
 		[CanBeNull] private readonly Delegate m_Delegate;
+		[CanBeNull] private readonly Type m_ValueType;
+
+		private readonly Debouncer<object> m_Debouncer;
 
 		private object m_CachedValue;
 
@@ -69,6 +73,12 @@ namespace ICD.Connect.Telemetry.Nodes
 				return m_PropertyInfo.GetValue(Provider, null);
 			}
 		}
+
+		/// <summary>
+		/// Gets the type of the underlying value.
+		/// </summary>
+		[CanBeNull]
+		public Type ValueType { get { return m_ValueType; } }
 
 		/// <summary>
 		/// Gets the info for the method.
@@ -136,9 +146,12 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <param name="propertyInfo"></param>
 		/// <param name="methodInfo"></param>
 		/// <param name="eventInfo"></param>
+		/// <param name="debounceMode"></param>
+		/// <param name="debounceIntervalMs"></param>
 		public TelemetryLeaf([NotNull] string name, [NotNull] ITelemetryProvider provider,
 		                     [CanBeNull] PropertyInfo propertyInfo, [CanBeNull] MethodInfo methodInfo,
-		                     [CanBeNull] EventInfo eventInfo)
+		                     [CanBeNull] EventInfo eventInfo, eDebounceMode debounceMode, long debounceIntervalMs,
+		                     object debounceLowValue)
 			: base(name, provider)
 		{
 			if (name == null)
@@ -150,16 +163,29 @@ namespace ICD.Connect.Telemetry.Nodes
 			if (propertyInfo == null && methodInfo == null && eventInfo == null)
 				throw new ArgumentException("At least one member info must not be null");
 
-			if (eventInfo != null && propertyInfo == null)
+			m_PropertyInfo = propertyInfo;
+			m_MethodInfo = methodInfo;
+			m_EventInfo = eventInfo;
+
+			// Determine the underlying data type
+			if (m_PropertyInfo != null)
+				m_ValueType = m_PropertyInfo.PropertyType;
+			else if (eventInfo != null)
 			{
 				Type eventArgsType = eventInfo.GetEventArgsType();
 				if (!eventArgsType.IsAssignableTo<IGenericEventArgs>())
 					throw new NotSupportedException("Event-only telemetry must use GenericEventArgs");
+
+				m_ValueType = eventArgsType.GetInnerGenericTypes(typeof (IGenericEventArgs<>)).Single();
 			}
 
-			m_PropertyInfo = propertyInfo;
-			m_MethodInfo = methodInfo;
-			m_EventInfo = eventInfo;
+			// Debounce low value wasn't configured, so use default
+			if (debounceLowValue == null && m_ValueType != null)
+				debounceLowValue = ReflectionUtils.GetDefaultValue(m_ValueType);
+
+			m_Debouncer = new Debouncer<object>(debounceMode, debounceIntervalMs,
+			                                    debounceLowValue, EqualityComparer<object>.Default,
+			                                    DebouncerOnValueChanged);
 
 			// Subscribe to the event.
 			if (m_EventInfo != null)
@@ -180,6 +206,8 @@ namespace ICD.Connect.Telemetry.Nodes
 			OnValueRaised = null;
 
 			base.Dispose();
+
+			m_Debouncer.Dispose();
 
 			if (m_EventInfo != null && m_Delegate != null)
 				ReflectionUtils.UnsubscribeEvent(Provider, m_EventInfo, m_Delegate);
@@ -236,7 +264,7 @@ namespace ICD.Connect.Telemetry.Nodes
 			// Use the property to get the current value
 			if (m_PropertyInfo != null)
 			{
-				Update(Value);
+				m_Debouncer.Enqueue(Value);
 				return;
 			}
 
@@ -245,7 +273,16 @@ namespace ICD.Connect.Telemetry.Nodes
 			if (genericArgs == null)
 				throw new InvalidOperationException("Unable to infer new value from event args");
 
-			Update(genericArgs.Data);
+			m_Debouncer.Enqueue(genericArgs.Data);
+		}
+
+		/// <summary>
+		/// Called when a debounced value changes.
+		/// </summary>
+		/// <param name="value"></param>
+		private void DebouncerOnValueChanged(object value)
+		{
+			Update(value);
 		}
 
 		/// <summary>

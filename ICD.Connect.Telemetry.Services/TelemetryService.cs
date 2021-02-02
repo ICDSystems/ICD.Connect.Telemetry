@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ICD.Connect.Telemetry.Debounce;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -316,16 +317,52 @@ namespace ICD.Connect.Telemetry.Services
 					           "Failed to find EventInfo {0} for PropertyInfo {1} on TelemetryProvider {2}",
 					           kvp.Value.EventName, kvp.Value.Name, instance);
 
-				yield return new TelemetryLeaf(kvp.Value.Name, instance, kvp.Key, methodAttributePair.Key, eventAttributePair.Key);
+				eDebounceMode debounceMode =
+					eventAttributePair.Value == null
+						? eDebounceMode.None
+						: eventAttributePair.Value.DebounceMode;
+
+				long debounceInterval =
+					eventAttributePair.Value == null
+						? 0
+						: eventAttributePair.Value.DebounceInterval;
+
+				object debounceLowValue =
+					eventAttributePair.Value == null
+						? null
+						: eventAttributePair.Value.DebounceLowValue;
+
+				yield return new TelemetryLeaf(kvp.Value.Name,
+				                               instance,
+				                               kvp.Key,
+				                               methodAttributePair.Key,
+				                               eventAttributePair.Key,
+				                               debounceMode,
+				                               debounceInterval,
+				                               debounceLowValue);
 			}
 
 			// Loose Methods
 			foreach (KeyValuePair<MethodInfo, MethodTelemetryAttribute> kvp in methods.Values)
-				yield return new TelemetryLeaf(kvp.Value.Name, instance, null, kvp.Key, null);
+				yield return new TelemetryLeaf(kvp.Value.Name,
+				                               instance,
+				                               null,
+				                               kvp.Key,
+				                               null,
+				                               eDebounceMode.None,
+				                               0,
+				                               null);
 
 			// Loose Events
 			foreach (KeyValuePair<EventInfo, EventTelemetryAttribute> kvp in events.Values)
-				yield return new TelemetryLeaf(kvp.Value.Name, instance, null, null, kvp.Key);
+				yield return new TelemetryLeaf(kvp.Value.Name,
+				                               instance,
+				                               null,
+				                               null,
+				                               kvp.Key,
+				                               kvp.Value.DebounceMode,
+				                               kvp.Value.DebounceInterval,
+				                               kvp.Value.DebounceLowValue);
 		}
 
 		/// <summary>

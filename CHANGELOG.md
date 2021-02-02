@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+ - Added debounce support to event telemetry items
+
 ## [8.2.2] - 2021-01-25
 ### Added
  - Added custom error handling for when Fusion asset/room telemetry bindings fail to build due to insufficient binding range

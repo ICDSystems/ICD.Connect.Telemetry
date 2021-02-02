@@ -5,6 +5,7 @@ using ICD.Common.Properties;
 using ICD.Common.Utils;
 using ICD.Common.Utils.Extensions;
 using ICD.Connect.Telemetry.Comparers;
+using ICD.Connect.Telemetry.Debounce;
 #if SIMPLSHARP
 using Crestron.SimplSharp.Reflection;
 #else
@@ -24,6 +25,21 @@ namespace ICD.Connect.Telemetry.Attributes
 
 		private static readonly Dictionary<Type, Dictionary<EventInfo, EventTelemetryAttribute>> s_TypeToEventInfo;
 		private static readonly SafeCriticalSection s_CacheSection;
+
+		/// <summary>
+		/// Gets/sets the debounce mode.
+		/// </summary>
+		public eDebounceMode DebounceMode { get; set; }
+
+		/// <summary>
+		/// Gets/sets the debounce interval in milliseconds.
+		/// </summary>
+		public long DebounceInterval { get; set; }
+
+		/// <summary>
+		/// Gets/sets the debounce low value.
+		/// </summary>
+		public object DebounceLowValue { get; set; }
 
 		/// <summary>
 		/// Constructor.
