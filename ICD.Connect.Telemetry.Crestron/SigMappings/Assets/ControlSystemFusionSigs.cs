@@ -14,7 +14,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 			{
 				new AssetFusionSigMapping
 				{
-					TelemetryName = ControlSystemExternalTelemetryNames.PROGRAM_UPTIME,
+					TelemetryName = ControlSystemExternalTelemetryNames.PROGRAM_START_TIME,
 					FusionSigName = "Program Uptime",
 					SigType = eSigType.Serial,
 					Sig = 58
