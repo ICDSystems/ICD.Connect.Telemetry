@@ -515,11 +515,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		private void GenerateBindingsForSystem()
 		{
-			// Subscribe to ProgramToService topics for cleanup
-			// TODO - Crashes CP3
-			//string topic = TopicUtils.GetProgramToServiceTopic(ClientId, PathPrefix, "#");
-			//Subscribe(topic, DiscoveredProgramToServiceTopic);
-
 			// Start building telemetry bindings
 			TelemetryProviderNode systemTelemetry = TelemetryService.LazyLoadCoreTelemetry();
 			m_NodeTracker.SetRootNode(systemTelemetry);
@@ -578,13 +573,9 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// <summary>
 		/// Destroys the binding and removes from the cache.
 		/// </summary>
-		/// <param name="telemetry"></param>
 		/// <param name="path"></param>
-		private void DestroyBinding([NotNull] TelemetryLeaf telemetry, [NotNull] IEnumerable<ITelemetryNode> path)
+		private void DestroyBinding([NotNull] IEnumerable<ITelemetryNode> path)
 		{
-			if (telemetry == null)
-				throw new ArgumentNullException("telemetry");
-
 			if (path == null)
 				throw new ArgumentNullException("path");
 
@@ -598,44 +589,19 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			try
 			{
 				MqttTelemetryBinding binding;
-				if (m_Bindings.TryGetValue(programToService, out binding))
-				{
-					m_Bindings.Remove(binding.ProgramToServiceTopic);
-					m_Bindings.Remove(binding.ServiceToProgramTopic);
-					m_Bindings.Remove(binding.ProgramToServiceMetadataTopic);
+				if (!m_Bindings.TryGetValue(programToService, out binding))
+					return;
 
-					binding.Dispose();
-				}
+				m_Bindings.Remove(binding.ProgramToServiceTopic);
+				m_Bindings.Remove(binding.ServiceToProgramTopic);
+				m_Bindings.Remove(binding.ProgramToServiceMetadataTopic);
+
+				binding.Dispose();
 			}
 			finally
 			{
 				m_BindingsSection.Leave();
 			}
-		}
-
-		/// <summary>
-		/// Called when we discover a ProgramToService topic on the broker.
-		/// This allows us to clean up any old retained telemetry.
-		/// </summary>
-		/// <param name="topic"></param>
-		/// <param name="data"></param>
-		private void DiscoveredProgramToServiceTopic(string topic, byte[] data)
-		{
-			if (topic == null)
-				throw new ArgumentNullException("topic");
-
-			// Already cleared - Trying to clear again makes a feedback loop!
-			if (data.Length == 0)
-				return;
-
-			// We're tracking this binding so don't clear it
-			if (m_BindingsSection.Execute(() => m_Bindings.ContainsKey(topic)) ||
-			    topic == SystemOnlineTopic ||
-			    topic == SystemOnlineMetadataTopic)
-				return;
-
-			// Clear the retained message
-			Publish(topic, null);
 		}
 
 		#endregion
@@ -683,7 +649,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		{
 			TelemetryLeaf leaf = node as TelemetryLeaf;
 			if (leaf != null)
-				DestroyBinding(leaf, path);
+				DestroyBinding(path);
 		}
 
 		#endregion
