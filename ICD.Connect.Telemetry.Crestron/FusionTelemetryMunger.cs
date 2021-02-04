@@ -32,15 +32,16 @@ namespace ICD.Connect.Telemetry.Crestron
 
 		private static readonly IcdHashSet<AssetFusionSigMapping> s_AssetMappings =
 			DisplayFusionSigs.AssetMappings
-			                    .Concat(SwitcherFusionSigs.AssetMappings)
-			                    .Concat(SwitcherFusionSigs.InputOutputAssetMappings)
-			                    .Concat(StandardFusionSigs.AssetMappings)
-			                    .Concat(DialingDeviceFusionSigs.AssetMappings)
-			                    .Concat(OccupancyFusionSigs.AssetMappings)
-			                    .Concat(DspFusionSigs.AssetMappings)
-			                    .Concat(ControlSystemFusionSigs.AssetMappings)
-			                    .Concat(VolumeDeviceControlFusionSigs.AssetMappings)
-								.ToIcdHashSet();
+			                 .Concat(SwitcherFusionSigs.AssetMappings)
+			                 .Concat(SwitcherFusionSigs.InputOutputAssetMappings)
+			                 .Concat(StandardFusionSigs.AssetMappings)
+			                 .Concat(DialingDeviceFusionSigs.AssetMappings)
+			                 .Concat(OccupancyFusionSigs.AssetMappings)
+			                 .Concat(DspFusionSigs.AssetMappings)
+			                 .Concat(ControlSystemFusionSigs.AssetMappings)
+			                 .Concat(VolumeDeviceControlFusionSigs.AssetMappings)
+			                 .Concat(TouchPanelFusionSigs.AssetMappings)
+			                 .ToIcdHashSet();
 
 		private static readonly IcdHashSet<RoomFusionSigMapping> s_RoomMappings =
 			RoomFusionSigs.RoomMappings
