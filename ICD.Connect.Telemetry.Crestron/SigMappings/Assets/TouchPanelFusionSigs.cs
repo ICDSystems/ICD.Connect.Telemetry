@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ICD.Common.Utils.Collections;
-using ICD.Connect.Panels.CrestronPro.TriListAdapters.Abstracts.TswFt5Buttons;
+using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.Telemetry;
 using ICD.Connect.Protocol.Sigs;
 
@@ -20,7 +20,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 					FusionSigName = "App Mode",
 					Sig = 64,
 					SigType = eSigType.Serial,
-					TelemetryProviderTypes = new IcdHashSet<Type> { typeof(ITswFt5ButtonAdapter) }
+					TelemetryProviderTypes = new IcdHashSet<Type> { typeof(IPanelDevice) }
 				},
 				new AssetFusionSigMapping
 				{
@@ -28,7 +28,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 					FusionSigName = "Display Project",
 					Sig = 63,
 					SigType = eSigType.Serial,
-					TelemetryProviderTypes = new IcdHashSet<Type> { typeof(ITswFt5ButtonAdapter) }
+					TelemetryProviderTypes = new IcdHashSet<Type> { typeof(IPanelDevice) }
 				}
 			};
 	}
