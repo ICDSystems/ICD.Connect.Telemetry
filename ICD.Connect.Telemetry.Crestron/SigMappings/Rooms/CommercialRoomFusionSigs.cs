@@ -18,7 +18,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Rooms
 					TelemetryName = CommercialRoomTelemetryNames.IS_AWAKE,
 					FusionSigName = "System Power On",
 					SigType = eSigType.Digital,
-					Sig = 3,
 					SendReservedSig = (r, o) => r.SetSystemPower((bool)o)
 				},
 				new RoomFusionSigMapping
@@ -26,7 +25,6 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Rooms
 					TelemetryName = CommercialRoomTelemetryNames.SLEEP_COMMAND,
 					FusionSigName = "System Power",
 					SigType = eSigType.Digital,
-					Sig = 4,
 					SendReservedSig = (r, o) => r.SetSystemPower((bool)o)
 				},
 				new RoomFusionSigMapping
