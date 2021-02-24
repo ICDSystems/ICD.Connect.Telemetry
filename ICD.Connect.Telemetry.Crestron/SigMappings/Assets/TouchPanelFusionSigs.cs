@@ -16,7 +16,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 			{
 				new AssetFusionSigMapping
 				{
-					TelemetryName = TswFt5ButtonAdapterTelemetryNames.APP_MODE_PROPERTY,
+					TelemetryName = CrestronPanelTelemetryNames.APP_MODE_PROPERTY,
 					FusionSigName = "App Mode",
 					Sig = 64,
 					SigType = eSigType.Serial,
@@ -24,7 +24,7 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 				},
 				new AssetFusionSigMapping
 				{
-					TelemetryName = TswFt5ButtonAdapterTelemetryNames.DISPLAY_PROJECT_EVENT,
+					TelemetryName = CrestronPanelTelemetryNames.DISPLAY_PROJECT_EVENT,
 					FusionSigName = "Display Project",
 					Sig = 63,
 					SigType = eSigType.Serial,
