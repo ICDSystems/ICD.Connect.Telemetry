@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
  - Fusion - removed joins from reserved sig mappings
+ 
+### Added
+ - FusionRoomAdapter - Added console command to manually generate RVI using Crestron methods
 
 ## [8.3.0] - 2021-02-04
 ### Added
