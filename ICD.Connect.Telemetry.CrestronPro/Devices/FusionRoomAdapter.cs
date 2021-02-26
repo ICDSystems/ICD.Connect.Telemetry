@@ -897,6 +897,9 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 				yield return command;
 
 			yield return new ConsoleCommand("GenerateRVI", "Starts generation of the RVI", () => RebuildRvi());
+#if SIMPLSHARP
+			yield return new ConsoleCommand("CrestronRVI", "Generate the RVI with Crestron utils", () => FusionRVI.GenerateFileForAllFusionDevices());
+#endif
 		}
 
 		private IEnumerable<IConsoleCommand> GetBaseConsoleCommands()

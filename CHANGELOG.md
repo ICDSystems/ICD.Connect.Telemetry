@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Fusion sig asset mappings for touch panel telemetry
 
+## [8.3.1] - 2021-02-26
+### Added
+ - FusionRoomAdapter - Added console command to manually generate RVI using Crestron methods
+ 
+### Changed
+ - Fusion - removed joins from reserved sig mappings
+
 ## [8.3.0] - 2021-02-04
 ### Added
  - Added debounce support to event telemetry items
