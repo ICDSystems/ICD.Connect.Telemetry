@@ -2,7 +2,6 @@
 using ICD.Common.Utils.Collections;
 using ICD.Connect.Misc.ControlSystems;
 using ICD.Connect.Protocol.Sigs;
-using ICD.Connect.Routing.Telemetry;
 
 namespace ICD.Connect.Telemetry.Crestron.SigMappings.Assets
 {
