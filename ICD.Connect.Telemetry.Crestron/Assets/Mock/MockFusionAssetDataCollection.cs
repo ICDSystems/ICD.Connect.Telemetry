@@ -7,7 +7,7 @@ namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 {
 	public sealed class MockFusionAssetDataCollection : IFusionAssetDataCollection
 	{
-		private readonly IcdOrderedDictionary<uint, IMockFusionAsset> m_Assets;
+		private readonly IcdSortedDictionary<uint, IMockFusionAsset> m_Assets;
 
 		/// <summary>
 		/// Gets the fusion asset data with the given id.
@@ -22,7 +22,7 @@ namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 		/// <param name="assets"></param>
 		public MockFusionAssetDataCollection(IDictionary<uint, IMockFusionAsset> assets)
 		{
-			m_Assets = new IcdOrderedDictionary<uint, IMockFusionAsset>(assets);
+			m_Assets = new IcdSortedDictionary<uint, IMockFusionAsset>(assets);
 		}
 
 		public IEnumerator<FusionAssetData> GetEnumerator()

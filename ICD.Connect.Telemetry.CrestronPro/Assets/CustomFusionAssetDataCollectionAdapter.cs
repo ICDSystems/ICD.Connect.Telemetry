@@ -15,7 +15,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 	public sealed class CustomFusionAssetDataCollectionAdapter : IFusionAssetDataCollection
 	{
 		private readonly CrestronCollection<CustomFusionAssetData> m_Collection;
-		private readonly IcdOrderedDictionary<uint, FusionAssetData> m_AdapterCache;
+		private readonly IcdSortedDictionary<uint, FusionAssetData> m_AdapterCache;
 		private readonly Dictionary<eAssetType, List<uint>> m_TypeToAdapters; 
 		private readonly SafeCriticalSection m_Section;
 
@@ -33,7 +33,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		public CustomFusionAssetDataCollectionAdapter(CrestronCollection<CustomFusionAssetData> collection)
 		{
 			m_Collection = collection;
-			m_AdapterCache = new IcdOrderedDictionary<uint, FusionAssetData>();
+			m_AdapterCache = new IcdSortedDictionary<uint, FusionAssetData>();
 			m_TypeToAdapters = new Dictionary<eAssetType, List<uint>>();
 			m_Section = new SafeCriticalSection();
 		}

@@ -17,7 +17,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		private readonly CrestronCollection<T> m_Collection;
 		private readonly Func<T, TAdapter> m_Factory;
 
-		private readonly IcdOrderedDictionary<uint, TAdapter> m_SigAdapterNumberCache;
+		private readonly IcdSortedDictionary<uint, TAdapter> m_SigAdapterNumberCache;
 		private readonly SafeCriticalSection m_CacheSection;
 
 		#region Properties
@@ -79,7 +79,7 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 			m_Collection = collection;
 			m_Factory = factory;
 
-			m_SigAdapterNumberCache = new IcdOrderedDictionary<uint, TAdapter>();
+			m_SigAdapterNumberCache = new IcdSortedDictionary<uint, TAdapter>();
 			m_CacheSection = new SafeCriticalSection();
 		}
 

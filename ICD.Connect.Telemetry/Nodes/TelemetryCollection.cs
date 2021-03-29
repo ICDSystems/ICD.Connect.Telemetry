@@ -24,7 +24,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		public event EventHandler OnCollectionChanged;
 
 		private readonly Func<TelemetryCollection, IEnumerable<ITelemetryNode>> m_GetTelemetryNodes;
-		private readonly IcdOrderedDictionary<string, ITelemetryNode> m_TelemetryNodes; 
+		private readonly IcdSortedDictionary<string, ITelemetryNode> m_TelemetryNodes; 
 		private readonly SafeCriticalSection m_TelemetryNodesSection;
 
 		[NotNull]
@@ -69,7 +69,7 @@ namespace ICD.Connect.Telemetry.Nodes
 
 			m_PropertyInfo = propertyInfo;
 			m_GetTelemetryNodes = getTelemetryNodes;
-			m_TelemetryNodes = new IcdOrderedDictionary<string, ITelemetryNode>();
+			m_TelemetryNodes = new IcdSortedDictionary<string, ITelemetryNode>();
 			m_TelemetryNodesSection = new SafeCriticalSection();
 
 			Subscribe(Value);

@@ -12,7 +12,7 @@ namespace ICD.Connect.Telemetry.Nodes
 {
 	public sealed class TelemetryProviderNode : AbstractTelemetryNode, IEnumerable<ITelemetryNode>
 	{
-		private readonly IcdOrderedDictionary<string, ITelemetryNode> m_Children;
+		private readonly IcdSortedDictionary<string, ITelemetryNode> m_Children;
 		private readonly SafeCriticalSection m_ChildrenSection;
 
 		/// <summary>
@@ -28,7 +28,7 @@ namespace ICD.Connect.Telemetry.Nodes
 			if (children == null)
 				throw new ArgumentNullException("children");
 
-			m_Children = new IcdOrderedDictionary<string, ITelemetryNode>();
+			m_Children = new IcdSortedDictionary<string, ITelemetryNode>();
 			m_ChildrenSection = new SafeCriticalSection();
 
 			m_Children.AddRange(children, c => c.Name);
