@@ -35,14 +35,10 @@ namespace ICD.Connect.Telemetry.MQTTPro
 	{
 		public delegate void SubscriptionCallback(string topic, byte[] data);
 
-		// Should be plenty - As of writing we send about 3k messages on startup,
-		// just don't want to fill memory so long as we can't connect to the broker
-		private const int PUBLISH_BUFFER_MAX_COUNT = 100 * 1000;
-
 		private readonly Dictionary<string, MqttTelemetryBinding> m_Bindings;
 		private readonly Dictionary<string, IcdHashSet<SubscriptionCallback>> m_SubscriptionCallbacks;
 		private readonly Dictionary<string, IcdHashSet<SubscriptionCallback>> m_WildcardSubscriptionCallbacks;
-		private readonly ScrollQueue<PublishMessageInfo> m_PublishBuffer;
+		private readonly IcdOrderedDictionary<string, PublishMessageInfo> m_PublishBuffer;
 		private readonly TelemetryNodeTracker m_NodeTracker;
 		private readonly SafeCriticalSection m_BindingsSection;
 		private readonly SafeCriticalSection m_BufferSection;
@@ -208,7 +204,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_Bindings = new Dictionary<string, MqttTelemetryBinding>();
 			m_SubscriptionCallbacks = new Dictionary<string, IcdHashSet<SubscriptionCallback>>();
 			m_WildcardSubscriptionCallbacks = new Dictionary<string, IcdHashSet<SubscriptionCallback>>();
-			m_PublishBuffer = new ScrollQueue<PublishMessageInfo>(PUBLISH_BUFFER_MAX_COUNT);
+			m_PublishBuffer = new IcdOrderedDictionary<string, PublishMessageInfo>();
 			m_BindingsSection = new SafeCriticalSection();
 			m_BufferSection = new SafeCriticalSection();
 			m_ProcessSection = new SafeCriticalSection();
@@ -403,21 +399,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 				throw new ArgumentException("Publish topics must start with " + TopicUtils.PROGRAM_TO_SERVICE_PREFIX);
 
 			// Enqueue the message onto the buffer
-			m_BufferSection.Enter();
-
-			try
-			{
-				PublishMessageInfo item = new PublishMessageInfo(topic, message);
-
-				PublishMessageInfo overflow;
-				if (m_PublishBuffer.Enqueue(item, out overflow))
-					Logger.Log(eSeverity.Warning, "Publish buffer is full - dropped message {0}:{1}",
-					           overflow.Topic, JsonUtils.Format(overflow.PublishMessage));
-			}
-			finally
-			{
-				m_BufferSection.Leave();
-			}
+			EnqueueBuffer(topic, message);
 
 			// Create a worker thread
 			ThreadingUtils.SafeInvoke(ProcessPublishBuffer);
@@ -434,7 +416,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			try
 			{
 				PublishMessageInfo item = default(PublishMessageInfo);
-				while (m_Client.IsConnected && m_BufferSection.Execute(() => m_PublishBuffer.Dequeue(out item)))
+				while (m_Client.IsConnected && m_BufferSection.Execute(() => DequeueBuffer(out item)))
 				{
 					if (item.PublishMessage == null)
 						m_Client.Clear(item.Topic);
@@ -449,6 +431,46 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			finally
 			{
 				m_ProcessSection.Leave();
+			}
+		}
+
+		/// <summary>
+		/// Stores the message to be sent to the broker.
+		/// Overwrites the existing message at the given topic.
+		/// </summary>
+		/// <param name="topic"></param>
+		/// <param name="message"></param>
+		private void EnqueueBuffer(string topic, PublishMessage message)
+		{
+			m_BufferSection.Execute(() => m_PublishBuffer[topic] = new PublishMessageInfo(topic, message));
+		}
+
+		/// <summary>
+		/// Gets and removes the next item from the buffer to be sent to the broker.
+		/// </summary>
+		/// <param name="output"></param>
+		/// <returns></returns>
+		private bool DequeueBuffer(out PublishMessageInfo output)
+		{
+			output = default(PublishMessageInfo);
+
+			m_BufferSection.Enter();
+
+			try
+			{
+				if (m_PublishBuffer.Count == 0)
+					return false;
+
+				KeyValuePair<string, PublishMessageInfo> kvp = m_PublishBuffer.Get(0);
+				output = kvp.Value;
+
+				m_PublishBuffer.Remove(kvp.Key);
+
+				return true;
+			}
+			finally
+			{
+				m_BufferSection.Leave();
 			}
 		}
 
