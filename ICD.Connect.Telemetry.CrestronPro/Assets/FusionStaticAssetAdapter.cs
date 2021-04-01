@@ -3,6 +3,7 @@ using ICD.Connect.Telemetry.CrestronPro.Devices;
 using System.Collections.Generic;
 using ICD.Connect.Telemetry.Nodes;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
+using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
@@ -90,19 +91,19 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedBooleanSigs()
 		{
 			foreach (BooleanSigData sig in m_Asset.FusionGenericAssetDigitalsAsset1.UserDefinedBooleanSigDetails)
-				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(ICD.Connect.Protocol.Sigs.eSigType.Digital, sig.Number, sig.Name, 0), sig.SigIoMask.ToIcd());
+				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(eSigType.Digital, sig.Number, sig.Name, 0), sig.SigIoMask.ToIcd());
 		}
 
 		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedUShortSigs()
 		{
 			foreach (UShortSigData sig in m_Asset.FusionGenericAssetAnalogsAsset2.UserDefinedUShortSigDetails)
-				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(ICD.Connect.Protocol.Sigs.eSigType.Analog, sig.Number, sig.Name, 0), sig.SigIoMask.ToIcd());
+				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(eSigType.Analog, sig.Number, sig.Name, 0), sig.SigIoMask.ToIcd());
 		}
 
 		public IEnumerable<KeyValuePair<SigInfo, eTelemetryIoMask>> GetUserDefinedSerialSigs()
 		{
 			foreach (StringSigData sig in m_Asset.FusionGenericAssetSerialsAsset3.UserDefinedStringSigDetails)
-				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(ICD.Connect.Protocol.Sigs.eSigType.Serial, sig.Number, sig.Name, 0), sig.SigIoMask.ToIcd());
+				yield return new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(eSigType.Serial, sig.Number, sig.Name, 0), sig.SigIoMask.ToIcd());
 		}
 	}
 }

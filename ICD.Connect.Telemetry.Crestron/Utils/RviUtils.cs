@@ -56,7 +56,7 @@ namespace ICD.Connect.Telemetry.Crestron.Utils
 			new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(eSigType.Analog, 1, "OccSensorTimeout", 0), 
 			                                            eTelemetryIoMask.BiDirectional), 
 			new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(eSigType.Serial, 12, "RoomOccupancyInfo", 0), 
-			                                            eTelemetryIoMask.BiDirectional), 
+			                                            eTelemetryIoMask.BiDirectional)
 		};
 
 		/// <summary>
