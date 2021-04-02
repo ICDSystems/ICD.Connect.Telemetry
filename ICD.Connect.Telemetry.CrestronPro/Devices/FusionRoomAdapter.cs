@@ -310,8 +310,16 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
 			try
 			{
-				string suffix = StringUtils.NiceName(asset.AssetType);
-				string name = string.Format("{0} ({1})", asset.Name, suffix);
+				string name;
+
+				// If it's not a static asset, append the asset type name
+				if (asset.AssetType == eAssetType.StaticAsset)
+					name = asset.Name;
+				else
+				{
+					string suffix = StringUtils.NiceName(asset.AssetType);
+					name = string.Format("{0} ({1})", asset.Name, suffix);
+				}
 
 				m_FusionRoom.AddAsset(asset.AssetType.FromIcd(),
 				                      asset.Number,
