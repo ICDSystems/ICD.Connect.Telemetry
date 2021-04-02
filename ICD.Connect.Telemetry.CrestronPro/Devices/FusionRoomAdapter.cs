@@ -25,6 +25,7 @@ using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
+using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 
 namespace ICD.Connect.Telemetry.CrestronPro.Devices
@@ -317,7 +318,17 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 				                      name,
 				                      asset.Type,
 				                      asset.InstanceId);
-			}
+
+				if (asset.AssetType == eAssetType.StaticAsset)
+				{
+					FusionStaticAsset fusionStaticAsset = m_FusionRoom.UserConfigurableAssetDetails[asset.Number].Asset as FusionStaticAsset;
+					if (fusionStaticAsset != null)
+					{
+						fusionStaticAsset.ParamMake.Value = asset.Make;
+						fusionStaticAsset.ParamModel.Value = asset.Model;
+					}
+				}
+		}
 				//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{

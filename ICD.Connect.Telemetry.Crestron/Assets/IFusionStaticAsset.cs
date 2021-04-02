@@ -6,6 +6,10 @@ namespace ICD.Connect.Telemetry.Crestron.Assets
 {
 	public interface IFusionStaticAsset : IFusionAsset
 	{
+		string Make { get; set; }
+
+		string Model { get; set; }
+
 		void SetPoweredState(bool powered);
 
 		void SetOnlineState(bool connected);
