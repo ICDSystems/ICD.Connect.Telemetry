@@ -6,7 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
- - Changed Fusion Asset GUID to use deterministic combination of IDevice UUID and asset type specific guid
+ - Fusion Changed Asset GUID to use deterministic combination of IDevice UUID and asset type specific guid
+ - Fusion Changed Static Assets to not append asset type to names
+ - Fusion Added Configured Device Make and Model to Static Assets, and added to RVI generation
 
 ## [8.3.1] - 2021-02-26
 ### Added
