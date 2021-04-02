@@ -330,16 +330,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #endif
 		}
 
-		/// <summary>
-		/// Adds the assets to the fusion room.
-		/// </summary>
-		/// <param name="assets"></param>
-		public void AddAssets(IEnumerable<AssetInfo> assets)
-		{
-			foreach (AssetInfo asset in assets)
-				AddAsset(asset);
-		}
-
 		public void UpdateDigitalSig(uint sig, bool newValue)
 		{
 #if SIMPLSHARP
