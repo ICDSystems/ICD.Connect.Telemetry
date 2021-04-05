@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [8.4.0] - 2021-04-05
 ### Changed
  - Fusion Changed Asset GUID to use deterministic combination of IDevice UUID and asset type specific guid
  - Fusion Changed Static Assets to not append asset type to names
