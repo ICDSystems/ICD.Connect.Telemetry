@@ -249,16 +249,6 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 				m_Assets.Add(asset.Number, asset);
 		}
 
-		/// <summary>
-		/// Adds the assets to the fusion room.
-		/// </summary>
-		/// <param name="assets"></param>
-		public void AddAssets(IEnumerable<AssetInfo> assets)
-		{
-			foreach(AssetInfo asset in assets)
-				AddAsset(asset);
-		}
-
 		public void UpdateDigitalSig(uint sig, bool newValue)
 		{
 			SendInputDigital(sig, newValue);

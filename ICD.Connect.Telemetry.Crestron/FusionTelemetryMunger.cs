@@ -394,14 +394,16 @@ namespace ICD.Connect.Telemetry.Crestron
 			uint assetId = m_FusionRoom.GetNextAssetId();
 			string instanceId = m_FusionRoom.GetInstanceId(device, assetType);
 
-			AssetInfo occAssetInfo =
+			AssetInfo assetInfo =
 				new AssetInfo(assetType,
 				              assetId,
 				              device.Name,
 				              device.GetType().Name,
-				              instanceId);
+				              instanceId,
+							  device.ConfiguredDeviceInfo.Make,
+							  device.ConfiguredDeviceInfo.Model);
 
-			m_FusionRoom.AddAsset(occAssetInfo);
+			m_FusionRoom.AddAsset(assetInfo);
 
 			return assetId;
 		}

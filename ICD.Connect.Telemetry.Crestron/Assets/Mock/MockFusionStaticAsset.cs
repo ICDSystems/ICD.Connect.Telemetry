@@ -39,7 +39,11 @@ namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 
 		public bool OnlineState { get; private set; }
 
-		public MockFusionStaticAsset(uint number, string name, string type, string instanceId): base(number, name, type, instanceId)
+		public string Make { get; set; }
+
+		public string Model { get; set; }
+
+		public MockFusionStaticAsset(uint number, string name, string type, string instanceId, string make, string model): base(number, name, type, instanceId)
 		{
 			m_InputSigsDigital = new Dictionary<uint, bool>();
 			m_InputSigsAnalog = new Dictionary<uint, ushort>();
@@ -51,9 +55,11 @@ namespace ICD.Connect.Telemetry.Crestron.Assets.Mock
 
 			m_SigNames = new Dictionary<eSigType, Dictionary<uint, string>>();
 			m_SigIoMasks = new Dictionary<eSigType, Dictionary<uint, eTelemetryIoMask>>();
+			Make = make;
+			Model = model;
 		}
 
-		public MockFusionStaticAsset(AssetInfo info) : this(info.Number, info.Name, info.Type, info.InstanceId)
+		public MockFusionStaticAsset(AssetInfo info) : this(info.Number, info.Name, info.Type, info.InstanceId, info.Make, info.Model)
 		{
 		}
 

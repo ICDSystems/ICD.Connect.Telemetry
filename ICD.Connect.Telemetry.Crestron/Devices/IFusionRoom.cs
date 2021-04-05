@@ -44,12 +44,6 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		/// </summary>
 		void AddAsset(AssetInfo asset);
 
-		/// <summary>
-		/// Adds the assets to the fusion room.
-		/// </summary>
-		/// <param name="assets"></param>
-		void AddAssets(IEnumerable<AssetInfo> assets);
-
 		void UpdateDigitalSig(uint sig, bool newValue);
 
 		bool ReadDigitalSig(uint sig);
@@ -163,19 +157,7 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 			if (device == null)
 				throw new ArgumentNullException("device");
 
-			int stableHash;
-
-			unchecked
-			{
-				stableHash = 17;
-				stableHash = stableHash * 23 + device.Id;
-				stableHash = stableHash * 23 + device.GetType().Name.GetStableHashCode();
-				stableHash = stableHash * 23 + extends.RoomId.GetStableHashCode();
-				stableHash = stableHash * 23 + (int)staticAsset;
-			}
-
-			Guid seeded = GuidUtils.GenerateSeeded(stableHash);
-			return seeded.ToString();
+			return GuidUtils.Combine(device.Uuid, staticAsset.GetAssetTypeGuid()).ToString();
 		}
 	}
 

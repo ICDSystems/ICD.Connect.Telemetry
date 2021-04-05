@@ -373,11 +373,12 @@ namespace ICD.Connect.Telemetry.Crestron.Utils
 				WriteAssetParam(writer, "AssetName", eSigType.Serial, assetData.Asset.Name);
 				WriteAssetParam(writer, "AssetType", eSigType.Serial, assetData.Asset.Type);
 				WriteAssetParam(writer, "InstanceID", eSigType.Serial, assetData.Asset.InstanceId);
-				
-				if (assetData.Asset is IFusionStaticAsset)
+
+				IFusionStaticAsset staticAsset = assetData.Asset as IFusionStaticAsset;
+				if (staticAsset != null)
 				{
-					WriteAssetParam(writer, "Make", eSigType.Serial, null);
-					WriteAssetParam(writer, "Model", eSigType.Serial, null);
+					WriteAssetParam(writer, "Make", eSigType.Serial, staticAsset.Make);
+					WriteAssetParam(writer, "Model", eSigType.Serial, staticAsset.Model);
 				}
 
 				foreach (var sig in GetDefaultSigsForAsset(assetData))

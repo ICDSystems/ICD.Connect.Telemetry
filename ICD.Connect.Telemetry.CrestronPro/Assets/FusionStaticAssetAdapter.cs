@@ -23,6 +23,19 @@ namespace ICD.Connect.Telemetry.CrestronPro.Assets
 		/// </summary>
 		public override eAssetType AssetType { get { return eAssetType.StaticAsset; } }
 
+		public string Make
+		{
+			get { return m_Asset.ParamMake.Value; }
+			set { m_Asset.ParamMake.Value = value; }
+		}
+
+		public string Model
+		{
+			get { return m_Asset.ParamModel.Value; }
+			set { m_Asset.ParamModel.Value = value; }
+		}
+
+
 		/// <summary>
 		/// Constructor.
 		/// </summary>

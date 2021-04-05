@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
  - Fusion sig asset mappings for touch panel telemetry
 
+## [8.4.0] - 2021-04-05
+### Changed
+ - Fusion Changed Asset GUID to use deterministic combination of IDevice UUID and asset type specific guid
+ - Fusion Changed Static Assets to not append asset type to names
+ - Fusion Added Configured Device Make and Model to Static Assets, and added to RVI generation
+
 ## [8.3.1] - 2021-02-26
 ### Added
  - FusionRoomAdapter - Added console command to manually generate RVI using Crestron methods

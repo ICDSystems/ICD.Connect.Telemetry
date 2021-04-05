@@ -25,6 +25,7 @@ using ICD.Connect.Panels.Devices;
 using ICD.Connect.Panels.SigCollections;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Telemetry.Crestron.Devices;
+using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
 
 namespace ICD.Connect.Telemetry.CrestronPro.Devices
@@ -309,15 +310,33 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #if SIMPLSHARP
 			try
 			{
-				string suffix = StringUtils.NiceName(asset.AssetType);
-				string name = string.Format("{0} ({1})", asset.Name, suffix);
+				string name;
+
+				// If it's not a static asset, append the asset type name
+				if (asset.AssetType == eAssetType.StaticAsset)
+					name = asset.Name;
+				else
+				{
+					string suffix = StringUtils.NiceName(asset.AssetType);
+					name = string.Format("{0} ({1})", asset.Name, suffix);
+				}
 
 				m_FusionRoom.AddAsset(asset.AssetType.FromIcd(),
 				                      asset.Number,
 				                      name,
 				                      asset.Type,
 				                      asset.InstanceId);
-			}
+
+				if (asset.AssetType == eAssetType.StaticAsset)
+				{
+					FusionStaticAsset fusionStaticAsset = m_FusionRoom.UserConfigurableAssetDetails[asset.Number].Asset as FusionStaticAsset;
+					if (fusionStaticAsset != null)
+					{
+						fusionStaticAsset.ParamMake.Value = asset.Make;
+						fusionStaticAsset.ParamModel.Value = asset.Model;
+					}
+				}
+		}
 				//Throws an argument exception when a duplicate is added
 			catch (Exception ex)
 			{
@@ -328,16 +347,6 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 #else
 			throw new NotSupportedException();
 #endif
-		}
-
-		/// <summary>
-		/// Adds the assets to the fusion room.
-		/// </summary>
-		/// <param name="assets"></param>
-		public void AddAssets(IEnumerable<AssetInfo> assets)
-		{
-			foreach (AssetInfo asset in assets)
-				AddAsset(asset);
 		}
 
 		public void UpdateDigitalSig(uint sig, bool newValue)
