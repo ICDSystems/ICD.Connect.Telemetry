@@ -807,25 +807,31 @@ namespace ICD.Connect.Telemetry.MQTTPro
 					? null
 					: PathUtils.GetDefaultConfigPath("Telemetry", settings.ConfigPath);
 
-			if (ConfigPath == null)
-			{
-				m_Overrides.Clear();
-				return;
-			}
-
 			try
 			{
-				string xml = IcdFile.ReadToEnd(ConfigPath, new UTF8Encoding(false));
-				xml = EncodingUtils.StripUtf8Bom(xml);
-
-				m_Overrides.ParseXml(xml);
-
-				Disable = m_Overrides.Disable ?? Disable;
+				if (ConfigPath == null)
+				{
+					m_Overrides.Clear();
+				}
+				else if (IcdFile.Exists(ConfigPath))
+				{
+					string xml = IcdFile.ReadToEnd(ConfigPath, new UTF8Encoding(false));
+					xml = EncodingUtils.StripUtf8Bom(xml);
+					m_Overrides.ParseXml(xml);
+				}
+				else
+				{
+					Logger.Log(eSeverity.Error, "Failed to load MQTT telemetry overrides {0} - File does not exist", ConfigPath);
+					m_Overrides.Clear();
+				}
 			}
 			catch (Exception e)
 			{
 				Logger.Log(eSeverity.Error, e, "Failed to load MQTT telemetry overrides {0} - {1}", ConfigPath, e.Message);
+				m_Overrides.Clear();
 			}
+
+			Disable = m_Overrides.Disable ?? Disable;
 		}
 
 		/// <summary>
