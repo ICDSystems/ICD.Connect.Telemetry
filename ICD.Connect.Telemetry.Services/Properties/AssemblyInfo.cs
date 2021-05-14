@@ -4,4 +4,4 @@
 [assembly: AssemblyCompany("ICD Systems")]
 [assembly: AssemblyProduct("ICD.Connect.Telemetry.Services")]
 [assembly: AssemblyCopyright("Copyright © ICD Systems 2021")]
-[assembly: AssemblyVersion("8.4.0.0")]
+[assembly: AssemblyVersion("8.5.0.0")]
