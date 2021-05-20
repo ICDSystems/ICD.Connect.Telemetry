@@ -148,6 +148,7 @@ namespace ICD.Connect.Telemetry.Nodes
 		/// <param name="eventInfo"></param>
 		/// <param name="debounceMode"></param>
 		/// <param name="debounceIntervalMs"></param>
+		/// <param name="debounceLowValue"></param>
 		public TelemetryLeaf([NotNull] string name, [NotNull] ITelemetryProvider provider,
 		                     [CanBeNull] PropertyInfo propertyInfo, [CanBeNull] MethodInfo methodInfo,
 		                     [CanBeNull] EventInfo eventInfo, eDebounceMode debounceMode, long debounceIntervalMs,

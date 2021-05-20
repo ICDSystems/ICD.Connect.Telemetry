@@ -31,7 +31,7 @@ namespace ICD.Connect.Telemetry.Crestron.Utils
 		private static readonly IcdHashSet<IFusionRoom> s_FusionRooms;
 		private static readonly SafeCriticalSection s_FusionRoomsSection;
 
-		private static readonly KeyValuePair<SigInfo, eTelemetryIoMask>[] s_StaticAssetDefaultSigs = new[]
+		private static readonly KeyValuePair<SigInfo, eTelemetryIoMask>[] s_StaticAssetDefaultSigs =
 		{
 			new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(eSigType.Digital, 1, "PowerIsOn", 0),
 			                                            eTelemetryIoMask.BiDirectional),
@@ -45,7 +45,7 @@ namespace ICD.Connect.Telemetry.Crestron.Utils
 			                                            eTelemetryIoMask.ProgramToService)
 		};
 
-		private static readonly KeyValuePair<SigInfo, eTelemetryIoMask>[] s_OccupancyAssetDefaultSigs = new[]
+		private static readonly KeyValuePair<SigInfo, eTelemetryIoMask>[] s_OccupancyAssetDefaultSigs =
 		{
 			new KeyValuePair<SigInfo, eTelemetryIoMask>(new SigInfo(eSigType.Digital, 1, "OccSensorEnabled", 0),
 			                                            eTelemetryIoMask.BiDirectional ), 
