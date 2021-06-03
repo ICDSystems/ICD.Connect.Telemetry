@@ -120,7 +120,15 @@ namespace ICD.Connect.Telemetry.Nodes
 					return;
 
 				m_TelemetryNodes.Clear();
-				m_TelemetryNodes.AddRange(currentNodes, n => n.Name);
+
+				foreach (ITelemetryNode node in currentNodes)
+				{
+					if (m_TelemetryNodes.ContainsKey(node.Name))
+						throw new InvalidOperationException(string.Format(
+							                                    "{0} {1} already contains a telemetry node with name {2}",
+							                                    GetType().Name, Name, node.Name));
+					m_TelemetryNodes.Add(node.Name, node);
+				}
 			}
 			finally
 			{
