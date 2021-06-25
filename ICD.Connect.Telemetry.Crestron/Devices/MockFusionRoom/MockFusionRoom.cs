@@ -47,6 +47,8 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 
 		private bool m_DisplayPower;
 
+		private ushort m_DisplayUsage;
+
 		#endregion
 
 		#region Events
@@ -295,6 +297,15 @@ namespace ICD.Connect.Telemetry.Crestron.Devices.MockFusionRoom
 		public void SendDeviceUsage(string usage)
 		{
 			m_DeviceUsage = usage;
+		}
+
+		/// <summary>
+		/// Sets the display usage analog.
+		/// </summary>
+		/// <param name="usage"></param>
+		public void SetDisplayUsage(ushort usage)
+		{
+			m_DisplayUsage = usage;
 		}
 
 		/// <summary>
