@@ -460,6 +460,19 @@ namespace ICD.Connect.Telemetry.CrestronPro.Devices
 		}
 
 		/// <summary>
+		/// Sets the display usage analog.
+		/// </summary>
+		/// <param name="usage"></param>
+		public void SetDisplayUsage(ushort usage)
+		{
+#if SIMPLSHARP
+			m_FusionRoom.DisplayUsage.InputSig.UShortValue = usage;
+#else
+			throw new NotSupportedException();
+#endif
+		}
+	
+		/// <summary>
 		/// Sets the system power on/off state for the room
 		/// </summary>
 		/// <param name="powered"></param>

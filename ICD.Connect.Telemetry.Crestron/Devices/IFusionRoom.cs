@@ -71,6 +71,13 @@ namespace ICD.Connect.Telemetry.Crestron.Devices
 		void SendDeviceUsage(string usage);
 
 		/// <summary>
+		/// Sets the display usage analog.
+		/// </summary>
+		/// <param name="usage"></param>
+		[PublicAPI]
+		void SetDisplayUsage(ushort usage);
+
+		/// <summary>
 		/// Sets the system power on/off state for the room.
 		/// </summary>
 		/// <param name="powered"></param>

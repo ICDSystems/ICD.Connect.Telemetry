@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
  - MQTT messages are buffered so that only the latest message for a given topic is stored
 
+## [8.4.1] - 2021-07-16
+### Changed
+ - IFusionRoom added SetDispalyUsage(ushort usage) for DisplayUsage reserved join, and implemented in Fusion and MockFusion
+
 ## [8.4.0] - 2021-04-05
 ### Changed
  - Fusion Changed Asset GUID to use deterministic combination of IDevice UUID and asset type specific guid
