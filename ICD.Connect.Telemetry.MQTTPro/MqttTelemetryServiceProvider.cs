@@ -1,4 +1,10 @@
-﻿using System;
+﻿#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +27,6 @@ using ICD.Connect.Settings;
 using ICD.Connect.Settings.Originators;
 using ICD.Connect.Telemetry.Nodes;
 using ICD.Connect.Telemetry.Services;
-using Newtonsoft.Json;
 #if SIMPLSHARP
 using Crestron.SimplSharpPro.CrestronThread;
 #else

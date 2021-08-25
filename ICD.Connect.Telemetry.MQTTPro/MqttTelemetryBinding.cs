@@ -1,4 +1,10 @@
-﻿using System;
+﻿#if NETFRAMEWORK
+extern alias RealNewtonsoft;
+using RealNewtonsoft.Newtonsoft.Json;
+#else
+using Newtonsoft.Json;
+#endif
+using System;
 using System.Linq;
 using System.Text;
 using ICD.Common.Properties;
@@ -7,7 +13,6 @@ using ICD.Common.Utils.IO;
 using ICD.Common.Utils.Json;
 using ICD.Connect.Telemetry.Bindings;
 using ICD.Connect.Telemetry.Nodes;
-using Newtonsoft.Json;
 
 namespace ICD.Connect.Telemetry.MQTTPro
 {
