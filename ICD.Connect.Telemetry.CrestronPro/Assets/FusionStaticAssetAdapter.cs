@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using ICD.Connect.Telemetry.Nodes;
 using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
 using eSigType = ICD.Connect.Protocol.Sigs.eSigType;
-#if SIMPLSHARP
+#if !NETSTANDARD
 using Crestron.SimplSharpPro;
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Telemetry.Crestron.Assets;

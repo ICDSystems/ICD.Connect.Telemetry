@@ -1,5 +1,5 @@
 ﻿using ICD.Connect.Telemetry.Nodes;
-#if SIMPLSHARP
+#if !NETSTANDARD
 using System;
 using Crestron.SimplSharpPro;
 

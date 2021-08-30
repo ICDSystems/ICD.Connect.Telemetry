@@ -1,5 +1,5 @@
 ﻿using eAssetType = ICD.Connect.Telemetry.Crestron.Assets.eAssetType;
-#if SIMPLSHARP
+#if !NETSTANDARD
 using Crestron.SimplSharpPro.Fusion;
 using ICD.Connect.Telemetry.Crestron.Assets;
 using ICD.Connect.Partitioning.Commercial.Controls.Occupancy;

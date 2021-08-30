@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Linq;
 using ICD.Common.Utils.Collections;
-#if SIMPLSHARP
+#if !NETSTANDARD
 using System;
 using System.Collections.Generic;
 using Crestron.SimplSharpPro;
