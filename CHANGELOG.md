@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [8.5.2] - 2021-10-04
+### Changed
+ - MqttTelemetryServiceProvider - removed BufferSection TryEnter(), using process running bool instead
+
 ## [8.5.1] - 2021-08-03
 ### Changed
  - Clarifying exception when adding a duplicate telemetry node to a collection

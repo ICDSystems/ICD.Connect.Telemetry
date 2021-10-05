@@ -47,7 +47,7 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		private readonly TelemetryNodeTracker m_NodeTracker;
 		private readonly SafeCriticalSection m_BindingsSection;
 		private readonly SafeCriticalSection m_BufferSection;
-		private readonly SafeCriticalSection m_ProcessSection;
+		private bool m_ProcessRunning;
 
 		private readonly ConnectionStateManager m_ConnectionStateManager;
 		private readonly IcdMqttClient m_Client;
@@ -212,7 +212,6 @@ namespace ICD.Connect.Telemetry.MQTTPro
 			m_PublishBuffer = new IcdOrderedDictionary<string, PublishMessageInfo>();
 			m_BindingsSection = new SafeCriticalSection();
 			m_BufferSection = new SafeCriticalSection();
-			m_ProcessSection = new SafeCriticalSection();
 			m_Overrides = new MqttTelemetryOverrides();
 
 			m_Client = new IcdMqttClient
@@ -415,27 +414,44 @@ namespace ICD.Connect.Telemetry.MQTTPro
 		/// </summary>
 		private void ProcessPublishBuffer()
 		{
-			if (!m_ProcessSection.TryEnter())
-				return;
-
+			m_BufferSection.Enter();
 			try
 			{
-				PublishMessageInfo item = default(PublishMessageInfo);
-				while (m_Client.IsConnected && m_BufferSection.Execute(() => DequeueBuffer(out item)))
-				{
-					if (item.PublishMessage == null)
-						m_Client.Clear(item.Topic);
-					else
-					{
-						string json = JsonConvert.SerializeObject(item.PublishMessage, Formatting.None, JsonUtils.CommonSettings);
-						byte[] data = Encoding.UTF8.GetBytes(json);
-						m_Client.Publish(item.Topic, data, MqttUtils.QOS_LEVEL_AT_LEAST_ONCE, true);
-					}
-				}
+				if (m_ProcessRunning)
+					return;
+				m_ProcessRunning = true;
 			}
 			finally
 			{
-				m_ProcessSection.Leave();
+				m_BufferSection.Leave();
+			}
+
+			PublishMessageInfo item = default(PublishMessageInfo);
+			while (true)
+			{
+				m_BufferSection.Enter();
+				try
+				{
+					if (!m_Client.IsConnected || !m_BufferSection.Execute(() => DequeueBuffer(out item)))
+					{
+						//End processing
+						m_ProcessRunning = false;
+						return;
+					}
+				}
+				finally
+				{
+					m_BufferSection.Leave();
+				}
+
+				if (item.PublishMessage == null)
+					m_Client.Clear(item.Topic);
+				else
+				{
+					string json = JsonConvert.SerializeObject(item.PublishMessage, Formatting.None, JsonUtils.CommonSettings);
+					byte[] data = Encoding.UTF8.GetBytes(json);
+					m_Client.Publish(item.Topic, data, MqttUtils.QOS_LEVEL_AT_LEAST_ONCE, true);
+				}
 			}
 		}
 
