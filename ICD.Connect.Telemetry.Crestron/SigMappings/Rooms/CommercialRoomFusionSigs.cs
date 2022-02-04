@@ -40,6 +40,13 @@ namespace ICD.Connect.Telemetry.Crestron.SigMappings.Rooms
 					FusionSigName = "Call Rating Average",
 					SigType = eSigType.Serial,
 					Sig = 200
+				},
+				new RoomFusionSigMapping
+				{
+					TelemetryName = CommercialRoomTelemetryNames.ROOM_TYPE,
+					FusionSigName = "Room Type",
+					SigType = eSigType.Serial,
+					Sig = 70
 				}
 			};
 	}
