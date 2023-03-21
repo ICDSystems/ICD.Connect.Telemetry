@@ -75,7 +75,6 @@
     <Compile Include="Debounce\eDebounceMode.cs" />
     <Compile Include="Nodes\TelemetryNodeTracker.cs" />
     <Compile Include="Nodes\TelemetryProviderNode.cs" />
-    <Compile Include="ObfuscationSettings.cs" />
     <Compile Include="Providers\ActivityExternalTelemetryProvider.cs" />
     <Compile Include="Providers\External\AbstractExternalTelemetryProvider.cs" />
     <Compile Include="Providers\AbstractTelemetryProvider.cs" />
